@@ -6,7 +6,9 @@ plugins {
 
 android {
     namespace = "com.duitlah.duitlah_mobile"
-    compileSdk = flutter.compileSdkVersion
+    // Current Flutter Android plugins require API 36 at compile time. This does
+    // not change the app's targetSdk or minimum supported Android version.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
