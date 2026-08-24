@@ -1,0 +1,21 @@
+package com.duitlah.api.bills;
+
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+public record CreatePersonalBillRequest(
+    @NotBlank @Size(max = 120) String name,
+    @Size(max = 120) String provider,
+    @NotNull LocalDate dueDate,
+    @NotNull @DecimalMin(value = "0.01") BigDecimal expectedAmount,
+    BillRecurrence recurrence,
+    String notes) {
+
+  public BillRecurrence recurrenceOrNone() {
+    return recurrence == null ? BillRecurrence.NONE : recurrence;
+  }
+}

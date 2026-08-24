@@ -1,0 +1,268 @@
+import 'package:flutter/material.dart';
+
+import 'app_colors.dart';
+import 'app_semantic_colors.dart';
+
+/// Spacing scale used throughout the design system instead of ad-hoc magic
+/// numbers (mobile redesign spec: 4/8/12/16/20/24/32).
+class AppSpacing {
+  AppSpacing._();
+  static const xs = 4.0;
+  static const sm = 8.0;
+  static const md = 12.0;
+  static const lg = 16.0;
+  static const xl = 24.0;
+  static const xxl = 32.0;
+
+  /// Standard horizontal page margin (mobile redesign spec: 20px) — kept
+  /// distinct from the xs/sm/md/lg/xl/xxl rhythm since it's a fixed layout
+  /// constant, not a step in that scale.
+  static const pageMargin = 20.0;
+}
+
+/// Radii scale from the mobile redesign spec — small controls (10–12px),
+/// inputs (12–14px), standard cards (16–18px), prominent financial cards
+/// (20–24px). Field names kept stable from the pre-redesign theme (only
+/// `sm`/`md`/`lg`/`pill` are referenced outside this file) even though the
+/// underlying values changed.
+class AppRadius {
+  AppRadius._();
+  static const sm = 12.0;
+  static const input = 13.0;
+  static const md = 16.0;
+  static const lg = 22.0;
+  static const pill = 999.0;
+}
+
+/// Duitlah's design system — Plus Jakarta Sans, Duitlah teal, deep navy,
+/// a small orange accent, in both a light and a dark variant (see
+/// docs/DESIGN.md). Dark mode is a navy family derived from the same brand
+/// ink used for light-mode text, not a generic near-black theme, so the
+/// brand still reads as distinctly Duitlah in either mode.
+class AppTheme {
+  AppTheme._();
+
+  static const _fontFamily = 'Plus Jakarta Sans';
+
+  static ThemeData light() => _build(Brightness.light);
+  static ThemeData dark() => _build(Brightness.dark);
+
+  static ThemeData _build(Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+
+    final background = isDark ? AppColors.darkBackground : AppColors.lightBackground;
+    final card = isDark ? AppColors.darkCard : AppColors.lightCard;
+    final ink = isDark ? AppColors.darkInk : AppColors.lightInk;
+    final muted = isDark ? AppColors.darkMutedForeground : AppColors.lightMutedForeground;
+    final border = isDark ? AppColors.darkBorder : AppColors.lightBorder;
+    final tealSoft = isDark ? AppColors.darkTealSoft : AppColors.lightTealSoft;
+    final teal = isDark ? AppColors.tealBright : AppColors.teal;
+    final negative = isDark ? AppColors.negativeBright : AppColors.negative;
+
+    final colorScheme = ColorScheme(
+      brightness: brightness,
+      surface: background,
+      onSurface: ink,
+      primary: teal,
+      onPrimary: isDark ? AppColors.darkBackground : Colors.white,
+      secondary: tealSoft,
+      onSecondary: AppColors.tealDark,
+      error: negative,
+      onError: Colors.white,
+      outline: border,
+      surfaceContainerHighest: card,
+    );
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      fontFamily: _fontFamily,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: background,
+      extensions: [isDark ? AppSemanticColors.dark : AppSemanticColors.light],
+      appBarTheme: AppBarTheme(
+        backgroundColor: background,
+        foregroundColor: ink,
+        elevation: 0,
+        scrolledUnderElevation: 0.5,
+        centerTitle: false,
+        titleTextStyle: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: ink,
+          letterSpacing: -0.2,
+        ),
+      ),
+      textTheme: _textTheme(ink, muted),
+      cardTheme: CardThemeData(
+        color: card,
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          side: BorderSide(color: border),
+        ),
+      ),
+      dividerTheme: DividerThemeData(color: border, thickness: 1, space: 1),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: teal,
+          foregroundColor: colorScheme.onPrimary,
+          disabledBackgroundColor: teal.withValues(alpha: 0.35),
+          minimumSize: const Size.fromHeight(52),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+          textStyle: const TextStyle(
+            fontFamily: _fontFamily,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+          elevation: 0,
+        ).copyWith(
+          // Pressed state uses the spec's dedicated "dark teal", not a
+          // generic opacity overlay on the primary color.
+          overlayColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.pressed)
+                ? AppColors.tealDark.withValues(alpha: 0.12)
+                : null,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: ink,
+          minimumSize: const Size.fromHeight(52),
+          side: BorderSide(color: border),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+          textStyle: const TextStyle(
+            fontFamily: _fontFamily,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: isDark ? AppColors.tealBright : AppColors.tealDark,
+          textStyle: const TextStyle(
+            fontFamily: _fontFamily,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: tealSoft.withValues(alpha: isDark ? 0.6 : 0.4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.input),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.input),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.input),
+          borderSide: BorderSide(color: teal, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.input),
+          borderSide: BorderSide(color: negative, width: 1.5),
+        ),
+        hintStyle: TextStyle(fontFamily: _fontFamily, color: muted),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: card,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
+        ),
+        showDragHandle: true,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: card,
+        indicatorColor: tealSoft,
+        elevation: 0,
+        height: 64,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        // Redesign spec: "Active navigation: teal icon, teal label" /
+        // "Inactive: muted navy/grey" — Material3's own default only tints
+        // the icon on selection, leaving the label a flat navy in both
+        // states.
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? (isDark ? AppColors.tealBright : AppColors.tealDark)
+                : muted,
+          ),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            fontFamily: _fontFamily,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: states.contains(WidgetState.selected)
+                ? (isDark ? AppColors.tealBright : AppColors.tealDark)
+                : muted,
+          ),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: isDark ? AppColors.darkCard : AppColors.lightInk,
+        contentTextStyle: TextStyle(
+          fontFamily: _fontFamily,
+          color: isDark ? AppColors.darkInk : Colors.white,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(AppRadius.sm)),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: card,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(AppRadius.lg)),
+        ),
+      ),
+    );
+  }
+
+  /// Financial-number hierarchy per the redesign spec: display figures get
+  /// ExtraBold, page titles Bold, section headings SemiBold, body
+  /// Regular/Medium, captions Medium — never left at the Material default
+  /// weight, since "financial values should always be visually prominent".
+  static TextTheme _textTheme(Color ink, Color muted) {
+    return TextTheme(
+      displaySmall: TextStyle(
+        fontFamily: _fontFamily,
+        fontSize: 36,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.6,
+        color: ink,
+      ),
+      headlineMedium: TextStyle(
+        fontFamily: _fontFamily,
+        fontSize: 26,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.4,
+        color: ink,
+      ),
+      headlineSmall: TextStyle(
+        fontFamily: _fontFamily,
+        fontSize: 21,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -0.3,
+        color: ink,
+      ),
+      titleLarge: TextStyle(fontFamily: _fontFamily, fontSize: 18, fontWeight: FontWeight.w700, color: ink),
+      titleMedium: TextStyle(fontFamily: _fontFamily, fontSize: 16, fontWeight: FontWeight.w600, color: ink),
+      titleSmall: TextStyle(fontFamily: _fontFamily, fontSize: 14, fontWeight: FontWeight.w600, color: ink),
+      bodyLarge: TextStyle(fontFamily: _fontFamily, fontSize: 16, fontWeight: FontWeight.w400, color: ink),
+      bodyMedium: TextStyle(fontFamily: _fontFamily, fontSize: 14, fontWeight: FontWeight.w400, color: ink),
+      bodySmall: TextStyle(fontFamily: _fontFamily, fontSize: 12.5, fontWeight: FontWeight.w500, color: muted),
+      labelLarge: TextStyle(fontFamily: _fontFamily, fontSize: 14, fontWeight: FontWeight.w600, color: ink),
+      labelMedium: TextStyle(fontFamily: _fontFamily, fontSize: 12, fontWeight: FontWeight.w600, color: muted),
+    );
+  }
+}

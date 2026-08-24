@@ -1,0 +1,17 @@
+# Env files
+.env
+.env.local
+!.env.example
+
+# OS
+.DS_Store
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Backend (Maven)
+apps/api/target/
+
+# Frontend build artifacts are covered by apps/web/.gitignore

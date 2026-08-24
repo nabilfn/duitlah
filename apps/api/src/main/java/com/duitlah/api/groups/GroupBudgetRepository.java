@@ -1,0 +1,10 @@
+package com.duitlah.api.groups;
+
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface GroupBudgetRepository extends JpaRepository<GroupBudget, UUID> {
+
+  Optional<GroupBudget> findByGroupId(UUID groupId);
+}
