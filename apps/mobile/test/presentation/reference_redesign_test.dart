@@ -430,7 +430,7 @@ void main() {
                   bottomNavigationBar: entry.key == 'add_transaction'
                       ? null
                       : DuitlahBottomNavigation(
-                          currentIndex: {
+                          currentBranch: {
                             'home': 0,
                             'transactions': 1,
                             'analytics': 2,

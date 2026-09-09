@@ -376,6 +376,20 @@ class _GlyphPainter extends CustomPainter {
       case 'mail':
         box(2, 5, 20, 15, 3);
         path([const Offset(3, 7), const Offset(12, 14), const Offset(21, 7)]);
+      case 'assistant':
+        // Duitlah's own assistant mark: the existing 'chart' bars (ascending
+        // rounded strokes) spoken from a rounded speech form — "your money,
+        // explained". Deliberately not a sparkle, star, wand or robot: it is
+        // built from geometry this icon set already uses elsewhere.
+        box(3, 3.5, 18, 13, 4);
+        path([
+          const Offset(8.5, 16.5),
+          const Offset(8.5, 20.5),
+          const Offset(12.5, 16.5),
+        ]);
+        line(9, 12.5, 9, 10);
+        line(12, 12.5, 12, 9);
+        line(15, 12.5, 15, 7);
       default:
         box(3, 3, 7, 7, 2);
         box(14, 3, 7, 7, 2);
@@ -505,7 +519,7 @@ final _glyphs = <IconData, String>{
   Icons.schedule_outlined: 'clock',
   Icons.search: 'search',
   Icons.settings_outlined: 'filter',
-  Icons.smart_toy_outlined: 'chart',
+  Icons.smart_toy_outlined: 'assistant',
   Icons.store_outlined: 'document',
   Icons.storefront_outlined: 'document',
   Icons.swap_horiz_outlined: 'transfer',
