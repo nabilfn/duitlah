@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -187,13 +188,14 @@ class _LinkFormSheetState extends ConsumerState<LinkFormSheet> {
               ),
               subtitle:
                   _transaction == null ? null : Text('RM ${_transaction!.amount} · ${_transaction!.occurredOn}'),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const DuitlahIcon(Icons.chevron_right),
               onTap: _pickTransaction,
             ),
             const SizedBox(height: AppSpacing.sm),
             if (_needsExpenseAccount) ...[
               DropdownButtonFormField<String>(
-                initialValue: _chartOfAccountsId,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _chartOfAccountsId,
                 isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Expense account'),
                 items: expenseAccounts
@@ -205,7 +207,8 @@ class _LinkFormSheetState extends ConsumerState<LinkFormSheet> {
             ],
             if (_needsBusinessAccount) ...[
               DropdownButtonFormField<String>(
-                initialValue: _businessAccountId,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _businessAccountId,
                 isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Business account'),
                 items: businessAccounts.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
@@ -215,7 +218,8 @@ class _LinkFormSheetState extends ConsumerState<LinkFormSheet> {
             ],
             if (_showsRelatedLink) ...[
               DropdownButtonFormField<String?>(
-                initialValue: _relatedLinkId,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _relatedLinkId,
                 isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Settles which advance? (optional)'),
                 items: [
@@ -240,7 +244,7 @@ class _LinkFormSheetState extends ConsumerState<LinkFormSheet> {
               contentPadding: EdgeInsets.zero,
               title: const Text('Date'),
               subtitle: Text(_fmtDate(_occurredOn)),
-              trailing: const Icon(Icons.calendar_month_outlined),
+              trailing: const DuitlahIcon(Icons.calendar_month_outlined),
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,

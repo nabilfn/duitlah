@@ -36,11 +36,15 @@ class FinanceRepository {
     return data.map((e) => Category.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  Future<TransactionPage> listTransactions({int page = 0, int size = 20, String? accountId}) async {
+  Future<TransactionPage> listTransactions({int page = 0, int size = 20, String? accountId, TransactionType? type, String? from, String? to}) async {
     final data = await _client.get('/api/v1/transactions', query: {
       'page': page,
       'size': size,
       if (accountId != null) 'accountId': accountId,
+      if (type != null) 'type': type.name,
+      if (from != null) 'from': from,
+      if (to != null) 'to': to,
+      'sort': 'occurredOn,desc',
     });
     return TransactionPage.fromJson(data as Map<String, dynamic>);
   }

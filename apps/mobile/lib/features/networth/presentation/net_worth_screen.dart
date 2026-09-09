@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,7 +25,7 @@ class NetWorthScreen extends ConsumerWidget {
     final added = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -37,7 +39,8 @@ class NetWorthScreen extends ConsumerWidget {
               Text('Add asset', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<AssetType>(
-                initialValue: type,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: type,
                 decoration: const InputDecoration(labelText: 'Type'),
                 items: AssetType.values.map((t) => DropdownMenuItem(value: t, child: Text(t.name))).toList(),
                 onChanged: (v) => setSheetState(() => type = v ?? type),
@@ -66,7 +69,7 @@ class NetWorthScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (added == true) {
@@ -84,7 +87,7 @@ class NetWorthScreen extends ConsumerWidget {
         title: const Text('Net Worth'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.camera_alt_outlined),
+            icon: const DuitlahIcon(Icons.camera_alt_outlined),
             tooltip: 'Take a snapshot',
             onPressed: () async {
               await ref.read(netWorthRepositoryProvider).takeSnapshot();
@@ -108,7 +111,7 @@ class NetWorthScreen extends ConsumerWidget {
                   child: Column(
                     children: [
                       Text('Net worth', style: Theme.of(context).textTheme.bodyMedium),
-                      Text('RM ${nw.netWorth}', style: Theme.of(context).textTheme.headlineMedium),
+                      Text(Money.format(nw.netWorth), style: Theme.of(context).textTheme.headlineMedium),
                       const SizedBox(height: AppSpacing.sm),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -130,7 +133,7 @@ class NetWorthScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.lg),
               OutlinedButton.icon(
                 onPressed: () => _addOtherAsset(context, ref),
-                icon: const Icon(Icons.add),
+                icon: const DuitlahIcon(Icons.add),
                 label: const Text('Add property, vehicle, or other asset'),
               ),
             ],
@@ -154,7 +157,7 @@ class _Summary extends StatelessWidget {
     return Column(
       children: [
         Text(label, style: Theme.of(context).textTheme.bodySmall),
-        Text('RM $amount', style: Theme.of(context).textTheme.titleMedium),
+        Text(Money.format(amount), style: Theme.of(context).textTheme.titleMedium),
       ],
     );
   }
@@ -170,7 +173,7 @@ class _BreakdownTile extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(line.label),
-      trailing: Text('RM ${line.amount}'),
+      trailing: Text(Money.format(line.amount)),
     );
   }
 }

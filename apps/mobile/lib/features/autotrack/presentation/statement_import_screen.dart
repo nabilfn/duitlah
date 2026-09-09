@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -131,7 +132,8 @@ class _AccountPickerState extends State<_AccountPicker> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DropdownButtonFormField<String>(
-          initialValue: _accountId,
+          icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _accountId,
           decoration: const InputDecoration(labelText: 'Which account is this statement for?'),
           items: widget.accounts.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
           onChanged: (v) => setState(() => _accountId = v ?? _accountId),

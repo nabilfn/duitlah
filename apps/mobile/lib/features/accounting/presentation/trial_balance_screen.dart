@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -51,7 +52,7 @@ class _TrialBalanceScreenState extends ConsumerState<TrialBalanceScreen> {
         actions: [
           PopupMenuButton<ExportFormat>(
             enabled: !_exporting,
-            icon: const Icon(Icons.ios_share),
+            icon: const DuitlahIcon(Icons.ios_share),
             onSelected: _export,
             itemBuilder: (context) =>
                 ExportFormat.values.map((f) => PopupMenuItem(value: f, child: Text('Share as ${f.name}'))).toList(),
@@ -131,7 +132,7 @@ class _Table extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              DuitlahIcon(
                 balanced ? Icons.check_circle_outline : Icons.error_outline,
                 color: balanced ? Colors.green : Colors.red,
               ),

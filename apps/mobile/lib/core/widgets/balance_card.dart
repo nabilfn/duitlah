@@ -44,18 +44,26 @@ class BalanceCard extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(color: onPrimary.withValues(alpha: 0.7), fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    color: onPrimary.withValues(alpha: 0.9),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 AmountText(
                   amount,
-                  style: theme.textTheme.displaySmall?.copyWith(color: onPrimary),
+                  style: theme.textTheme.displaySmall?.copyWith(
+                    color: onPrimary,
+                  ),
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 6),
                   Text(
                     subtitle!,
-                    style: TextStyle(color: onPrimary.withValues(alpha: 0.7), fontSize: 13),
+                    style: TextStyle(
+                      color: onPrimary.withValues(alpha: 0.9),
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ],

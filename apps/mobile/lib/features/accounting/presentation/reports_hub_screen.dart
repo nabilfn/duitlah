@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -57,12 +58,12 @@ class _Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: ListTile(
-        leading: Icon(icon),
+        leading: DuitlahIcon(icon),
         title: Text(label),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: const DuitlahIcon(Icons.chevron_right),
         onTap: () => context.push(route),
       ),
     );

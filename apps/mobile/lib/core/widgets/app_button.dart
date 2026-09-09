@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 
 /// Primary call-to-action button with a built-in loading state — every
@@ -23,17 +24,23 @@ class PrimaryButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: loading ? null : onPressed,
       child: loading
-          ? const SizedBox(
+          ? SizedBox(
               height: 20,
               width: 20,
-              child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
+              child: CircularProgressIndicator(
+                strokeWidth: 2.4,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             )
           : Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (icon != null) ...[Icon(icon, size: 20), const SizedBox(width: 8)],
-                Text(label),
+                if (icon != null) ...[
+                  DuitlahIcon(icon, size: 20),
+                  const SizedBox(width: 8),
+                ],
+                Flexible(child: Text(label, textAlign: TextAlign.center)),
               ],
             ),
     );
@@ -41,7 +48,12 @@ class PrimaryButton extends StatelessWidget {
 }
 
 class SecondaryButton extends StatelessWidget {
-  const SecondaryButton({super.key, required this.label, required this.onPressed, this.icon});
+  const SecondaryButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.icon,
+  });
 
   final String label;
   final VoidCallback? onPressed;
@@ -55,8 +67,8 @@ class SecondaryButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (icon != null) ...[Icon(icon, size: 20), const SizedBox(width: 8)],
-          Text(label),
+          if (icon != null) ...[DuitlahIcon(icon, size: 20), const SizedBox(width: 8)],
+          Flexible(child: Text(label, textAlign: TextAlign.center)),
         ],
       ),
     );

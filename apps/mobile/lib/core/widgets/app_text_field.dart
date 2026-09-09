@@ -29,7 +29,13 @@ class AppTextField extends StatelessWidget {
     return TextField(
       controller: controller,
       obscureText: obscureText,
-      keyboardType: keyboardType,
+      keyboardType: keyboardType == TextInputType.number
+          ? const TextInputType.numberWithOptions(decimal: true)
+          : keyboardType,
+      textInputAction: onSubmitted != null
+          ? TextInputAction.done
+          : TextInputAction.next,
+      scrollPadding: const EdgeInsets.all(32),
       enabled: enabled,
       autofillHints: autofillHints,
       onSubmitted: onSubmitted,

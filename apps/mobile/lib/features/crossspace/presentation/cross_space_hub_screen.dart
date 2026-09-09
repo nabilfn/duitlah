@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -83,11 +85,11 @@ class _ActionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: Icon(crossSpaceLinkTypeIcon(linkType)),
+        leading: DuitlahIcon(crossSpaceLinkTypeIcon(linkType)),
         title: Text(crossSpaceLinkTypeLabel(linkType)),
         subtitle: Text(crossSpaceLinkTypeDescription(linkType)),
         isThreeLine: true,
-        trailing: const Icon(Icons.chevron_right),
+        trailing: const DuitlahIcon(Icons.chevron_right),
         onTap: onTap,
       ),
     );
@@ -104,10 +106,10 @@ class _LinkTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
-        leading: Icon(crossSpaceLinkTypeIcon(link.linkType)),
+        leading: DuitlahIcon(crossSpaceLinkTypeIcon(link.linkType)),
         title: Text(crossSpaceLinkTypeLabel(link.linkType)),
         subtitle: Text(link.description ?? link.createdAt),
-        trailing: Text('RM ${link.amount}', style: Theme.of(context).textTheme.titleSmall),
+        trailing: Text(Money.format(link.amount), style: Theme.of(context).textTheme.titleSmall),
       ),
     );
   }

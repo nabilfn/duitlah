@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,7 +40,7 @@ class FinancialHealthScreen extends ConsumerWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.lightbulb_outline, size: 18),
+                        const DuitlahIcon(Icons.lightbulb_outline, size: 18),
                         const SizedBox(width: AppSpacing.xs),
                         Expanded(child: Text(r)),
                       ],

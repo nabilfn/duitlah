@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 
 class StatusChip extends StatelessWidget {
@@ -18,7 +19,7 @@ class StatusChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (icon != null) ...[Icon(icon, size: 14, color: color), const SizedBox(width: 4)],
+          if (icon != null) ...[DuitlahIcon(icon, size: 14, color: color), const SizedBox(width: 4)],
           Text(
             label,
             style: TextStyle(color: color, fontSize: 12.5, fontWeight: FontWeight.w700),

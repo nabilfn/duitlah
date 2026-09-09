@@ -19,6 +19,13 @@ final categoryListProvider = FutureProvider.autoDispose<List<Category>>(
   (ref) => ref.watch(financeRepositoryProvider).listCategories(),
 );
 
+final transactionPageIndexProvider = StateProvider.autoDispose<int>((ref) => 0);
+final transactionTypeFilterProvider = StateProvider.autoDispose<TransactionType?>((ref) => null);
+final transactionAccountFilterProvider = StateProvider.autoDispose<String?>((ref) => null);
 final transactionsProvider = FutureProvider.autoDispose<TransactionPage>(
-  (ref) => ref.watch(financeRepositoryProvider).listTransactions(),
+  (ref) => ref.watch(financeRepositoryProvider).listTransactions(
+    page: ref.watch(transactionPageIndexProvider),
+    type: ref.watch(transactionTypeFilterProvider),
+    accountId: ref.watch(transactionAccountFilterProvider),
+  ),
 );

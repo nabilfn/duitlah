@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,7 +24,7 @@ class PersonalIncomeScreen extends ConsumerWidget {
     final added = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -36,7 +38,8 @@ class PersonalIncomeScreen extends ConsumerWidget {
               Text('Add income — YA $ya', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<IncomeType>(
-                initialValue: type,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: type,
                 decoration: const InputDecoration(labelText: 'Type'),
                 items: IncomeType.values.map((t) => DropdownMenuItem(value: t, child: Text(t.name))).toList(),
                 onChanged: (v) => setSheetState(() => type = v ?? type),
@@ -66,7 +69,7 @@ class PersonalIncomeScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (added == true) {
@@ -95,7 +98,7 @@ class PersonalIncomeScreen extends ConsumerWidget {
                       child: ListTile(
                         title: Text(record.incomeType.name),
                         subtitle: record.description != null ? Text(record.description!) : null,
-                        trailing: Text('RM ${record.amount}'),
+                        trailing: Text(Money.format(record.amount)),
                       ),
                     );
                   },
@@ -104,7 +107,7 @@ class PersonalIncomeScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(personalIncomeListProvider)),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addIncome(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _addIncome(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

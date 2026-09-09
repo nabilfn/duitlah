@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -77,7 +78,7 @@ class VaultReceiptDetailScreen extends ConsumerWidget {
                 ),
                 child: const Row(
                   children: [
-                    Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                    DuitlahIcon(Icons.info_outline, color: Colors.orange, size: 20),
                     SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text('Double-check this scan — some details look uncertain.'),

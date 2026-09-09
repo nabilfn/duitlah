@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -80,7 +81,7 @@ class GroupDetailScreen extends ConsumerWidget {
         title: Text(groupAsync.valueOrNull?.name ?? 'Group'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.person_add_alt_1_outlined),
+            icon: const DuitlahIcon(Icons.person_add_alt_1_outlined),
             onPressed: () => _showInvite(context, ref),
           ),
         ],
@@ -209,7 +210,7 @@ class GroupDetailScreen extends ConsumerWidget {
           membersAsync.valueOrNull ?? const [],
           groupAsync.valueOrNull?.type,
         ),
-        icon: const Icon(Icons.add),
+        icon: const DuitlahIcon(Icons.add),
         label: const Text('Add expense'),
       ),
     );
@@ -264,7 +265,8 @@ class GroupDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<String>(
-                  initialValue: paidByUserId,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: paidByUserId,
                   decoration: const InputDecoration(labelText: 'Paid by'),
                   items: members
                       .map(
@@ -301,7 +303,8 @@ class GroupDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<GroupExpenseCategory?>(
-                  initialValue: category,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: category,
                   decoration: const InputDecoration(
                     labelText: 'Category (optional)',
                   ),

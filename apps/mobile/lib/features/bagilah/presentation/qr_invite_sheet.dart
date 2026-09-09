@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -52,7 +53,7 @@ class QrInviteSheet extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  icon: const Icon(Icons.copy_outlined),
+                  icon: const DuitlahIcon(Icons.copy_outlined),
                   label: const Text('Copy link'),
                   onPressed: () async {
                     await Clipboard.setData(ClipboardData(text: _link));
@@ -64,7 +65,7 @@ class QrInviteSheet extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: FilledButton.icon(
-                  icon: const Icon(Icons.ios_share),
+                  icon: const DuitlahIcon(Icons.ios_share),
                   label: const Text('Share'),
                   onPressed: () => Share.share(_link),
                 ),

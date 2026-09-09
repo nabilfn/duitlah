@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -113,12 +115,12 @@ class _BusinessTaxHubScreenState extends ConsumerState<BusinessTaxHubScreen> {
                     ListTile(
                       title: const Text('Collected tax'),
                       subtitle: Text('${r.from} to ${r.to}'),
-                      trailing: Text('RM ${r.collectedTax}', style: Theme.of(context).textTheme.titleMedium),
+                      trailing: Text(Money.format(r.collectedTax), style: Theme.of(context).textTheme.titleMedium),
                     ),
                     const Divider(height: 1),
                     ListTile(
                       title: const Text('Payable tax'),
-                      trailing: Text('RM ${r.payableTax}', style: Theme.of(context).textTheme.titleMedium),
+                      trailing: Text(Money.format(r.payableTax), style: Theme.of(context).textTheme.titleMedium),
                     ),
                   ],
                 ),
@@ -169,7 +171,7 @@ class _ReadinessCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
+                DuitlahIcon(
                   ready ? Icons.check_circle_outline : Icons.warning_amber_outlined,
                   color: ready ? theme.colorScheme.primary : theme.colorScheme.error,
                 ),
@@ -208,7 +210,7 @@ class _ReadinessCard extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.circle, size: 6),
+                      const DuitlahIcon(Icons.circle, size: 6),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(child: Text(_missingFieldLabel(f), style: theme.textTheme.bodySmall)),
                     ],

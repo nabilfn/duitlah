@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -37,7 +39,7 @@ class CombinedNetWorthScreen extends ConsumerWidget {
                   child: Column(
                     children: [
                       Text('Estimated net worth', style: Theme.of(context).textTheme.bodyMedium),
-                      Text('RM ${nw.estimatedTotalNetWorth}', style: Theme.of(context).textTheme.headlineMedium),
+                      Text(Money.format(nw.estimatedTotalNetWorth), style: Theme.of(context).textTheme.headlineMedium),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         'Personal net worth plus your ownership value across every business you own. '
@@ -85,7 +87,7 @@ class _Summary extends StatelessWidget {
     return Column(
       children: [
         Text(label, style: Theme.of(context).textTheme.bodySmall),
-        Text('RM $amount', style: Theme.of(context).textTheme.titleMedium),
+        Text(Money.format(amount), style: Theme.of(context).textTheme.titleMedium),
       ],
     );
   }
@@ -101,9 +103,9 @@ class _OwnershipTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
-        leading: const Icon(Icons.store_outlined),
+        leading: const DuitlahIcon(Icons.store_outlined),
         title: Text(line.spaceName),
-        trailing: Text('RM ${line.equityValue}', style: Theme.of(context).textTheme.titleSmall),
+        trailing: Text(Money.format(line.equityValue), style: Theme.of(context).textTheme.titleSmall),
       ),
     );
   }

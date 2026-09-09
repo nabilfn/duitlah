@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -34,7 +36,7 @@ class ProductsScreen extends ConsumerWidget {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -52,7 +54,8 @@ class ProductsScreen extends ConsumerWidget {
               AppTextField(label: 'SKU (optional)', controller: skuController),
               const SizedBox(height: AppSpacing.sm),
               DropdownButtonFormField<ProductType>(
-                initialValue: type,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: type,
                 decoration: const InputDecoration(labelText: 'Type'),
                 items: ProductType.values.map((t) => DropdownMenuItem(value: t, child: Text(t.name))).toList(),
                 onChanged: (v) => setSheetState(() => type = v ?? type),
@@ -71,7 +74,8 @@ class ProductsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
               DropdownButtonFormField<TaxClassification>(
-                initialValue: taxClassification,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: taxClassification,
                 decoration: const InputDecoration(labelText: 'Tax classification'),
                 items: TaxClassification.values
                     .map((t) => DropdownMenuItem(value: t, child: Text(t.name)))
@@ -147,7 +151,7 @@ class ProductsScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (saved == true) ref.invalidate(productListProvider(spaceId));
@@ -193,10 +197,10 @@ class ProductsScreen extends ConsumerWidget {
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text('RM ${p.unitPrice}'),
+                            Text(Money.format(p.unitPrice)),
                             if (!p.active) const Padding(padding: EdgeInsets.only(left: 8), child: Chip(label: Text('Archived'))),
                             IconButton(
-                              icon: const Icon(Icons.archive_outlined),
+                              icon: const DuitlahIcon(Icons.archive_outlined),
                               onPressed: () => _archive(context, ref, p.id),
                             ),
                           ],
@@ -210,7 +214,7 @@ class ProductsScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(productListProvider(spaceId))),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _openForm(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _openForm(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

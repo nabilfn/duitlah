@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -129,7 +130,7 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
               AppTextField(label: 'Merchant', controller: _merchantController),
               const SizedBox(height: AppSpacing.md),
               OutlinedButton.icon(
-                icon: const Icon(Icons.calendar_today_outlined),
+                icon: const DuitlahIcon(Icons.calendar_today_outlined),
                 label: Text(_date.toIso8601String().split('T').first),
                 onPressed: () async {
                   final picked = await showDatePicker(
@@ -146,7 +147,7 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
               const SizedBox(height: AppSpacing.sm),
               for (var i = 0; i < _items.length; i++) _buildItemRow(i),
               TextButton.icon(
-                icon: const Icon(Icons.add),
+                icon: const DuitlahIcon(Icons.add),
                 label: const Text('Add item'),
                 onPressed: () => setState(() => _items.add(_EditableItem())),
               ),
@@ -181,7 +182,7 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
       ),
       child: const Row(
         children: [
-          Icon(Icons.info_outline, color: Colors.orange, size: 20),
+          DuitlahIcon(Icons.info_outline, color: Colors.orange, size: 20),
           SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -218,7 +219,7 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
             child: AppTextField(label: 'Price', controller: item.unitPriceController, keyboardType: TextInputType.number),
           ),
           IconButton(
-            icon: const Icon(Icons.close, size: 18),
+            icon: const DuitlahIcon(Icons.close, size: 18),
             onPressed: () => setState(() => _items.removeAt(index)),
           ),
         ],

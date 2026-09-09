@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -115,24 +116,24 @@ class ReconciliationSessionScreen extends ConsumerWidget {
               child: Text(line.description ?? line.occurredOn, style: Theme.of(context).textTheme.titleLarge),
             ),
             ListTile(
-              leading: const Icon(Icons.link),
+              leading: const DuitlahIcon(Icons.link),
               title: const Text('Match to an existing entry'),
               onTap: () => Navigator.of(context).pop('match'),
             ),
             ListTile(
-              leading: const Icon(Icons.add_circle_outline),
+              leading: const DuitlahIcon(Icons.add_circle_outline),
               title: const Text('Create transaction'),
               subtitle: const Text('No existing entry — post a new one'),
               onTap: () => Navigator.of(context).pop('create'),
             ),
             ListTile(
-              leading: const Icon(Icons.call_split),
+              leading: const DuitlahIcon(Icons.call_split),
               title: const Text('Split into portions'),
               subtitle: const Text('One statement line, several ledger entries'),
               onTap: () => Navigator.of(context).pop('split'),
             ),
             ListTile(
-              leading: const Icon(Icons.visibility_off_outlined),
+              leading: const DuitlahIcon(Icons.visibility_off_outlined),
               title: const Text('Ignore'),
               subtitle: const Text('Not a real business transaction'),
               onTap: () => Navigator.of(context).pop('ignore'),
@@ -177,7 +178,7 @@ class ReconciliationSessionScreen extends ConsumerWidget {
 
     final saved = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => Padding(
+      builder: (context) => SingleChildScrollView(child: Padding(
         padding: EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.lg,
@@ -224,7 +225,7 @@ class ReconciliationSessionScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
     if (saved == true) _invalidateAll(ref, session.businessStatementImportId);
   }
@@ -282,7 +283,7 @@ class _Body extends ConsumerWidget {
             Card(
               color: Theme.of(context).colorScheme.primaryContainer,
               child: const ListTile(
-                leading: Icon(Icons.check_circle_outline),
+                leading: DuitlahIcon(Icons.check_circle_outline),
                 title: Text('Session completed'),
               ),
             ),
@@ -291,7 +292,7 @@ class _Body extends ConsumerWidget {
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
-              const Icon(Icons.info_outline, size: 16),
+              const DuitlahIcon(Icons.info_outline, size: 16),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
@@ -435,7 +436,7 @@ class _LineTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
-        leading: Icon(
+        leading: DuitlahIcon(
           isOutflow ? Icons.arrow_upward : Icons.arrow_downward,
           color: isOutflow ? Colors.red : Colors.green,
         ),

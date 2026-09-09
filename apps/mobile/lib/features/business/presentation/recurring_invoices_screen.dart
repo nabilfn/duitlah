@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -103,12 +104,12 @@ class RecurringInvoicesScreen extends ConsumerWidget {
                                 child: StatusChip(label: 'Paused', color: Colors.grey),
                               ),
                             IconButton(
-                              icon: Icon(schedule.active ? Icons.pause_circle_outline : Icons.play_circle_outline),
+                              icon: DuitlahIcon(schedule.active ? Icons.pause_circle_outline : Icons.play_circle_outline),
                               tooltip: schedule.active ? 'Pause' : 'Resume',
                               onPressed: () => _toggleActive(context, ref, schedule),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 18),
+                              icon: const DuitlahIcon(Icons.delete_outline, size: 18),
                               onPressed: () => _delete(context, ref, schedule),
                             ),
                           ],
@@ -121,7 +122,7 @@ class RecurringInvoicesScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(recurringInvoiceListProvider(spaceId))),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _newSchedule(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _newSchedule(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }
@@ -221,14 +222,16 @@ class _RecurringInvoiceFormSheetState extends ConsumerState<_RecurringInvoiceFor
                   Text('New recurring invoice', style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: AppSpacing.md),
                   DropdownButtonFormField<Customer>(
-                    initialValue: _customer,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _customer,
                     decoration: const InputDecoration(labelText: 'Customer'),
                     items: _customers.map((c) => DropdownMenuItem(value: c, child: Text(c.name))).toList(),
                     onChanged: (v) => setState(() => _customer = v),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   DropdownButtonFormField<RecurrenceFrequency>(
-                    initialValue: _frequency,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _frequency,
                     decoration: const InputDecoration(labelText: 'Repeats'),
                     items: RecurrenceFrequency.values
                         .map((f) => DropdownMenuItem(value: f, child: Text(f.name.toLowerCase())))
@@ -239,7 +242,7 @@ class _RecurringInvoiceFormSheetState extends ConsumerState<_RecurringInvoiceFor
                   AppTextField(label: 'Every N periods', controller: _intervalCountController, keyboardType: TextInputType.number),
                   const SizedBox(height: AppSpacing.sm),
                   OutlinedButton.icon(
-                    icon: const Icon(Icons.calendar_today_outlined),
+                    icon: const DuitlahIcon(Icons.calendar_today_outlined),
                     label: Text('Starts ${_startDate.toIso8601String().split('T').first}'),
                     onPressed: () async {
                       final picked = await showDatePicker(
@@ -253,7 +256,7 @@ class _RecurringInvoiceFormSheetState extends ConsumerState<_RecurringInvoiceFor
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   OutlinedButton.icon(
-                    icon: const Icon(Icons.event_busy_outlined),
+                    icon: const DuitlahIcon(Icons.event_busy_outlined),
                     label: Text(_endDate == null ? 'No end date' : 'Ends ${_endDate!.toIso8601String().split('T').first}'),
                     onPressed: () async {
                       final picked = await showDatePicker(

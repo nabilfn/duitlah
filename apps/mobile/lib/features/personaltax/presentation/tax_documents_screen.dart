@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -69,7 +70,7 @@ class _TaxDocumentsScreenState extends ConsumerState<TaxDocumentsScreen> {
                     final doc = items[index];
                     return Card(
                       child: ListTile(
-                        leading: Icon(doc.receiptId != null ? Icons.receipt_outlined : Icons.insert_drive_file_outlined),
+                        leading: DuitlahIcon(doc.receiptId != null ? Icons.receipt_outlined : Icons.insert_drive_file_outlined),
                         title: Text(doc.type.name),
                       ),
                     );
@@ -83,7 +84,7 @@ class _TaxDocumentsScreenState extends ConsumerState<TaxDocumentsScreen> {
         onPressed: _uploading ? null : _upload,
         child: _uploading
             ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2.4))
-            : const Icon(Icons.upload_file_outlined),
+            : const DuitlahIcon(Icons.upload_file_outlined),
       ),
     );
   }

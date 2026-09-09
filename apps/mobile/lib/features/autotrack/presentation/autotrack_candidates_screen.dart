@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -44,7 +46,7 @@ class AutoTrackCandidatesScreen extends ConsumerWidget {
     final confirmed = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -57,7 +59,7 @@ class AutoTrackCandidatesScreen extends ConsumerWidget {
             children: [
               Text('Confirm transaction', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
-              SegmentedButton<TransactionType>(
+              DuitlahSegmentedControl<TransactionType>(
                 segments: const [
                   ButtonSegment(value: TransactionType.EXPENSE, label: Text('Expense')),
                   ButtonSegment(value: TransactionType.INCOME, label: Text('Income')),
@@ -67,7 +69,8 @@ class AutoTrackCandidatesScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
-                initialValue: accountId,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: accountId,
                 decoration: const InputDecoration(labelText: 'Account'),
                 items: accounts.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
                 onChanged: (v) => setSheetState(() => accountId = v ?? accountId),
@@ -100,7 +103,7 @@ class AutoTrackCandidatesScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (confirmed == true) {
@@ -159,7 +162,7 @@ class AutoTrackCandidatesScreen extends ConsumerWidget {
                                 padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.warning_amber_rounded,
+                                    DuitlahIcon(Icons.warning_amber_rounded,
                                         size: 16, color: Theme.of(context).colorScheme.error),
                                     const SizedBox(width: 4),
                                     Text(

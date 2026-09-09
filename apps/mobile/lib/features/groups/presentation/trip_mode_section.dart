@@ -105,7 +105,7 @@ class TripModeSection extends ConsumerWidget {
 
     final saved = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => Padding(
+      builder: (context) => SingleChildScrollView(child: Padding(
         padding: EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.lg,
@@ -141,7 +141,7 @@ class TripModeSection extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
     if (saved == true) ref.invalidate(tripSummaryProvider(groupId));
   }

@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
+import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -50,7 +52,8 @@ class _GeneralLedgerScreenState extends ConsumerState<GeneralLedgerScreen> {
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
               DropdownButtonFormField<LedgerAccount>(
-                initialValue: _account,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _account,
                 isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Account'),
                 items: active.map((a) => DropdownMenuItem(value: a, child: Text('${a.code} · ${a.name}'))).toList(),
@@ -116,7 +119,7 @@ class _ReportBody extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Opening balance'),
-                  Text('RM ${r.openingBalance}', style: Theme.of(context).textTheme.titleMedium),
+                  Text(Money.format(r.openingBalance), style: Theme.of(context).textTheme.titleMedium),
                 ],
               ),
             ),
@@ -152,7 +155,7 @@ class _ReportBody extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('Closing balance', style: Theme.of(context).textTheme.titleMedium),
-                  Text('RM ${r.closingBalance}', style: Theme.of(context).textTheme.titleMedium),
+                  Text(Money.format(r.closingBalance), style: Theme.of(context).textTheme.titleMedium),
                 ],
               ),
             ),

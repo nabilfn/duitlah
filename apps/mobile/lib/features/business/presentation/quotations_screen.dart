@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/theme/app_semantic_colors.dart';
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,14 +21,14 @@ import 'widgets/line_items_editor.dart';
 Color quotationStatusColor(BuildContext context, QuotationStatus status) {
   switch (status) {
     case QuotationStatus.ACCEPTED:
-      return Colors.green;
+      return Theme.of(context).extension<AppSemanticColors>()!.success;
     case QuotationStatus.DECLINED:
     case QuotationStatus.EXPIRED:
       return Theme.of(context).colorScheme.error;
     case QuotationStatus.SENT:
-      return Colors.blue;
+      return Theme.of(context).colorScheme.primary;
     case QuotationStatus.DRAFT:
-      return Colors.grey;
+      return Theme.of(context).colorScheme.onSurfaceVariant;
   }
 }
 
@@ -66,7 +69,7 @@ class QuotationsScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('RM ${q.total}'),
+                            Text(Money.format(q.total)),
                             Chip(
                               label: Text(q.status.name, style: const TextStyle(fontSize: 11)),
                               backgroundColor: quotationStatusColor(context, q.status).withValues(alpha: 0.15),
@@ -84,7 +87,7 @@ class QuotationsScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(quotationListProvider(spaceId))),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _newQuotation(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _newQuotation(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }
@@ -164,7 +167,8 @@ class _QuotationFormSheetState extends ConsumerState<_QuotationFormSheet> {
                   Text('New quotation', style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: AppSpacing.md),
                   DropdownButtonFormField<Customer>(
-                    initialValue: _customer,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _customer,
                     decoration: const InputDecoration(labelText: 'Customer'),
                     items: _customers.map((c) => DropdownMenuItem(value: c, child: Text(c.name))).toList(),
                     onChanged: (v) => setState(() => _customer = v),

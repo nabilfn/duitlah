@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,7 +31,7 @@ class QuotationDetailScreen extends ConsumerWidget {
         children: QuotationStatus.values
             .map((s) => ListTile(
                   title: Text(s.name),
-                  trailing: s == current ? const Icon(Icons.check) : null,
+                  trailing: s == current ? const DuitlahIcon(Icons.check) : null,
                   onTap: () => Navigator.of(context).pop(s),
                 ))
             .toList(),
@@ -49,7 +51,7 @@ class QuotationDetailScreen extends ConsumerWidget {
     final dueDateController = TextEditingController(text: DateTime.now().toIso8601String().substring(0, 10));
     final confirmed = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => Padding(
+      builder: (context) => SingleChildScrollView(child: Padding(
         padding: EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.lg,
@@ -67,7 +69,7 @@ class QuotationDetailScreen extends ConsumerWidget {
             PrimaryButton(label: 'Convert', onPressed: () => Navigator.of(context).pop(true)),
           ],
         ),
-      ),
+      )),
     );
     if (confirmed != true) return;
     try {
@@ -99,7 +101,7 @@ class QuotationDetailScreen extends ConsumerWidget {
           if (quotation.valueOrNull != null)
             TextButton(
               onPressed: () => _changeStatus(context, ref, quotation.value!.status),
-              child: const Text('Status', style: TextStyle(color: Colors.white)),
+              child: const Text('Status'),
             ),
         ],
       ),
@@ -134,7 +136,7 @@ class QuotationDetailScreen extends ConsumerWidget {
                           child: Row(
                             children: [
                               Expanded(child: Text('${li.description} × ${li.quantity}')),
-                              Text('RM ${li.lineTotal}'),
+                              Text(Money.format(li.lineTotal)),
                             ],
                           ),
                         ),
@@ -169,7 +171,7 @@ class QuotationDetailScreen extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(label, style: bold ? const TextStyle(fontWeight: FontWeight.bold) : null),
-            Text('RM $amount', style: bold ? const TextStyle(fontWeight: FontWeight.bold) : null),
+            Text(Money.format(amount), style: bold ? const TextStyle(fontWeight: FontWeight.bold) : null),
           ],
         ),
       );

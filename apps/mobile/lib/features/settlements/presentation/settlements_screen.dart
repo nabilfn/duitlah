@@ -38,7 +38,7 @@ class SettlementsScreen extends ConsumerWidget {
     final amountController = TextEditingController(text: settlement.amountRemaining);
     await showAppBottomSheet(
       context,
-      builder: (context) => Padding(
+      builder: (context) => SingleChildScrollView(child: Padding(
         padding: EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.lg,
@@ -74,7 +74,7 @@ class SettlementsScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 

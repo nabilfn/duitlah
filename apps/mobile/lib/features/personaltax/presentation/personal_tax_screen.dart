@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -59,7 +61,7 @@ class PersonalTaxScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => _pickYear(context, ref),
-            child: Text('YA $yearOfAssessment', style: const TextStyle(color: Colors.white)),
+            child: Text('YA $yearOfAssessment', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
           ),
         ],
       ),
@@ -93,7 +95,7 @@ class PersonalTaxScreen extends ConsumerWidget {
             const SizedBox(height: AppSpacing.lg),
             OutlinedButton.icon(
               onPressed: () => _downloadSummary(context, ref),
-              icon: const Icon(Icons.picture_as_pdf_outlined),
+              icon: const DuitlahIcon(Icons.picture_as_pdf_outlined),
               label: const Text('Download preparation summary'),
             ),
           ],
@@ -156,7 +158,7 @@ class _Row extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [Text(label), Text('RM $amount')],
+        children: [Text(label), Text(Money.format(amount))],
       ),
     );
   }
@@ -188,7 +190,7 @@ class _ReadinessCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 2),
                 child: Row(
                   children: [
-                    Icon(
+                    DuitlahIcon(
                       item.ready ? Icons.check_circle : Icons.warning_amber_rounded,
                       size: 18,
                       color: item.ready ? Colors.green : Colors.orange,
@@ -215,12 +217,12 @@ class _NavTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: ListTile(
-        leading: Icon(icon),
+        leading: DuitlahIcon(icon),
         title: Text(label),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: const DuitlahIcon(Icons.chevron_right),
         onTap: () => context.push(route),
       ),
     );

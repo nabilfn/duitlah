@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -26,7 +28,7 @@ class BusinessAccountsScreen extends ConsumerWidget {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -42,7 +44,8 @@ class BusinessAccountsScreen extends ConsumerWidget {
               AppTextField(label: 'Name', controller: nameController),
               const SizedBox(height: AppSpacing.sm),
               DropdownButtonFormField<BusinessAccountType>(
-                initialValue: type,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: type,
                 decoration: const InputDecoration(labelText: 'Type'),
                 items: BusinessAccountType.values.map((t) => DropdownMenuItem(value: t, child: Text(t.name))).toList(),
                 onChanged: (v) => setSheetState(() => type = v ?? type),
@@ -75,7 +78,7 @@ class BusinessAccountsScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (saved == true) ref.invalidate(businessAccountListProvider(spaceId));
@@ -101,7 +104,7 @@ class BusinessAccountsScreen extends ConsumerWidget {
                       child: ListTile(
                         title: Text(a.name),
                         subtitle: Text('${a.type.name} · ${a.currency}${a.archived ? ' · Archived' : ''}'),
-                        trailing: Text('RM ${a.balance}', style: Theme.of(context).textTheme.titleMedium),
+                        trailing: Text(Money.format(a.balance), style: Theme.of(context).textTheme.titleMedium),
                         onTap: () => context.push(AppRoutes.businessAccountDetail(spaceId, a.id)),
                       ),
                     );
@@ -111,7 +114,7 @@ class BusinessAccountsScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(businessAccountListProvider(spaceId))),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addAccount(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _addAccount(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

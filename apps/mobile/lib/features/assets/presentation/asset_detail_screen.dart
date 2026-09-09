@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -112,7 +114,7 @@ class AssetDetailScreen extends ConsumerWidget {
         actions: [
           if (asset.valueOrNull != null && asset.valueOrNull!.status == FixedAssetStatus.ACTIVE)
             IconButton(
-              icon: const Icon(Icons.edit_outlined),
+              icon: const DuitlahIcon(Icons.edit_outlined),
               onPressed: () => _openEditForm(context, ref, asset.valueOrNull!),
             ),
         ],
@@ -147,7 +149,7 @@ class AssetDetailScreen extends ConsumerWidget {
                 Card(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   child: ListTile(
-                    leading: const Icon(Icons.inventory_2_outlined),
+                    leading: const DuitlahIcon(Icons.inventory_2_outlined),
                     title: const Text('This asset has been disposed'),
                     subtitle: Text(
                       'Disposed on ${a.disposedOn ?? '-'}'
@@ -259,9 +261,9 @@ class _DepreciationTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
-        leading: const Icon(Icons.calendar_month_outlined),
+        leading: const DuitlahIcon(Icons.calendar_month_outlined),
         title: Text(entry.period),
-        trailing: Text('RM ${entry.amount}', style: Theme.of(context).textTheme.titleSmall),
+        trailing: Text(Money.format(entry.amount), style: Theme.of(context).textTheme.titleSmall),
       ),
     );
   }
@@ -359,7 +361,7 @@ class _DisposeSheetState extends ConsumerState<_DisposeSheet> {
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Disposal date'),
                 subtitle: Text(_fmtDate(_disposedOn)),
-                trailing: const Icon(Icons.calendar_month_outlined),
+                trailing: const DuitlahIcon(Icons.calendar_month_outlined),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -378,7 +380,8 @@ class _DisposeSheetState extends ConsumerState<_DisposeSheet> {
               ),
               const SizedBox(height: AppSpacing.sm),
               DropdownButtonFormField<String?>(
-                initialValue: _businessAccountId,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _businessAccountId,
                 decoration: InputDecoration(
                   labelText: _needsAccount ? 'Received into (required)' : 'Received into (optional)',
                 ),

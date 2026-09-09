@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -192,7 +194,7 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
                               title: Text(c.displayName),
                               subtitle: Text('${c.claimType.name} · ${c.value}'),
                               trailing: IconButton(
-                                icon: const Icon(Icons.close, size: 18),
+                                icon: const DuitlahIcon(Icons.close, size: 18),
                                 onPressed: () => _removeClaim(c.id),
                               ),
                             )),
@@ -205,7 +207,7 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
               ),
               error: (_, _) => const SizedBox.shrink(),
             ),
-            SegmentedButton<_ClaimMode>(
+            DuitlahSegmentedControl<_ClaimMode>(
               segments: const [
                 ButtonSegment(value: _ClaimMode.whole, label: Text('Whole item')),
                 ButtonSegment(value: _ClaimMode.equalSplit, label: Text('Split equally')),
@@ -234,7 +236,8 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
               )
             else ...[
               DropdownButtonFormField<String>(
-                initialValue: _selectedParticipantId,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _selectedParticipantId,
                 decoration: const InputDecoration(labelText: 'Participant'),
                 items: widget.participants
                     .map((p) => DropdownMenuItem(value: p.id, child: Text(p.displayName)))
@@ -243,7 +246,7 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
               ),
               if (_mode == _ClaimMode.custom) ...[
                 const SizedBox(height: AppSpacing.md),
-                SegmentedButton<ClaimType>(
+                DuitlahSegmentedControl<ClaimType>(
                   segments: const [
                     ButtonSegment(value: ClaimType.PERCENTAGE, label: Text('%')),
                     ButtonSegment(value: ClaimType.QUANTITY, label: Text('Qty')),

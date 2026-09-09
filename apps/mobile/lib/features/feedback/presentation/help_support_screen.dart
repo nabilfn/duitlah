@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -77,10 +78,10 @@ class HelpSupportScreen extends StatelessWidget {
           final (icon, title, subtitle, onTap) = items[index];
           return Card(
             child: ListTile(
-              leading: Icon(icon),
+              leading: DuitlahIcon(icon),
               title: Text(title),
               subtitle: subtitle == null ? null : Text(subtitle),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const DuitlahIcon(Icons.chevron_right),
               onTap: onTap,
             ),
           );

@@ -32,6 +32,7 @@ class AppRoutes {
 
   static const settlements = '/settlements';
   static const accounts = '/accounts';
+  static const categories = '/categories';
   static const budgets = '/budgets';
   static const goals = '/goals';
   static const profile = '/profile';

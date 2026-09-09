@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -15,6 +16,8 @@ import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/list_rows.dart';
 import '../../../core/widgets/participant_avatar.dart';
 import '../../../core/widgets/status_chip.dart';
+import '../../../core/widgets/financial_surfaces.dart';
+import '../../../core/utils/money.dart';
 import '../application/bagilah_providers.dart';
 import '../domain/bagilah_enums.dart';
 import 'claim_item_sheet.dart';
@@ -156,7 +159,7 @@ class _BillDetailScreenState extends ConsumerState<BillDetailScreen> {
     final nameController = TextEditingController();
     final added = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => Padding(
+      builder: (context) => SingleChildScrollView(child: Padding(
         padding: EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.lg,
@@ -188,7 +191,7 @@ class _BillDetailScreenState extends ConsumerState<BillDetailScreen> {
             ),
           ],
         ),
-      ),
+      )),
     );
     if (added == true) ref.invalidate(billParticipantsProvider(widget.billId));
   }
@@ -206,7 +209,7 @@ class _BillDetailScreenState extends ConsumerState<BillDetailScreen> {
         title: Text(billAsync.valueOrNull?.merchant ?? 'Bill'),
         actions: [
           if (billAsync.valueOrNull?.status == BillStatus.DRAFT)
-            IconButton(icon: const Icon(Icons.person_add_alt_1_outlined), onPressed: _showInvite),
+            IconButton(icon: const DuitlahIcon(Icons.person_add_alt_1_outlined), onPressed: _showInvite),
         ],
       ),
       body: billAsync.when(
@@ -215,6 +218,14 @@ class _BillDetailScreenState extends ConsumerState<BillDetailScreen> {
           child: ListView(
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
+              ForestSurface(radius: 22, child: SizedBox(width: double.infinity, child: Padding(padding: const EdgeInsets.all(24), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(bill.merchant ?? 'Shared bill', style: const TextStyle(color: Colors.white, fontSize: 16)),
+                const SizedBox(height: 8),
+                Text(bill.total != null ? Money.format(bill.total!, currency: bill.currency == 'MYR' ? 'RM' : bill.currency) : 'Build your split', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white)),
+                const SizedBox(height: 8),
+                Text(bill.status == BillStatus.DRAFT ? 'Add items, invite people and choose your shares.' : 'Your shared expense, all in one place.', style: const TextStyle(color: Color(0xFFDCE8E2), fontSize: 13)),
+              ])))),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -223,7 +234,7 @@ class _BillDetailScreenState extends ConsumerState<BillDetailScreen> {
                     label: bill.status.name,
                     color: bill.status == BillStatus.DRAFT
                         ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.outline,
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ],
               ),
@@ -243,7 +254,7 @@ class _BillDetailScreenState extends ConsumerState<BillDetailScreen> {
                           child: CircleAvatar(
                             radius: 20,
                             backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            child: const Icon(Icons.add),
+                            child: const DuitlahIcon(Icons.add),
                           ),
                         );
                       }
@@ -263,7 +274,7 @@ class _BillDetailScreenState extends ConsumerState<BillDetailScreen> {
                 children: [
                   Text('Items', style: Theme.of(context).textTheme.titleMedium),
                   if (bill.status == BillStatus.DRAFT)
-                    TextButton.icon(onPressed: _addItem, icon: const Icon(Icons.add, size: 18), label: const Text('Add item')),
+                    TextButton.icon(onPressed: _addItem, icon: const DuitlahIcon(Icons.add, size: 18), label: const Text('Add item')),
                 ],
               ),
               itemsAsync.when(
@@ -320,8 +331,8 @@ class _BillDetailScreenState extends ConsumerState<BillDetailScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(p.displayName),
-                                AmountText(p.finalAmount, style: Theme.of(context).textTheme.titleSmall),
+                                Expanded(child: Text(p.displayName)),
+                                Flexible(child: AmountText(p.finalAmount, style: Theme.of(context).textTheme.titleSmall)),
                               ],
                             ),
                           ),

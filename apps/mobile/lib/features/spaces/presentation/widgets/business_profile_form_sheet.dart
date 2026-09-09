@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -160,14 +161,14 @@ class _BusinessProfileFormSheetState extends ConsumerState<BusinessProfileFormSh
               contentPadding: EdgeInsets.zero,
               title: const Text('Financial year start'),
               subtitle: Text(_financialYearStart != null ? _fmtDate(_financialYearStart!) : 'Not set'),
-              trailing: const Icon(Icons.calendar_month_outlined),
+              trailing: const DuitlahIcon(Icons.calendar_month_outlined),
               onTap: () => _pickDate(true),
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Financial year end'),
               subtitle: Text(_financialYearEnd != null ? _fmtDate(_financialYearEnd!) : 'Not set'),
-              trailing: const Icon(Icons.calendar_month_outlined),
+              trailing: const DuitlahIcon(Icons.calendar_month_outlined),
               onTap: () => _pickDate(false),
             ),
             const SizedBox(height: AppSpacing.sm),

@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,7 +18,7 @@ class GroupsListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Groups'),
         actions: [
-          IconButton(icon: const Icon(Icons.group_add_outlined), onPressed: () => context.push(AppRoutes.groupJoin)),
+          IconButton(icon: const DuitlahIcon(Icons.group_add_outlined), onPressed: () => context.push(AppRoutes.groupJoin)),
         ],
       ),
       body: RefreshIndicator(
@@ -51,7 +52,7 @@ class GroupsListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push(AppRoutes.groupCreate),
-        icon: const Icon(Icons.add),
+        icon: const DuitlahIcon(Icons.add),
         label: const Text('New group'),
       ),
     );

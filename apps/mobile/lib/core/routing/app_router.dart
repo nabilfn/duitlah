@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/accounts/presentation/accounts_screen.dart';
+import '../../features/accounts/presentation/categories_screen.dart';
 import '../../features/assistant/presentation/assistant_screen.dart';
 import '../../features/auth/application/auth_state.dart';
 import '../../features/autotrack/presentation/autotrack_candidates_screen.dart';
@@ -157,14 +158,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => GroupDetailScreen(groupId: state.pathParameters['id']!),
       ),
       GoRoute(path: AppRoutes.settlements, builder: (context, state) => const SettlementsScreen()),
+      GoRoute(path: AppRoutes.categories, builder: (context, state) => const CategoriesScreen()),
       GoRoute(path: AppRoutes.accounts, builder: (context, state) => const AccountsScreen()),
       GoRoute(path: AppRoutes.budgets, builder: (context, state) => const BudgetsScreen()),
       GoRoute(path: AppRoutes.goals, builder: (context, state) => const GoalsScreen()),
-      GoRoute(path: AppRoutes.profile, builder: (context, state) => const ProfileScreen()),
       GoRoute(path: AppRoutes.notifications, builder: (context, state) => const NotificationsScreen()),
       GoRoute(path: AppRoutes.recurring, builder: (context, state) => const RecurringTransactionsScreen()),
       GoRoute(path: AppRoutes.calendar, builder: (context, state) => const CalendarScreen()),
-      GoRoute(path: AppRoutes.insights, builder: (context, state) => const InsightsScreen()),
       GoRoute(path: AppRoutes.assistant, builder: (context, state) => const AssistantScreen()),
       GoRoute(path: AppRoutes.duitlahPlus, builder: (context, state) => const DuitlahPlusScreen()),
       GoRoute(path: AppRoutes.helpSupport, builder: (context, state) => const HelpSupportScreen()),
@@ -385,6 +385,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             VaultReceiptDetailScreen(receiptId: state.pathParameters['receiptId']!),
       ),
+      GoRoute(path: AppRoutes.groups, builder: (context, state) => const GroupsListScreen()),
+      GoRoute(path: AppRoutes.more, builder: (context, state) => const MoreMenuScreen()),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => MainShell(navigationShell: navigationShell),
         branches: [
@@ -395,13 +397,13 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(path: AppRoutes.transactions, builder: (context, state) => const TransactionsScreen()),
           ]),
           StatefulShellBranch(routes: [
+            GoRoute(path: AppRoutes.insights, builder: (context, state) => const InsightsScreen()),
+          ]),
+          StatefulShellBranch(routes: [
             GoRoute(path: AppRoutes.bagilah, builder: (context, state) => const BillsListScreen()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: AppRoutes.groups, builder: (context, state) => const GroupsListScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: AppRoutes.more, builder: (context, state) => const MoreMenuScreen()),
+            GoRoute(path: AppRoutes.profile, builder: (context, state) => const ProfileScreen()),
           ]),
         ],
       ),

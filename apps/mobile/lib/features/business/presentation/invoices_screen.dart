@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/theme/app_semantic_colors.dart';
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,17 +24,17 @@ import 'widgets/line_items_editor.dart';
 Color invoiceEffectiveStatusColor(BuildContext context, InvoiceEffectiveStatus status) {
   switch (status) {
     case InvoiceEffectiveStatus.PAID:
-      return Colors.green;
+      return Theme.of(context).extension<AppSemanticColors>()!.success;
     case InvoiceEffectiveStatus.PARTIALLY_PAID:
-      return Colors.orange;
+      return Theme.of(context).extension<AppSemanticColors>()!.warning;
     case InvoiceEffectiveStatus.OVERDUE:
       return Theme.of(context).colorScheme.error;
     case InvoiceEffectiveStatus.VOID:
-      return Colors.grey;
+      return Theme.of(context).colorScheme.onSurfaceVariant;
     case InvoiceEffectiveStatus.SENT:
-      return Colors.blue;
+      return Theme.of(context).colorScheme.primary;
     case InvoiceEffectiveStatus.DRAFT:
-      return Colors.blueGrey;
+      return Theme.of(context).colorScheme.onSurfaceVariant;
   }
 }
 
@@ -72,7 +75,7 @@ class InvoicesScreen extends ConsumerWidget {
                             Text(inv.invoiceNumber),
                             if (inv.sourceRecurringInvoiceId != null) ...[
                               const SizedBox(width: AppSpacing.xs),
-                              const Icon(Icons.event_repeat_outlined, size: 14),
+                              const DuitlahIcon(Icons.event_repeat_outlined, size: 14),
                             ],
                           ],
                         ),
@@ -81,7 +84,7 @@ class InvoicesScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('RM ${inv.total}'),
+                            Text(Money.format(inv.total)),
                             Chip(
                               label: Text(inv.effectiveStatus.name, style: const TextStyle(fontSize: 11)),
                               backgroundColor: invoiceEffectiveStatusColor(context, inv.effectiveStatus).withValues(alpha: 0.15),
@@ -99,7 +102,7 @@ class InvoicesScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(invoiceListProvider(spaceId))),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _newInvoice(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _newInvoice(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }
@@ -181,7 +184,8 @@ class _InvoiceFormSheetState extends ConsumerState<_InvoiceFormSheet> {
                   Text('New invoice', style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: AppSpacing.md),
                   DropdownButtonFormField<Customer>(
-                    initialValue: _customer,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _customer,
                     decoration: const InputDecoration(labelText: 'Customer'),
                     items: _customers.map((c) => DropdownMenuItem(value: c, child: Text(c.name))).toList(),
                     onChanged: (v) => setState(() => _customer = v),

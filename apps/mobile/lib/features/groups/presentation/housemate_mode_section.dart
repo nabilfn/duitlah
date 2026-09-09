@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -34,13 +35,13 @@ class HousemateModeSection extends ConsumerWidget {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.chevron_left),
+                  icon: const DuitlahIcon(Icons.chevron_left),
                   onPressed: () => ref.read(housemateMonthProvider(groupId).notifier).state =
                       DateTime(month.year, month.month - 1),
                 ),
                 Text('${_monthNames[month.month - 1]} ${month.year}', style: theme.textTheme.bodyMedium),
                 IconButton(
-                  icon: const Icon(Icons.chevron_right),
+                  icon: const DuitlahIcon(Icons.chevron_right),
                   onPressed: () => ref.read(housemateMonthProvider(groupId).notifier).state =
                       DateTime(month.year, month.month + 1),
                 ),

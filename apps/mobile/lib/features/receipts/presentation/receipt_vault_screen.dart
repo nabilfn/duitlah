@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -130,7 +131,7 @@ class _ReceiptVaultScreenState extends ConsumerState<ReceiptVaultScreen> {
         child: _uploading
             ? const SizedBox(
                 height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2.4))
-            : const Icon(Icons.add_a_photo_outlined),
+            : const DuitlahIcon(Icons.add_a_photo_outlined),
       ),
     );
   }
@@ -159,7 +160,7 @@ class _ReceiptCard extends StatelessWidget {
                     const Positioned(
                       top: 4,
                       right: 4,
-                      child: Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 18),
+                      child: DuitlahIcon(Icons.warning_amber_rounded, color: Colors.orange, size: 18),
                     ),
                 ],
               ),

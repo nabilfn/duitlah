@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,7 +45,7 @@ class BusinessProfileScreen extends ConsumerWidget {
         actions: [
           if (profile.valueOrNull != null)
             IconButton(
-              icon: const Icon(Icons.edit_outlined),
+              icon: const DuitlahIcon(Icons.edit_outlined),
               onPressed: () => _openEditForm(context, ref, profile.value!),
             ),
         ],

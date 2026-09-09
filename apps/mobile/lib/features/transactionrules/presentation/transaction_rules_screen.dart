@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -111,7 +112,7 @@ class TransactionRulesScreen extends ConsumerWidget {
                                 child: StatusChip(label: 'Inactive', color: Colors.grey),
                               ),
                             IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 18),
+                              icon: const DuitlahIcon(Icons.delete_outline, size: 18),
                               onPressed: () => _delete(context, ref, rule),
                             ),
                           ],
@@ -124,7 +125,7 @@ class TransactionRulesScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(transactionRuleListProvider)),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _openForm(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _openForm(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }
@@ -212,7 +213,8 @@ class _RuleFormSheetState extends ConsumerState<_RuleFormSheet> {
             ],
             const SizedBox(height: AppSpacing.md),
             DropdownButtonFormField<MatchType>(
-              initialValue: _matchType,
+              icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _matchType,
               decoration: const InputDecoration(labelText: 'Match type'),
               items: MatchType.values
                   .map((t) => DropdownMenuItem(value: t, child: Text(t == MatchType.MERCHANT_EQUALS ? 'Merchant is exactly' : 'Merchant contains')))
@@ -223,7 +225,8 @@ class _RuleFormSheetState extends ConsumerState<_RuleFormSheet> {
             AppTextField(label: 'Merchant text', controller: _matchValueController),
             const SizedBox(height: AppSpacing.sm),
             DropdownButtonFormField<String>(
-              initialValue: _categoryId,
+              icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _categoryId,
               isExpanded: true,
               decoration: const InputDecoration(labelText: 'Category'),
               items: widget.categories.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),

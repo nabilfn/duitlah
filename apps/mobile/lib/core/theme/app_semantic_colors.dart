@@ -20,17 +20,13 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color bagilah;
   final Color bagilahForeground;
 
-  /// Bagilah gets Duitlah's orange accent, not teal — the flagship feature
-  /// should read as its own moment even resting among ordinary teal actions,
-  /// the same reasoning `apps/web`'s own design system uses for its
-  /// (differently-hued) Bagilah color. Orange at full strength needs a dark
-  /// foreground, not white — a light, saturated color fails contrast with
-  /// white text.
+  /// Bagilah shares the forest/sage palette; its signature is the organic
+  /// composition rather than a competing saturated brand color.
   static const light = AppSemanticColors(
     success: AppColors.positive,
-    warning: AppColors.orange,
+    warning: Color(0xFF945000),
     info: AppColors.tealDark,
-    bagilah: AppColors.orange,
+    bagilah: AppColors.sage,
     bagilahForeground: AppColors.lightInk,
   );
 
@@ -38,8 +34,8 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     success: AppColors.positiveBright,
     warning: AppColors.orangeBright,
     info: AppColors.tealBright,
-    bagilah: AppColors.orangeBright,
-    bagilahForeground: AppColors.darkInk,
+    bagilah: AppColors.tealBright,
+    bagilahForeground: AppColors.lightInk,
   );
 
   @override
@@ -67,7 +63,11 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       warning: Color.lerp(warning, other.warning, t)!,
       info: Color.lerp(info, other.info, t)!,
       bagilah: Color.lerp(bagilah, other.bagilah, t)!,
-      bagilahForeground: Color.lerp(bagilahForeground, other.bagilahForeground, t)!,
+      bagilahForeground: Color.lerp(
+        bagilahForeground,
+        other.bagilahForeground,
+        t,
+      )!,
     );
   }
 }

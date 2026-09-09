@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -62,7 +63,7 @@ class LineItemsEditor extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         OutlinedButton.icon(
           onPressed: () => onChanged([...items, LineItemDraft()]),
-          icon: const Icon(Icons.add),
+          icon: const DuitlahIcon(Icons.add),
           label: const Text('Add line item'),
         ),
         const SizedBox(height: AppSpacing.md),
@@ -93,7 +94,8 @@ class LineItemsEditor extends StatelessWidget {
             children: [
               Expanded(
                 child: DropdownButtonFormField<Product?>(
-                  initialValue: item.product,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: item.product,
                   isExpanded: true,
                   decoration: const InputDecoration(labelText: 'Product (optional)'),
                   items: [
@@ -111,7 +113,7 @@ class LineItemsEditor extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close),
+                icon: const DuitlahIcon(Icons.close),
                 onPressed: () => onChanged([...items]..removeAt(index)),
               ),
             ],

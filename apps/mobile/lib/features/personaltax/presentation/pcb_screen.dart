@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -20,7 +22,7 @@ class PcbScreen extends ConsumerWidget {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -34,7 +36,8 @@ class PcbScreen extends ConsumerWidget {
               Text('Record PCB — YA $ya', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<int>(
-                initialValue: month,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: month,
                 decoration: const InputDecoration(labelText: 'Month'),
                 items: List.generate(12, (i) => i + 1).map((m) => DropdownMenuItem(value: m, child: Text('$m'))).toList(),
                 onChanged: (v) => setSheetState(() => month = v ?? month),
@@ -59,7 +62,7 @@ class PcbScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (saved == true) {
@@ -85,7 +88,7 @@ class PcbScreen extends ConsumerWidget {
                   itemBuilder: (context, index) {
                     final payment = items[index];
                     return Card(
-                      child: ListTile(title: Text('Month ${payment.month}'), trailing: Text('RM ${payment.amount}')),
+                      child: ListTile(title: Text('Month ${payment.month}'), trailing: Text(Money.format(payment.amount))),
                     );
                   },
                 ),
@@ -93,7 +96,7 @@ class PcbScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(pcbListProvider)),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _recordPcb(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _recordPcb(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

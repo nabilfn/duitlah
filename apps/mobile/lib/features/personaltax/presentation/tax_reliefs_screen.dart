@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,7 +25,7 @@ class TaxReliefsScreen extends ConsumerWidget {
     final confirmed = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -37,7 +39,8 @@ class TaxReliefsScreen extends ConsumerWidget {
               Text('Confirm relief', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<PersonalTaxReliefCategory>(
-                initialValue: category,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: category,
                 decoration: const InputDecoration(labelText: 'Category'),
                 items: PersonalTaxReliefCategory.values.map((c) => DropdownMenuItem(value: c, child: Text(c.name))).toList(),
                 onChanged: (v) => setSheetState(() => category = v ?? category),
@@ -64,7 +67,7 @@ class TaxReliefsScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (confirmed == true) {
@@ -80,7 +83,7 @@ class TaxReliefsScreen extends ConsumerWidget {
     final ya = ref.read(selectedYearOfAssessmentProvider);
     final added = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => Padding(
+      builder: (context) => SingleChildScrollView(child: Padding(
         padding: EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.lg,
@@ -112,7 +115,7 @@ class TaxReliefsScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
     if (added == true) ref.invalidate(reliefCandidateListProvider);
   }
@@ -139,7 +142,7 @@ class TaxReliefsScreen extends ConsumerWidget {
                   ? const Text('None confirmed yet.')
                   : Column(
                       children: items
-                          .map((r) => Card(child: ListTile(title: Text(r.category.name), trailing: Text('RM ${r.confirmedAmount}'))))
+                          .map((r) => Card(child: ListTile(title: Text(r.category.name), trailing: Text(Money.format(r.confirmedAmount)))))
                           .toList(),
                     ),
               loading: () => const LoadingView(),
@@ -185,7 +188,7 @@ class TaxReliefsScreen extends ConsumerWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addCandidate(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _addCandidate(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

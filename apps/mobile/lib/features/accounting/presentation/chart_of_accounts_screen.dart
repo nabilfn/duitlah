@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -62,7 +63,7 @@ class ChartOfAccountsScreen extends ConsumerWidget {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -83,7 +84,8 @@ class ChartOfAccountsScreen extends ConsumerWidget {
               AppTextField(label: 'Name', controller: nameController),
               const SizedBox(height: AppSpacing.sm),
               DropdownButtonFormField<LedgerAccountType>(
-                initialValue: type,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: type,
                 decoration: const InputDecoration(labelText: 'Type'),
                 items: _sectionOrder.map((t) => DropdownMenuItem(value: t, child: Text(sectionTitle(t)))).toList(),
                 onChanged: (v) => setSheetState(() => type = v ?? type),
@@ -135,7 +137,7 @@ class ChartOfAccountsScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (saved == true) ref.invalidate(chartOfAccountsListProvider(spaceId));
@@ -223,7 +225,7 @@ class ChartOfAccountsScreen extends ConsumerWidget {
                           ),
                           onTap: () => _addOrEdit(context, ref, existing: a),
                           trailing: IconButton(
-                            icon: const Icon(Icons.archive_outlined),
+                            icon: const DuitlahIcon(Icons.archive_outlined),
                             onPressed: a.archived ? null : () => _archive(context, ref, a),
                           ),
                         ),
@@ -237,7 +239,7 @@ class ChartOfAccountsScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(chartOfAccountsListProvider(spaceId))),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addOrEdit(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _addOrEdit(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

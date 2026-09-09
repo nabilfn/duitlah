@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,7 +29,7 @@ class TeamScreen extends ConsumerWidget {
     final added = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -44,7 +45,8 @@ class TeamScreen extends ConsumerWidget {
               AppTextField(label: 'Email', controller: emailController, keyboardType: TextInputType.emailAddress),
               const SizedBox(height: AppSpacing.sm),
               DropdownButtonFormField<SpaceRole>(
-                initialValue: role,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: role,
                 decoration: const InputDecoration(labelText: 'Role'),
                 items: SpaceRole.values.map((r) => DropdownMenuItem(value: r, child: Text(r.name))).toList(),
                 onChanged: (v) => setSheetState(() => role = v ?? role),
@@ -67,7 +69,7 @@ class TeamScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (added == true) ref.invalidate(spaceMembersProvider(spaceId));
@@ -78,7 +80,7 @@ class TeamScreen extends ConsumerWidget {
     final action = await showAppBottomSheet<String>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -92,7 +94,8 @@ class TeamScreen extends ConsumerWidget {
               Text(member.displayName ?? member.email ?? 'Member', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<SpaceRole>(
-                initialValue: role,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: role,
                 decoration: const InputDecoration(labelText: 'Role'),
                 items: SpaceRole.values.map((r) => DropdownMenuItem(value: r, child: Text(r.name))).toList(),
                 onChanged: (v) => setSheetState(() => role = v ?? role),
@@ -103,7 +106,7 @@ class TeamScreen extends ConsumerWidget {
               SecondaryButton(label: 'Remove from space', onPressed: () => Navigator.of(context).pop('remove')),
             ],
           ),
-        ),
+        )),
       ),
     );
 
@@ -173,7 +176,7 @@ class TeamScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(spaceMembersProvider(spaceId))),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addMember(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _addMember(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

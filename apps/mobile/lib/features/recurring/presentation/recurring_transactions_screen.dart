@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -110,7 +112,7 @@ class _RecurringTransactionsScreenState extends ConsumerState<RecurringTransacti
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateSheet(context),
-        icon: const Icon(Icons.add),
+        icon: const DuitlahIcon(Icons.add),
         label: const Text('Add recurring'),
       ),
     );
@@ -173,7 +175,7 @@ class _RuleCard extends ConsumerWidget {
             if (!rule.active)
               StatusChip(label: 'Ended', color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
             IconButton(
-              icon: const Icon(Icons.delete_outline, size: 18),
+              icon: const DuitlahIcon(Icons.delete_outline, size: 18),
               onPressed: () => _confirmDelete(context, ref),
             ),
           ],
@@ -245,7 +247,7 @@ class _RecurringTransactionFormState extends ConsumerState<_RecurringTransaction
           children: [
             Text('New recurring transaction', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppSpacing.md),
-            SegmentedButton<TransactionType>(
+            DuitlahSegmentedControl<TransactionType>(
               segments: const [
                 ButtonSegment(value: TransactionType.EXPENSE, label: Text('Expense')),
                 ButtonSegment(value: TransactionType.INCOME, label: Text('Income')),
@@ -255,7 +257,8 @@ class _RecurringTransactionFormState extends ConsumerState<_RecurringTransaction
             ),
             const SizedBox(height: AppSpacing.md),
             DropdownButtonFormField<String>(
-              initialValue: _accountId,
+              icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _accountId,
               decoration: const InputDecoration(labelText: 'Account'),
               items: widget.accounts.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
               onChanged: (v) => setState(() => _accountId = v ?? _accountId),
@@ -266,7 +269,8 @@ class _RecurringTransactionFormState extends ConsumerState<_RecurringTransaction
             AppTextField(label: 'Merchant / description', controller: _merchantController),
             const SizedBox(height: AppSpacing.md),
             DropdownButtonFormField<RecurrenceFrequency>(
-              initialValue: _frequency,
+              icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _frequency,
               decoration: const InputDecoration(labelText: 'Repeats'),
               items: RecurrenceFrequency.values
                   .map((f) => DropdownMenuItem(value: f, child: Text(f.name.toLowerCase())))
@@ -275,7 +279,7 @@ class _RecurringTransactionFormState extends ConsumerState<_RecurringTransaction
             ),
             const SizedBox(height: AppSpacing.sm),
             OutlinedButton.icon(
-              icon: const Icon(Icons.calendar_today_outlined),
+              icon: const DuitlahIcon(Icons.calendar_today_outlined),
               label: Text('Starts ${_startDate.toIso8601String().split('T').first}'),
               onPressed: () async {
                 final picked = await showDatePicker(

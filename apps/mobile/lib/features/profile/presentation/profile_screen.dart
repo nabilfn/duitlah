@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/dialogs.dart';
+import '../../../core/widgets/duitlah_icon.dart';
 import '../../../core/widgets/participant_avatar.dart';
 import '../../auth/application/auth_state.dart';
 
@@ -62,7 +64,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       await ref.read(authProvider.notifier).logout();
       if (mounted) context.go(AppRoutes.login);
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
@@ -79,6 +86,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (dialogContext, setDialogState) => AlertDialog(
+          scrollable: true,
           title: const Text('Delete account?'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -119,11 +127,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         await ref
                             .read(authProvider.notifier)
                             .deleteAccount(passwordController.text);
-                        if (dialogContext.mounted) Navigator.of(dialogContext).pop(true);
+                        if (dialogContext.mounted) {
+                          Navigator.of(dialogContext).pop(true);
+                        }
                       } catch (e) {
                         setDialogState(() {
                           submitting = false;
-                          errorText = e is AppException ? e.message : 'Something went wrong.';
+                          errorText = e is AppException
+                              ? e.message
+                              : 'Something went wrong.';
                         });
                       }
                     },
@@ -142,69 +154,170 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final theme = Theme.of(context);
+    Widget section(List<(IconData, String, String)> rows) => Card(
+      child: Column(
+        children: [
+          for (final (icon, label, route) in rows)
+            ListTile(
+              leading: DuitlahIcon(icon, size: 22),
+              title: Text(label, style: theme.textTheme.bodyMedium),
+              trailing: const DuitlahIcon(Icons.chevron_right, size: 17),
+              onTap: () => context.push(route),
+            ),
+        ],
+      ),
+    );
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: authState.when(
-        loading: () => const SizedBox.shrink(),
-        unauthenticated: () => const SizedBox.shrink(),
-        authenticated: (user) => ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          children: [
-            Row(
-              children: [
-                ParticipantAvatar(name: user.displayName, size: 56),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
+      body: SafeArea(
+        child: authState.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          unauthenticated: () => const SizedBox.shrink(),
+          authenticated: (user) => ListView(
+            padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
+            children: [
+              Row(
+                children: [
+                  ParticipantAvatar(name: user.displayName, size: 64),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          user.displayName,
+                          style: theme.textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(user.email, style: theme.textTheme.bodySmall),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 28),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(user.displayName, style: Theme.of(context).textTheme.titleLarge),
-                      Text(user.email, style: Theme.of(context).textTheme.bodySmall),
+                      Text('Financial view', style: theme.textTheme.bodySmall),
+                      const SizedBox(height: 10),
+                      DuitlahSegmentedControl<int>(
+                        showSelectedIcon: false,
+                        segments: const [
+                          ButtonSegment(value: 0, label: Text('Personal')),
+                          ButtonSegment(value: 1, label: Text('Business')),
+                          ButtonSegment(value: 2, label: Text('Both')),
+                        ],
+                        selected: const {0},
+                        onSelectionChanged: (s) {
+                          if (s.first == 1) context.push(AppRoutes.spaces);
+                          if (s.first == 2) {
+                            context.push(AppRoutes.combinedNetWorth);
+                          }
+                        },
+                      ),
                     ],
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xxl),
-            if (_biometricSupported)
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Unlock with biometrics'),
-                subtitle: const Text("Adds a device-level lock on top of your account sign-in."),
-                value: _biometricEnabled,
-                onChanged: _toggleBiometric,
               ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.devices_outlined),
-              title: const Text('Active sessions'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {},
-            ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.notifications_outlined),
-              title: const Text('Notifications'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push(AppRoutes.notifications),
-            ),
-            const Divider(height: AppSpacing.xxl),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
-              title: Text('Sign out', style: TextStyle(color: Theme.of(context).colorScheme.error)),
-              onTap: _logout,
-            ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.delete_forever_outlined, color: Theme.of(context).colorScheme.error),
-              title: Text(
-                'Delete account',
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              const SizedBox(height: 16),
+              section([
+                (
+                  Icons.account_balance_wallet_outlined,
+                  'My Accounts',
+                  AppRoutes.accounts,
+                ),
+                (Icons.pie_chart_outline, 'Categories', AppRoutes.categories),
+                (
+                  Icons.repeat_rounded,
+                  'Recurring Transactions',
+                  AppRoutes.recurring,
+                ),
+                (
+                  Icons.account_balance_outlined,
+                  'Tax / LHDN',
+                  AppRoutes.personalTax,
+                ),
+                (Icons.download_outlined, 'Export Data', AppRoutes.exports),
+              ]),
+              const SizedBox(height: 16),
+              Card(
+                child: Column(
+                  children: [
+                    if (_biometricSupported)
+                      SwitchListTile(
+                        title: Text(
+                          'Unlock with biometrics',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                        subtitle: const Text('Protect access on this device.'),
+                        value: _biometricEnabled,
+                        onChanged: _toggleBiometric,
+                      ),
+                    ListTile(
+                      leading: const DuitlahIcon(Icons.devices_outlined),
+                      title: Text(
+                        'Active sessions',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      subtitle: const Text(
+                        'Session management is not available yet',
+                      ),
+                      enabled: false,
+                    ),
+                    ListTile(
+                      leading: const DuitlahIcon(Icons.notifications_outlined),
+                      title: Text(
+                        'Notifications',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      trailing: const DuitlahIcon(
+                        Icons.chevron_right,
+                        size: 17,
+                      ),
+                      onTap: () => context.push(AppRoutes.notifications),
+                    ),
+                  ],
+                ),
               ),
-              onTap: _deleteAccount,
-            ),
-          ],
+              const SizedBox(height: 16),
+              section([
+                (
+                  Icons.tune_outlined,
+                  'Notification Settings',
+                  AppRoutes.notificationRules,
+                ),
+                (Icons.more_horiz, 'All tools & workspaces', AppRoutes.more),
+                (Icons.help_outline, 'Help & Support', AppRoutes.helpSupport),
+              ]),
+              const SizedBox(height: 16),
+              Card(
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const DuitlahIcon(Icons.logout),
+                      title: const Text('Log out'),
+                      onTap: _logout,
+                    ),
+                    ListTile(
+                      leading: DuitlahIcon(
+                        Icons.delete_forever_outlined,
+                        color: theme.colorScheme.error,
+                      ),
+                      title: Text(
+                        'Delete account',
+                        style: TextStyle(color: theme.colorScheme.error),
+                      ),
+                      onTap: _deleteAccount,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

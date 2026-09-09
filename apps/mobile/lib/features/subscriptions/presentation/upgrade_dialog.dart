@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,7 +13,7 @@ Future<void> showUpgradeDialog(BuildContext context, {required String message}) 
   return showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
-      icon: const Icon(Icons.workspace_premium_outlined),
+      icon: const DuitlahIcon(Icons.workspace_premium_outlined),
       title: const Text('Duitlah+'),
       content: Text(message),
       actions: [

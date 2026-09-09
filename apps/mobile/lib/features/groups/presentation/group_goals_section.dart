@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -33,7 +34,7 @@ class GroupGoalsSection extends ConsumerWidget {
             Text('Shared goals', style: Theme.of(context).textTheme.titleMedium),
             TextButton.icon(
               onPressed: () => _createGoal(context, ref),
-              icon: const Icon(Icons.add, size: 18),
+              icon: const DuitlahIcon(Icons.add, size: 18),
               label: const Text('New goal'),
             ),
           ],
@@ -58,7 +59,7 @@ class GroupGoalsSection extends ConsumerWidget {
 
     final created = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => Padding(
+      builder: (context) => SingleChildScrollView(child: Padding(
         padding: EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.lg,
@@ -98,7 +99,7 @@ class GroupGoalsSection extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
     if (created == true) ref.invalidate(groupGoalsProvider(groupId));
   }
@@ -172,7 +173,7 @@ class _GoalCard extends ConsumerWidget {
 
     final added = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => Padding(
+      builder: (context) => SingleChildScrollView(child: Padding(
         padding: EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.lg,
@@ -212,7 +213,7 @@ class _GoalCard extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
     if (added == true) ref.invalidate(groupGoalsProvider(groupId));
   }

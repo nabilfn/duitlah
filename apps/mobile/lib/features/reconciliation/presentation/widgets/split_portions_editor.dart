@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -52,7 +53,7 @@ class SplitPortionsEditor extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         OutlinedButton.icon(
           onPressed: () => onChanged([...portions, SplitPortionDraft()]),
-          icon: const Icon(Icons.add),
+          icon: const DuitlahIcon(Icons.add),
           label: const Text('Add portion'),
         ),
       ],
@@ -85,7 +86,7 @@ class SplitPortionsEditor extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close),
+            icon: const DuitlahIcon(Icons.close),
             onPressed: portions.length <= 2 ? null : () => onChanged([...portions]..removeAt(index)),
           ),
         ],

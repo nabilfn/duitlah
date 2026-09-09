@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -43,7 +44,7 @@ class SpacesScreen extends ConsumerWidget {
                     Text('Businesses', style: Theme.of(context).textTheme.titleSmall),
                     TextButton.icon(
                       onPressed: () => context.push(AppRoutes.createBusinessSpace),
-                      icon: const Icon(Icons.add, size: 18),
+                      icon: const DuitlahIcon(Icons.add, size: 18),
                       label: const Text('Add Business'),
                     ),
                   ],
@@ -84,12 +85,12 @@ class _SpaceCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
-        leading: Icon(
+        leading: DuitlahIcon(
           space.type == SpaceType.PERSONAL ? Icons.person_outline : Icons.business_outlined,
         ),
         title: Text(space.name),
         subtitle: Text(space.yourRole.name),
-        trailing: onTap != null ? const Icon(Icons.chevron_right) : null,
+        trailing: onTap != null ? const DuitlahIcon(Icons.chevron_right) : null,
         onTap: onTap,
       ),
     );

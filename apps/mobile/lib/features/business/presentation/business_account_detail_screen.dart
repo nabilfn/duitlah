@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -38,7 +41,7 @@ class BusinessAccountDetailScreen extends ConsumerWidget {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -51,7 +54,7 @@ class BusinessAccountDetailScreen extends ConsumerWidget {
             children: [
               Text('Add entry', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
-              SegmentedButton<EntryDirection>(
+              DuitlahSegmentedControl<EntryDirection>(
                 segments: const [
                   ButtonSegment(value: EntryDirection.IN, label: Text('Money in')),
                   ButtonSegment(value: EntryDirection.OUT, label: Text('Money out')),
@@ -91,7 +94,7 @@ class BusinessAccountDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (saved == true) {
@@ -118,7 +121,7 @@ class BusinessAccountDetailScreen extends ConsumerWidget {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -132,7 +135,8 @@ class BusinessAccountDetailScreen extends ConsumerWidget {
               Text('Transfer to another account', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
-                initialValue: destinationId,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: destinationId,
                 decoration: const InputDecoration(labelText: 'To account'),
                 items: destinations.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
                 onChanged: (v) => setSheetState(() => destinationId = v ?? destinationId),
@@ -169,7 +173,7 @@ class BusinessAccountDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (saved == true) {
@@ -200,7 +204,7 @@ class BusinessAccountDetailScreen extends ConsumerWidget {
             ),
             ListTile(
               title: const Text('No mapping'),
-              trailing: account.chartOfAccountsId == null ? const Icon(Icons.check) : null,
+              trailing: account.chartOfAccountsId == null ? const DuitlahIcon(Icons.check) : null,
               onTap: () => Navigator.of(context).pop((chartOfAccountsId: null)),
             ),
             if (candidates.isEmpty)
@@ -212,7 +216,7 @@ class BusinessAccountDetailScreen extends ConsumerWidget {
               for (final a in candidates)
                 ListTile(
                   title: Text('${a.code} · ${a.name}'),
-                  trailing: account.chartOfAccountsId == a.id ? const Icon(Icons.check) : null,
+                  trailing: account.chartOfAccountsId == a.id ? const DuitlahIcon(Icons.check) : null,
                   onTap: () => Navigator.of(context).pop((chartOfAccountsId: a.id)),
                 ),
           ],
@@ -290,13 +294,13 @@ class BusinessAccountDetailScreen extends ConsumerWidget {
                             (e) => Card(
                               margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                               child: ListTile(
-                                leading: Icon(
+                                leading: DuitlahIcon(
                                   e.direction == EntryDirection.IN ? Icons.arrow_downward : Icons.arrow_upward,
                                   color: e.direction == EntryDirection.IN ? Colors.green : Colors.red,
                                 ),
                                 title: Text(e.description ?? (e.direction == EntryDirection.IN ? 'Money in' : 'Money out')),
                                 subtitle: Text(e.occurredOn),
-                                trailing: Text('RM ${e.amount}'),
+                                trailing: Text(Money.format(e.amount)),
                               ),
                             ),
                           )
@@ -308,7 +312,7 @@ class BusinessAccountDetailScreen extends ConsumerWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addEntry(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _addEntry(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

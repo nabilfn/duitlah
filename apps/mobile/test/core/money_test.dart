@@ -6,7 +6,8 @@ void main() {
     test('format renders a two-decimal amount with currency prefix', () {
       expect(Money.format('12.5'), 'RM 12.50');
       expect(Money.format('0'), 'RM 0.00');
-      expect(Money.format('1234.999'), 'RM 1235.00');
+      expect(Money.format('-1234567.89'), 'RM -1,234,567.89');
+      expect(Money.format('1234.999'), 'RM 1,235.00');
     });
 
     test('format never fabricates a value for unparseable input', () {

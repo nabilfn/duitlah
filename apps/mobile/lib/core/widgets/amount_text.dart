@@ -38,10 +38,10 @@ class AmountText extends StatelessWidget {
         color = Money.isNegative(amount)
             ? theme.colorScheme.error
             : Money.isPositive(amount)
-                ? semantic.success
-                : theme.colorScheme.onSurface;
+            ? semantic.success
+            : theme.colorScheme.onSurface;
       case AmountTone.neutral:
-        color = theme.colorScheme.onSurface;
+        color = style?.color ?? theme.colorScheme.onSurface;
     }
 
     return Text(

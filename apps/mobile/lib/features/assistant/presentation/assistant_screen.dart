@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -260,7 +261,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
         title: const Text('Assistant'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.calculate_outlined),
+            icon: const DuitlahIcon(Icons.calculate_outlined),
             tooltip: 'Can I afford this?',
             onPressed: _openAffordabilityCheck,
           ),
@@ -306,7 +307,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
                   const SizedBox(width: AppSpacing.sm),
                   IconButton.filled(
                     onPressed: _sending ? null : _send,
-                    icon: const Icon(Icons.arrow_upward),
+                    icon: const DuitlahIcon(Icons.arrow_upward),
                   ),
                 ],
               ),
@@ -351,7 +352,7 @@ class _SpaceContextBar extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.workspaces_outlined, size: 18, color: theme.colorScheme.onSurfaceVariant),
+          DuitlahIcon(Icons.workspaces_outlined, size: 18, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: AppSpacing.sm),
           Text('Asking about:', style: theme.textTheme.bodySmall),
           const SizedBox(width: AppSpacing.xs),

@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -46,7 +48,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -60,7 +62,8 @@ class ExpenseDetailScreen extends ConsumerWidget {
               Text('Record payment', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<BusinessAccount>(
-                initialValue: account,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: account,
                 decoration: const InputDecoration(labelText: 'Paid from'),
                 items: active.map((a) => DropdownMenuItem(value: a, child: Text(a.name))).toList(),
                 onChanged: (v) => setSheetState(() => account = v ?? account),
@@ -96,7 +99,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (saved == true) {
@@ -127,7 +130,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
             ),
             ListTile(
               title: const Text('No mapping'),
-              trailing: expense.chartOfAccountsId == null ? const Icon(Icons.check) : null,
+              trailing: expense.chartOfAccountsId == null ? const DuitlahIcon(Icons.check) : null,
               onTap: () => Navigator.of(context).pop((chartOfAccountsId: null)),
             ),
             if (candidates.isEmpty)
@@ -139,7 +142,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
               for (final a in candidates)
                 ListTile(
                   title: Text('${a.code} · ${a.name}'),
-                  trailing: expense.chartOfAccountsId == a.id ? const Icon(Icons.check) : null,
+                  trailing: expense.chartOfAccountsId == a.id ? const DuitlahIcon(Icons.check) : null,
                   onTap: () => Navigator.of(context).pop((chartOfAccountsId: a.id)),
                 ),
           ],
@@ -224,7 +227,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
                             (p) => Card(
                               margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                               child: ListTile(
-                                title: Text('RM ${p.amount}'),
+                                title: Text(Money.format(p.amount)),
                                 subtitle: Text(p.paidOn),
                               ),
                             ),
@@ -239,7 +242,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _recordPayment(context, ref),
-        child: const Icon(Icons.payments_outlined),
+        child: const DuitlahIcon(Icons.payments_outlined),
       ),
     );
   }
@@ -248,7 +251,7 @@ class ExpenseDetailScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(vertical: 2),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text(label), Text('RM $amount')],
+          children: [Text(label), Text(Money.format(amount))],
         ),
       );
 }

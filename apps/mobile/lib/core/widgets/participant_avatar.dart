@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 
 /// A colored initial-letter avatar for a Bagilah participant/group member.
@@ -11,27 +12,16 @@ class ParticipantAvatar extends StatelessWidget {
   final double size;
   final bool isGuest;
 
-  // A deliberately-designed "connected people" set (redesign spec section
-  // 7) that lives comfortably alongside the teal/navy/orange brand palette,
-  // not six arbitrary hues -- teal and navy are the brand's own colors, and
-  // the other four are chosen to read as a cohesive family with them rather
-  // than clashing. The orange here is a deeper shade than the UI accent
-  // (`AppColors.orange`) specifically so white initials stay legible; the
-  // brighter accent value is for small highlights, not a solid fill behind
-  // white text.
   static const _palette = [
-    Color(0xFF00A8AD), // teal
-    Color(0xFF0D1B2A), // navy
-    Color(0xFFD97706), // deep orange
-    Color(0xFF5B6EE8), // indigo
-    Color(0xFF9B6FD1), // plum
-    Color(0xFFD97757), // terracotta
+    Color(0xFFD1E0D6), Color(0xFFF0E6D4), Color(0xFFDED8EE),
+    Color(0xFFE9D6CF), Color(0xFFD3E1E6), Color(0xFFE1E7D6),
   ];
 
   @override
   Widget build(BuildContext context) {
     final trimmed = name.trim();
-    final initial = trimmed.isEmpty ? '?' : trimmed[0].toUpperCase();
+    final words = trimmed.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    final initial = words.isEmpty ? '?' : (words.first[0] + (words.length > 1 ? words.last[0] : '')).toUpperCase();
     final color = _palette[trimmed.codeUnits.fold<int>(0, (a, b) => a + b) % _palette.length];
 
     return Stack(
@@ -52,9 +42,9 @@ class ParticipantAvatar extends StatelessWidget {
           child: Text(
             initial,
             style: TextStyle(
-              color: Colors.white,
+              color: const Color(0xFF1D4D46),
               fontWeight: FontWeight.w700,
-              fontSize: size * 0.42,
+              fontSize: size * 0.32,
             ),
           ),
         ),
@@ -68,7 +58,7 @@ class ParticipantAvatar extends StatelessWidget {
                 color: Theme.of(context).scaffoldBackgroundColor,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.person_outline, size: size * 0.32, color: color),
+              child: DuitlahIcon(Icons.person_outline, size: size * 0.32, color: color),
             ),
           ),
       ],

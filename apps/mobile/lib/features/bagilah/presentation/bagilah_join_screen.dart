@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -111,7 +112,7 @@ class _BagilahJoinScreenState extends ConsumerState<BagilahJoinScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.receipt_long_rounded, size: 56, color: theme.colorScheme.primary),
+            DuitlahIcon(Icons.receipt_long_rounded, size: 56, color: theme.colorScheme.primary),
             const SizedBox(height: AppSpacing.lg),
             Text(
               "You've been invited to split a bill",

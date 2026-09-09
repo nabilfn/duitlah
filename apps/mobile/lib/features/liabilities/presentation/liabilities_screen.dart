@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,7 +26,7 @@ class LiabilitiesScreen extends ConsumerWidget {
     final added = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -39,7 +40,8 @@ class LiabilitiesScreen extends ConsumerWidget {
               Text('New loan / liability', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<LiabilityType>(
-                initialValue: type,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: type,
                 decoration: const InputDecoration(labelText: 'Type'),
                 items: LiabilityType.values.map((t) => DropdownMenuItem(value: t, child: Text(t.name))).toList(),
                 onChanged: (v) => setSheetState(() => type = v ?? type),
@@ -71,7 +73,7 @@ class LiabilitiesScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (added == true) ref.invalidate(liabilityListProvider);
@@ -83,7 +85,7 @@ class LiabilitiesScreen extends ConsumerWidget {
 
     final recorded = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => Padding(
+      builder: (context) => SingleChildScrollView(child: Padding(
         padding: EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.lg,
@@ -120,7 +122,7 @@ class LiabilitiesScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
     if (recorded == true) ref.invalidate(liabilityListProvider);
   }
@@ -167,7 +169,7 @@ class LiabilitiesScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(liabilityListProvider)),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addLiability(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _addLiability(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
@@ -12,6 +13,7 @@ class MoneyRow extends StatelessWidget {
     super.key,
     required this.title,
     required this.amount,
+    this.currency = "RM",
     this.subtitle,
     this.leadingIcon,
     this.tone = AmountTone.neutral,
@@ -20,6 +22,7 @@ class MoneyRow extends StatelessWidget {
 
   final String title;
   final String amount;
+  final String currency;
   final String? subtitle;
   final IconData? leadingIcon;
   final AmountTone tone;
@@ -32,7 +35,10 @@ class MoneyRow extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.sm),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.md,
+          horizontal: AppSpacing.xs,
+        ),
         child: Row(
           children: [
             if (leadingIcon != null) ...[
@@ -43,7 +49,11 @@ class MoneyRow extends StatelessWidget {
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(leadingIcon, size: 20, color: theme.colorScheme.onSurface),
+                child: DuitlahIcon(
+                  leadingIcon,
+                  size: 20,
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
             ],
@@ -51,14 +61,31 @@ class MoneyRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: theme.textTheme.bodyLarge, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyLarge,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   if (subtitle != null)
-                    Text(subtitle!, style: theme.textTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(
+                      subtitle!,
+                      style: theme.textTheme.bodySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                 ],
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            AmountText(amount, tone: tone, style: theme.textTheme.titleSmall),
+            Flexible(
+              child: AmountText(
+                amount,
+                currency: currency,
+                tone: tone,
+                style: theme.textTheme.titleSmall,
+              ),
+            ),
           ],
         ),
       ),
@@ -90,7 +117,10 @@ class ReceiptItemRow extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.sm),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm, horizontal: AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.sm,
+          horizontal: AppSpacing.xs,
+        ),
         child: Row(
           children: [
             Expanded(
@@ -102,8 +132,13 @@ class ReceiptItemRow extends StatelessWidget {
                 ],
               ),
             ),
-            if (claimStatus != null) ...[claimStatus!, const SizedBox(width: AppSpacing.sm)],
-            AmountText(totalPrice, style: theme.textTheme.titleSmall),
+            if (claimStatus != null) ...[
+              claimStatus!,
+              const SizedBox(width: AppSpacing.sm),
+            ],
+            Flexible(
+              child: AmountText(totalPrice, style: theme.textTheme.titleSmall),
+            ),
           ],
         ),
       ),

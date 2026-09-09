@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -50,16 +51,20 @@ class _CreateBillScreenState extends ConsumerState<CreateBillScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('New bill')),
-      body: Padding(
+      appBar: AppBar(title: const Text('New split')),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text('Bring everyone together.', style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: 8),
+            Text('Start with a name and date. Add items, people and their shares on the next screen.', style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: 24),
             AppTextField(label: 'Merchant (optional)', controller: _merchantController),
             const SizedBox(height: AppSpacing.md),
             OutlinedButton.icon(
-              icon: const Icon(Icons.calendar_today_outlined),
+              icon: const DuitlahIcon(Icons.calendar_today_outlined),
               label: Text('${_date.year}-${_date.month.toString().padLeft(2, '0')}-${_date.day.toString().padLeft(2, '0')}'),
               onPressed: () async {
                 final picked = await showDatePicker(
@@ -72,7 +77,7 @@ class _CreateBillScreenState extends ConsumerState<CreateBillScreen> {
               },
             ),
             const SizedBox(height: AppSpacing.xl),
-            PrimaryButton(label: 'Create bill', onPressed: _submit, loading: _loading),
+            PrimaryButton(label: 'Create split', onPressed: _submit, loading: _loading),
           ],
         ),
       ),

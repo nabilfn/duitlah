@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -5,6 +6,8 @@ import 'package:uuid/uuid.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/amount_text.dart';
+import '../../../core/utils/money.dart';
 import '../../../core/widgets/app_state_views.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/dialogs.dart';
@@ -19,7 +22,7 @@ class GoalsScreen extends ConsumerWidget {
     final targetController = TextEditingController();
     final added = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => Padding(
+      builder: (context) => SingleChildScrollView(child: Padding(
         padding: EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.lg,
@@ -37,7 +40,7 @@ class GoalsScreen extends ConsumerWidget {
             AppTextField(label: 'Target amount (RM)', controller: targetController, keyboardType: TextInputType.number),
             const SizedBox(height: AppSpacing.lg),
             PrimaryButton(
-              label: 'Create',
+              label: 'Create goal',
               onPressed: () async {
                 try {
                   await ref.read(goalsRepositoryProvider).createGoal(
@@ -55,7 +58,7 @@ class GoalsScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
     if (added == true) ref.invalidate(goalListProvider);
   }
@@ -64,7 +67,7 @@ class GoalsScreen extends ConsumerWidget {
     final amountController = TextEditingController();
     await showAppBottomSheet(
       context,
-      builder: (context) => Padding(
+      builder: (context) => SingleChildScrollView(child: Padding(
         padding: EdgeInsets.only(
           left: AppSpacing.lg,
           right: AppSpacing.lg,
@@ -80,7 +83,7 @@ class GoalsScreen extends ConsumerWidget {
             AppTextField(label: 'Amount (RM)', controller: amountController, keyboardType: TextInputType.number),
             const SizedBox(height: AppSpacing.lg),
             PrimaryButton(
-              label: 'Add',
+              label: 'Add contribution',
               onPressed: () async {
                 try {
                   await ref.read(goalsRepositoryProvider).addContribution(
@@ -100,7 +103,7 @@ class GoalsScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 
@@ -120,7 +123,7 @@ class GoalsScreen extends ConsumerWidget {
                   ],
                 )
               : ListView.separated(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 104),
                   itemCount: list.length,
                   separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
                   itemBuilder: (context, index) {
@@ -135,18 +138,21 @@ class GoalsScreen extends ConsumerWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(g.name, style: Theme.of(context).textTheme.titleSmall),
+                                Expanded(child: Text(g.name, style: Theme.of(context).textTheme.titleMedium)),
                                 TextButton(
                                   onPressed: () => _addContribution(context, ref, g.id),
-                                  child: const Text('Add'),
+                                  child: const Text('Contribute'),
                                 ),
                               ],
                             ),
-                            Text('RM ${g.currentAmount} / ${g.targetAmount}', style: Theme.of(context).textTheme.bodySmall),
+                            AmountText(g.currentAmount, style: Theme.of(context).textTheme.headlineSmall),
+                            const SizedBox(height: 4),
+                            Text('of ${Money.format(g.targetAmount)} · ${g.percentage}% saved', style: Theme.of(context).textTheme.bodySmall),
+                            if (g.targetDate != null) Text('Target date ${g.targetDate}', style: Theme.of(context).textTheme.bodySmall),
                             const SizedBox(height: AppSpacing.sm),
                             ClipRRect(
                               borderRadius: BorderRadius.circular(4),
-                              child: LinearProgressIndicator(value: percentage, minHeight: 8),
+                              child: LinearProgressIndicator(value: percentage, minHeight: 8, backgroundColor: Theme.of(context).colorScheme.outline, semanticsLabel: g.name, semanticsValue: "${g.percentage}% saved"),
                             ),
                           ],
                         ),
@@ -158,7 +164,7 @@ class GoalsScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(goalListProvider)),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addGoal(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton.extended(label: const Text('New goal'), onPressed: () => _addGoal(context, ref), icon: const DuitlahIcon(Icons.add)),
     );
   }
 }

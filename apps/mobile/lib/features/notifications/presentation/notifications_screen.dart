@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,7 +40,7 @@ class NotificationsScreen extends ConsumerWidget {
                   itemBuilder: (context, index) {
                     final n = items[index];
                     return ListTile(
-                      leading: Icon(
+                      leading: DuitlahIcon(
                         n.read ? Icons.notifications_none : Icons.notifications,
                         color: n.read ? null : Theme.of(context).colorScheme.primary,
                       ),

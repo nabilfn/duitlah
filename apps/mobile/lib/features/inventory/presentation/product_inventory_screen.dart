@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -117,7 +118,7 @@ class ProductInventoryScreen extends ConsumerWidget {
                 Text('Recipe / ingredients', style: Theme.of(context).textTheme.titleMedium),
                 TextButton.icon(
                   onPressed: () => _openAddIngredientSheet(context, ref),
-                  icon: const Icon(Icons.add),
+                  icon: const DuitlahIcon(Icons.add),
                   label: const Text('Add'),
                 ),
               ],
@@ -142,7 +143,7 @@ class ProductInventoryScreen extends ConsumerWidget {
                                     children: [
                                       Text(item.lineCost),
                                       IconButton(
-                                        icon: const Icon(Icons.delete_outline),
+                                        icon: const DuitlahIcon(Icons.delete_outline),
                                         onPressed: () => _removeIngredient(context, ref, item),
                                       ),
                                     ],
@@ -220,7 +221,7 @@ class _MovementTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
-        leading: Icon(
+        leading: DuitlahIcon(
           isInbound ? Icons.arrow_downward : Icons.arrow_upward,
           color: isInbound ? Colors.green : Colors.red,
         ),
@@ -360,7 +361,8 @@ class _MovementFormSheetState extends ConsumerState<_MovementFormSheet> {
               Text('Record movement', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<MovementType>(
-                initialValue: _type,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _type,
                 decoration: const InputDecoration(labelText: 'Type'),
                 items: MovementType.values.map((t) => DropdownMenuItem(value: t, child: Text(t.name))).toList(),
                 onChanged: (v) => setState(() => _type = v ?? _type),
@@ -396,7 +398,8 @@ class _MovementFormSheetState extends ConsumerState<_MovementFormSheet> {
               if (_type == MovementType.PURCHASE) ...[
                 const SizedBox(height: AppSpacing.sm),
                 DropdownButtonFormField<String?>(
-                  initialValue: _businessAccountId,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _businessAccountId,
                   decoration: const InputDecoration(labelText: 'Paid from (optional — omit if bought on credit)'),
                   items: [
                     const DropdownMenuItem<String?>(value: null, child: Text('On credit / not set')),
@@ -483,7 +486,8 @@ class _AddIngredientSheetState extends ConsumerState<_AddIngredientSheet> {
             const Text('No other products available to use as an ingredient.')
           else
             DropdownButtonFormField<String>(
-              initialValue: _ingredientProductId,
+              icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _ingredientProductId,
               decoration: const InputDecoration(labelText: 'Ingredient product'),
               items: candidates.map((p) => DropdownMenuItem(value: p.id, child: Text(p.name))).toList(),
               onChanged: (v) => setState(() => _ingredientProductId = v),

@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -69,7 +70,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
             ),
             const SizedBox(height: AppSpacing.lg),
             DropdownButtonFormField<FeedbackCategory>(
-              initialValue: _category,
+              icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _category,
               decoration: const InputDecoration(labelText: 'Category'),
               items: const [
                 DropdownMenuItem(value: FeedbackCategory.BUG, child: Text('Bug report')),

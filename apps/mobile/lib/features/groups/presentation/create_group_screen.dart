@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -64,7 +65,8 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             AppTextField(label: 'Group name', controller: _nameController),
             const SizedBox(height: AppSpacing.md),
             DropdownButtonFormField<GroupType>(
-              initialValue: _type,
+              icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _type,
               decoration: const InputDecoration(labelText: 'Type'),
               items: GroupType.values
                   .map((t) => DropdownMenuItem(value: t, child: Text(t.name)))

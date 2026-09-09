@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -101,9 +102,9 @@ class _ExportTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
-        leading: Icon(icon),
+        leading: DuitlahIcon(icon),
         title: Text(title),
-        trailing: const Icon(Icons.ios_share),
+        trailing: const DuitlahIcon(Icons.ios_share),
         onTap: onTap,
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -80,7 +81,7 @@ class _InventoryHubScreenState extends ConsumerState<InventoryHubScreen> {
                 child: ListTile(
                   title: const Text('Total COGS'),
                   subtitle: Text('${r.from} to ${r.to}'),
-                  trailing: Text('RM ${r.totalCogs}', style: Theme.of(context).textTheme.titleMedium),
+                  trailing: Text(Money.format(r.totalCogs), style: Theme.of(context).textTheme.titleMedium),
                 ),
               ),
               loading: () => const LoadingView(),
@@ -111,7 +112,7 @@ class _InventoryHubScreenState extends ConsumerState<InventoryHubScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      Text('RM ${row.totalValue}', style: Theme.of(context).textTheme.titleSmall),
+                                      Text(Money.format(row.totalValue), style: Theme.of(context).textTheme.titleSmall),
                                       Text(
                                         'WAC ${row.weightedAverageCost}',
                                         style: Theme.of(context).textTheme.bodySmall,

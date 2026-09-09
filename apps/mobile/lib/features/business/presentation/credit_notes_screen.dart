@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -42,7 +44,7 @@ class CreditNotesScreen extends ConsumerWidget {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -56,7 +58,8 @@ class CreditNotesScreen extends ConsumerWidget {
               Text('New credit note', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<Customer>(
-                initialValue: customer,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: customer,
                 decoration: const InputDecoration(labelText: 'Customer'),
                 items: customers.map((c) => DropdownMenuItem(value: c, child: Text(c.name))).toList(),
                 onChanged: (v) => setSheetState(() => customer = v),
@@ -94,7 +97,7 @@ class CreditNotesScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (saved == true) ref.invalidate(creditNoteListProvider(spaceId));
@@ -140,7 +143,7 @@ class CreditNotesScreen extends ConsumerWidget {
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text('RM ${cn.amount}'),
+                            Text(Money.format(cn.amount)),
                             const SizedBox(width: AppSpacing.sm),
                             Chip(
                               label: Text(cn.status.name, style: const TextStyle(fontSize: 11)),
@@ -150,7 +153,7 @@ class CreditNotesScreen extends ConsumerWidget {
                             ),
                             if (cn.status == CreditNoteStatus.ISSUED)
                               IconButton(
-                                icon: const Icon(Icons.block),
+                                icon: const DuitlahIcon(Icons.block),
                                 onPressed: () => _void(context, ref, cn.id),
                               ),
                           ],
@@ -163,7 +166,7 @@ class CreditNotesScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(creditNoteListProvider(spaceId))),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _newCreditNote(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _newCreditNote(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

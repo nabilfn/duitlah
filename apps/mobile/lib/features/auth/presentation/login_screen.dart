@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -36,13 +37,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _error = null;
     });
     try {
-      await ref.read(authProvider.notifier).login(
-            _emailController.text.trim(),
-            _passwordController.text,
-          );
+      await ref
+          .read(authProvider.notifier)
+          .login(_emailController.text.trim(), _passwordController.text);
       if (mounted) context.go(AppRoutes.home);
     } catch (e) {
-      setState(() => _error = e is AppException ? e.message : 'Something went wrong.');
+      setState(
+        () => _error = e is AppException ? e.message : 'Something went wrong.',
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -60,12 +62,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Duitlah', style: theme.textTheme.displaySmall, textAlign: TextAlign.center),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.secondary,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: DuitlahIcon(
+                      Icons.account_balance_wallet_outlined,
+                      size: 32,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Duitlah',
+                  style: theme.textTheme.displaySmall,
+                  textAlign: TextAlign.left,
+                ),
                 const SizedBox(height: 6),
                 Text(
-                  'Split bills, track spending, together.',
+                  'Your money. Clearer, together.',
                   style: theme.textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
+                  textAlign: TextAlign.left,
                 ),
                 const SizedBox(height: AppSpacing.xxl),
                 AppTextField(
@@ -84,10 +106,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: AppSpacing.sm),
-                  Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
+                  Text(
+                    _error!,
+                    style: TextStyle(color: theme.colorScheme.error),
+                  ),
                 ],
                 const SizedBox(height: AppSpacing.xl),
-                PrimaryButton(label: 'Sign in', onPressed: _submit, loading: _loading),
+                PrimaryButton(
+                  label: 'Sign in',
+                  onPressed: _submit,
+                  loading: _loading,
+                ),
                 const SizedBox(height: AppSpacing.md),
                 TextButton(
                   onPressed: () => context.push(AppRoutes.register),
@@ -109,38 +138,55 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final controller = TextEditingController();
     showAppBottomSheet(
       context,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.xl,
-          right: AppSpacing.xl,
-          top: AppSpacing.xl,
-          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.xl,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Reset your password', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(label: 'Email', controller: controller, keyboardType: TextInputType.emailAddress),
-            const SizedBox(height: AppSpacing.lg),
-            PrimaryButton(
-              label: 'Send reset link',
-              onPressed: () async {
-                try {
-                  await ref.read(authRepositoryProvider).requestPasswordReset(controller.text.trim());
-                  if (context.mounted) {
-                    Navigator.of(context).pop();
-                    showSuccessSnackBar(context, 'If that email exists, a reset link is on its way.');
+      builder: (context) => SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.xl,
+            right: AppSpacing.xl,
+            top: AppSpacing.xl,
+            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.xl,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Reset your password',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              AppTextField(
+                label: 'Email',
+                controller: controller,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              PrimaryButton(
+                label: 'Send reset link',
+                onPressed: () async {
+                  try {
+                    await ref
+                        .read(authRepositoryProvider)
+                        .requestPasswordReset(controller.text.trim());
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      showSuccessSnackBar(
+                        context,
+                        'If that email exists, a reset link is on its way.',
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      showErrorSnackBar(
+                        context,
+                        e is AppException ? e.message : 'Something went wrong.',
+                      );
+                    }
                   }
-                } catch (e) {
-                  if (context.mounted) {
-                    showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
-                  }
-                }
-              },
-            ),
-          ],
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

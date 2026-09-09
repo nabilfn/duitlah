@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -231,7 +232,7 @@ class _ContactsBody extends ConsumerWidget {
           children: [
             if (status == ContactStatus.ARCHIVED) const Chip(label: Text('Archived')),
             IconButton(
-              icon: const Icon(Icons.archive_outlined),
+              icon: const DuitlahIcon(Icons.archive_outlined),
               onPressed: () => _archive(context, ref, id),
             ),
           ],
@@ -329,7 +330,7 @@ class _ContactsBody extends ConsumerWidget {
                   error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(customerListProvider(spaceId))),
                 ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _openForm(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _openForm(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

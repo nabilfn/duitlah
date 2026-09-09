@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -141,7 +142,7 @@ class _AssetFormSheetState extends ConsumerState<AssetFormSheet> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.lock_outline, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    DuitlahIcon(Icons.lock_outline, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
@@ -159,7 +160,7 @@ class _AssetFormSheetState extends ConsumerState<AssetFormSheet> {
               contentPadding: EdgeInsets.zero,
               title: const Text('Acquisition date'),
               subtitle: Text(_fmtDate(_acquisitionDate)),
-              trailing: locked ? null : const Icon(Icons.calendar_month_outlined),
+              trailing: locked ? null : const DuitlahIcon(Icons.calendar_month_outlined),
               enabled: !locked,
               onTap: locked
                   ? null
@@ -196,7 +197,8 @@ class _AssetFormSheetState extends ConsumerState<AssetFormSheet> {
             ),
             const SizedBox(height: AppSpacing.sm),
             DropdownButtonFormField<DepreciationMethod>(
-              initialValue: _method,
+              icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _method,
               decoration: const InputDecoration(labelText: 'Depreciation method'),
               items: DepreciationMethod.values
                   .map((m) => DropdownMenuItem(value: m, child: Text(depreciationMethodLabel(m))))
@@ -206,7 +208,8 @@ class _AssetFormSheetState extends ConsumerState<AssetFormSheet> {
             if (!_isEdit) ...[
               const SizedBox(height: AppSpacing.sm),
               DropdownButtonFormField<String?>(
-                initialValue: _businessAccountId,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: _businessAccountId,
                 decoration: const InputDecoration(labelText: 'Paid from (optional — omit if bought on credit)'),
                 items: [
                   const DropdownMenuItem<String?>(value: null, child: Text('On credit / not set')),

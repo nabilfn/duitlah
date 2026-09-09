@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,7 +29,7 @@ class AccountingPeriodsScreen extends ConsumerWidget {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -45,7 +46,7 @@ class AccountingPeriodsScreen extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Start'),
                 subtitle: Text(_fmtDate(start)),
-                trailing: const Icon(Icons.calendar_month_outlined),
+                trailing: const DuitlahIcon(Icons.calendar_month_outlined),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -60,7 +61,7 @@ class AccountingPeriodsScreen extends ConsumerWidget {
                 contentPadding: EdgeInsets.zero,
                 title: const Text('End'),
                 subtitle: Text(_fmtDate(end)),
-                trailing: const Icon(Icons.calendar_month_outlined),
+                trailing: const DuitlahIcon(Icons.calendar_month_outlined),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -91,7 +92,7 @@ class AccountingPeriodsScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (saved == true) ref.invalidate(accountingPeriodListProvider(spaceId));
@@ -155,7 +156,7 @@ class AccountingPeriodsScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(accountingPeriodListProvider(spaceId))),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _create(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _create(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

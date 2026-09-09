@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -64,7 +66,7 @@ class JournalLineEditor extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         OutlinedButton.icon(
           onPressed: () => onChanged([...lines, JournalLineDraft()]),
-          icon: const Icon(Icons.add),
+          icon: const DuitlahIcon(Icons.add),
           label: const Text('Add line'),
         ),
       ],
@@ -87,7 +89,8 @@ class JournalLineEditor extends StatelessWidget {
             children: [
               Expanded(
                 child: DropdownButtonFormField<LedgerAccount>(
-                  initialValue: line.account,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: line.account,
                   isExpanded: true,
                   decoration: const InputDecoration(labelText: 'Account'),
                   items: accounts
@@ -100,13 +103,13 @@ class JournalLineEditor extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close),
+                icon: const DuitlahIcon(Icons.close),
                 onPressed: lines.length <= 1 ? null : () => onChanged([...lines]..removeAt(index)),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          SegmentedButton<LedgerDirection>(
+          DuitlahSegmentedControl<LedgerDirection>(
             segments: const [
               ButtonSegment(value: LedgerDirection.DEBIT, label: Text('Debit')),
               ButtonSegment(value: LedgerDirection.CREDIT, label: Text('Credit')),

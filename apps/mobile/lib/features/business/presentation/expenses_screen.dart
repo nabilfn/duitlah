@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -57,7 +59,8 @@ class ExpensesScreen extends ConsumerWidget {
                 Text('Add expense', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: AppSpacing.md),
                 DropdownButtonFormField<Supplier?>(
-                  initialValue: supplier,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: supplier,
                   decoration: const InputDecoration(labelText: 'Supplier (optional — makes this a payable)'),
                   items: [
                     const DropdownMenuItem<Supplier?>(value: null, child: Text('None')),
@@ -129,7 +132,7 @@ class ExpensesScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('RM ${e.amount}'),
+                            Text(Money.format(e.amount)),
                             Chip(
                               label: Text(e.status.name, style: const TextStyle(fontSize: 11)),
                               backgroundColor: expenseStatusColor(context, e.status).withValues(alpha: 0.15),
@@ -147,7 +150,7 @@ class ExpensesScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(expenseListProvider(spaceId))),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addExpense(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _addExpense(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

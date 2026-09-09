@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 
 import '../errors/app_exception.dart';
@@ -7,7 +8,22 @@ class LoadingView extends StatelessWidget {
   const LoadingView({super.key});
 
   @override
-  Widget build(BuildContext context) => const Center(child: CircularProgressIndicator());
+  Widget build(BuildContext context) => Semantics(
+    label: 'Loading',
+    child: const Padding(
+      padding: EdgeInsets.all(20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SkeletonBlock(height: 18),
+          SizedBox(height: 12),
+          SkeletonBlock(height: 18),
+          SizedBox(height: 12),
+          SkeletonBlock(height: 18, width: 120),
+        ],
+      ),
+    ),
+  );
 }
 
 /// A shimmer-free skeleton placeholder — plain rounded blocks that pulse
@@ -23,9 +39,22 @@ class SkeletonBlock extends StatefulWidget {
   State<SkeletonBlock> createState() => _SkeletonBlockState();
 }
 
-class _SkeletonBlockState extends State<SkeletonBlock> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 900))..repeat(reverse: true);
+class _SkeletonBlockState extends State<SkeletonBlock>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..repeat(reverse: true);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    }
+  }
 
   @override
   void dispose() {
@@ -75,9 +104,17 @@ class EmptyView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 48, color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
+            DuitlahIcon(
+              icon,
+              size: 48,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
             const SizedBox(height: 16),
-            Text(title, style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
+            Text(
+              title,
+              style: theme.textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
             if (message != null) ...[
               const SizedBox(height: 6),
               Text(
@@ -88,7 +125,10 @@ class EmptyView extends StatelessWidget {
             ],
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 20),
-              SizedBox(width: 200, child: PrimaryButton(label: actionLabel!, onPressed: onAction)),
+              SizedBox(
+                width: 200,
+                child: PrimaryButton(label: actionLabel!, onPressed: onAction),
+              ),
             ],
           ],
         ),
@@ -105,7 +145,9 @@ class ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final message = error is AppException ? (error as AppException).message : 'Something went wrong.';
+    final message = error is AppException
+        ? (error as AppException).message
+        : 'Something went wrong.';
     return EmptyView(
       icon: error is AppException && (error as AppException).isNetworkError
           ? Icons.wifi_off_rounded

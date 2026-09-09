@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -76,7 +77,7 @@ class _ReceiptCaptureScreenState extends ConsumerState<ReceiptCaptureScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(Icons.receipt_long_rounded, size: 64, color: Theme.of(context).colorScheme.primary),
+                    DuitlahIcon(Icons.receipt_long_rounded, size: 64, color: Theme.of(context).colorScheme.primary),
                     const SizedBox(height: AppSpacing.lg),
                     Text(
                       "Take a photo of the receipt and we'll pull out the items automatically. "

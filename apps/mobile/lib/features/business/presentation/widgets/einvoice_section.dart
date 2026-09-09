@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -156,7 +157,7 @@ class EInvoiceSection extends ConsumerWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.receipt_long_outlined),
+                const DuitlahIcon(Icons.receipt_long_outlined),
                 const SizedBox(width: AppSpacing.sm),
                 Text('e-Invoice', style: Theme.of(context).textTheme.titleMedium),
               ],
@@ -364,7 +365,7 @@ class _LogTile extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       dense: true,
-      leading: Icon(
+      leading: DuitlahIcon(
         entry.success ? Icons.check_circle_outline : Icons.error_outline,
         color: entry.success ? Colors.green : Theme.of(context).colorScheme.error,
         size: 20,

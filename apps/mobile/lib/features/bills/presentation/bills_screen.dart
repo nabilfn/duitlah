@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -41,7 +42,7 @@ class BillsScreen extends ConsumerWidget {
     final added = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -63,7 +64,7 @@ class BillsScreen extends ConsumerWidget {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text('Due: ${dueDate.toIso8601String().split('T').first}'),
-                trailing: const Icon(Icons.calendar_month_outlined),
+                trailing: const DuitlahIcon(Icons.calendar_month_outlined),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -75,7 +76,8 @@ class BillsScreen extends ConsumerWidget {
                 },
               ),
               DropdownButtonFormField<BillRecurrence>(
-                initialValue: recurrence,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: recurrence,
                 decoration: const InputDecoration(labelText: 'Repeats'),
                 items: BillRecurrence.values
                     .map((r) => DropdownMenuItem(value: r, child: Text(r.name)))
@@ -104,7 +106,7 @@ class BillsScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (added == true) ref.invalidate(personalBillListProvider);
@@ -153,7 +155,7 @@ class BillsScreen extends ConsumerWidget {
     final paid = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -167,7 +169,8 @@ class BillsScreen extends ConsumerWidget {
               Text('Mark "${bill.name}" as paid', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
-                initialValue: accountId,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: accountId,
                 decoration: const InputDecoration(labelText: 'Paid from'),
                 items: accounts.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
                 onChanged: (v) => setSheetState(() => accountId = v ?? accountId),
@@ -195,7 +198,7 @@ class BillsScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (paid == true) {
@@ -237,7 +240,7 @@ class BillsScreen extends ConsumerWidget {
                             Text(bill.name),
                             if (bill.receiptId != null) ...[
                               const SizedBox(width: AppSpacing.xs),
-                              const Icon(Icons.attach_file, size: 14),
+                              const DuitlahIcon(Icons.attach_file, size: 14),
                             ],
                           ],
                         ),
@@ -276,7 +279,7 @@ class BillsScreen extends ConsumerWidget {
           error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(personalBillListProvider)),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addBill(context, ref), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _addBill(context, ref), child: const DuitlahIcon(Icons.add)),
     );
   }
 }

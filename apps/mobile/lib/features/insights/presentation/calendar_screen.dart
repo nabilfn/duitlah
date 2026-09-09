@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,13 +26,13 @@ class CalendarScreen extends ConsumerWidget {
         title: const Text('Calendar'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.chevron_left),
+            icon: const DuitlahIcon(Icons.chevron_left),
             onPressed: () => ref.read(selectedInsightsMonthProvider.notifier).state =
                 DateTime(month.year, month.month - 1),
           ),
           Center(child: Text('${month.year}-${month.month.toString().padLeft(2, '0')}')),
           IconButton(
-            icon: const Icon(Icons.chevron_right),
+            icon: const DuitlahIcon(Icons.chevron_right),
             onPressed: () => ref.read(selectedInsightsMonthProvider.notifier).state =
                 DateTime(month.year, month.month + 1),
           ),
@@ -95,7 +96,7 @@ class _CalendarEntryTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 4),
       child: ListTile(
         dense: true,
-        leading: Icon(
+        leading: DuitlahIcon(
           entry.confirmed ? Icons.check_circle_outline : Icons.schedule_outlined,
           size: 20,
           color: entry.confirmed ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.4),

@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,10 +31,10 @@ class AccountingHubScreen extends ConsumerWidget {
             Card(
               color: Theme.of(context).colorScheme.primaryContainer,
               child: ListTile(
-                leading: const Icon(Icons.rocket_launch_outlined),
+                leading: const DuitlahIcon(Icons.rocket_launch_outlined),
                 title: const Text('Set up your Chart of Accounts'),
                 subtitle: const Text('Required before you can post journal entries or run reports.'),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const DuitlahIcon(Icons.chevron_right),
                 onTap: () => context.push(AppRoutes.accountingChartOfAccounts(spaceId)),
               ),
             ),
@@ -74,12 +75,12 @@ class _Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: ListTile(
-        leading: Icon(icon),
+        leading: DuitlahIcon(icon),
         title: Text(label),
-        trailing: const Icon(Icons.chevron_right),
+        trailing: const DuitlahIcon(Icons.chevron_right),
         onTap: () => context.push(route),
       ),
     );

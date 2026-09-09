@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -34,7 +36,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
         children: InvoiceStatus.values
             .map((s) => ListTile(
                   title: Text(s.name),
-                  trailing: s == current ? const Icon(Icons.check) : null,
+                  trailing: s == current ? const DuitlahIcon(Icons.check) : null,
                   onTap: () => Navigator.of(context).pop(s),
                 ))
             .toList(),
@@ -67,7 +69,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => Padding(
+        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.lg,
             right: AppSpacing.lg,
@@ -81,7 +83,8 @@ class InvoiceDetailScreen extends ConsumerWidget {
               Text('Record payment', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<BusinessAccount>(
-                initialValue: account,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+initialValue: account,
                 decoration: const InputDecoration(labelText: 'Paid into'),
                 items: active.map((a) => DropdownMenuItem(value: a, child: Text(a.name))).toList(),
                 onChanged: (v) => setSheetState(() => account = v ?? account),
@@ -120,7 +123,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
     if (saved == true) {
@@ -142,7 +145,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
           if (invoice.valueOrNull != null)
             TextButton(
               onPressed: () => _changeStatus(context, ref, invoice.value!.status),
-              child: const Text('Status', style: TextStyle(color: Colors.white)),
+              child: const Text('Status'),
             ),
         ],
       ),
@@ -179,7 +182,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                           child: Row(
                             children: [
                               Expanded(child: Text('${li.description} × ${li.quantity}')),
-                              Text('RM ${li.lineTotal}'),
+                              Text(Money.format(li.lineTotal)),
                             ],
                           ),
                         ),
@@ -227,7 +230,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                             .map(
                               (p) => Card(
                                 margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                                child: ListTile(title: Text('RM ${p.amount}'), subtitle: Text(p.paidOn)),
+                                child: ListTile(title: Text(Money.format(p.amount)), subtitle: Text(p.paidOn)),
                               ),
                             )
                             .toList(),
@@ -243,7 +246,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _recordPayment(context, ref),
-        child: const Icon(Icons.payments_outlined),
+        child: const DuitlahIcon(Icons.payments_outlined),
       ),
     );
   }
@@ -254,7 +257,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(label, style: bold ? const TextStyle(fontWeight: FontWeight.bold) : null),
-            Text('RM $amount', style: bold ? const TextStyle(fontWeight: FontWeight.bold) : null),
+            Text(Money.format(amount), style: bold ? const TextStyle(fontWeight: FontWeight.bold) : null),
           ],
         ),
       );

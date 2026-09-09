@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -143,7 +144,7 @@ class _JournalEntriesScreenState extends ConsumerState<JournalEntriesScreen> {
       appBar: AppBar(
         title: const Text('Journal Entries'),
         actions: [
-          IconButton(icon: const Icon(Icons.date_range_outlined), onPressed: () => _pickRange(context)),
+          IconButton(icon: const DuitlahIcon(Icons.date_range_outlined), onPressed: () => _pickRange(context)),
         ],
       ),
       body: Column(
@@ -198,7 +199,7 @@ class _JournalEntriesScreenState extends ConsumerState<JournalEntriesScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _newEntry(context), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => _newEntry(context), child: const DuitlahIcon(Icons.add)),
     );
   }
 }
@@ -284,7 +285,7 @@ class _JournalEntryFormSheetState extends ConsumerState<_JournalEntryFormSheet> 
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Date'),
                 subtitle: Text(_fmtDate(_entryDate)),
-                trailing: const Icon(Icons.calendar_month_outlined),
+                trailing: const DuitlahIcon(Icons.calendar_month_outlined),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,

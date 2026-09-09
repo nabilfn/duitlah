@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -60,7 +62,7 @@ class AssetsHubScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openCreateForm(context, ref),
-        icon: const Icon(Icons.add),
+        icon: const DuitlahIcon(Icons.add),
         label: const Text('New Asset'),
       ),
     );
@@ -85,7 +87,7 @@ class _AssetTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text('RM ${asset.netBookValue}', style: Theme.of(context).textTheme.titleSmall),
+            Text(Money.format(asset.netBookValue), style: Theme.of(context).textTheme.titleSmall),
             Chip(
               label: Text(isDisposed ? 'Disposed' : 'Active'),
               backgroundColor: isDisposed ? null : Theme.of(context).colorScheme.primaryContainer,

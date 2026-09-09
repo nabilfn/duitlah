@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
@@ -64,7 +66,7 @@ class _IncomeStatementScreenState extends ConsumerState<IncomeStatementScreen> {
         actions: [
           PopupMenuButton<ExportFormat>(
             enabled: !_exporting,
-            icon: const Icon(Icons.ios_share),
+            icon: const DuitlahIcon(Icons.ios_share),
             onSelected: _export,
             itemBuilder: (context) =>
                 ExportFormat.values.map((f) => PopupMenuItem(value: f, child: Text('Share as ${f.name}'))).toList(),
@@ -155,7 +157,7 @@ class _Body extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 2),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text('${l.accountCode} ${l.accountName}'), Text('RM ${l.amount}')],
+          children: [Text('${l.accountCode} ${l.accountName}'), Text(Money.format(l.amount))],
         ),
       );
 
@@ -163,7 +165,7 @@ class _Body extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: Theme.of(context).textTheme.titleSmall),
-          Text('RM $amount', style: Theme.of(context).textTheme.titleSmall),
+          Text(Money.format(amount), style: Theme.of(context).textTheme.titleSmall),
         ],
       );
 }

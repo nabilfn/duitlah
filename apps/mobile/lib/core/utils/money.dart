@@ -12,7 +12,12 @@ class Money {
   /// subtract, or otherwise recompute the value.
   static String format(String amount, {String currency = 'RM'}) {
     final value = num.tryParse(amount) ?? 0;
-    return '$currency ${value.toStringAsFixed(2)}';
+    final parts = value.toStringAsFixed(2).split('.');
+    final grouped = parts.first.replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+      (match) => '${match[1]},',
+    );
+    return '$currency $grouped${parts.length > 1 ? '.${parts[1]}' : ''}';
   }
 
   /// Same as [format] but without the currency prefix, for compact contexts

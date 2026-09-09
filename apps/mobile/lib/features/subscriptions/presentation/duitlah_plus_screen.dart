@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -48,7 +49,7 @@ class DuitlahPlusScreen extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          Icon(
+                          DuitlahIcon(
                             entitlement.tier == SubscriptionTier.PLUS
                                 ? Icons.workspace_premium
                                 : Icons.workspace_premium_outlined,
@@ -84,7 +85,7 @@ class DuitlahPlusScreen extends ConsumerWidget {
                   child: Column(
                     children: _plusFeatures
                         .map((f) => ListTile(
-                              leading: const Icon(Icons.check_circle_outline),
+                              leading: const DuitlahIcon(Icons.check_circle_outline),
                               title: Text(f),
                               dense: true,
                             ))
