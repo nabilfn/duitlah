@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -219,11 +220,11 @@ class _BillDetailScreenState extends ConsumerState<BillDetailScreen> {
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
               ForestSurface(radius: 22, child: SizedBox(width: double.infinity, child: Padding(padding: const EdgeInsets.all(24), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(bill.merchant ?? 'Shared bill', style: const TextStyle(color: Colors.white, fontSize: 16)),
+                Text(bill.merchant ?? 'Shared bill', style: TextStyle(color: context.duitlahColors.balanceText, fontSize: 16)),
                 const SizedBox(height: 8),
-                Text(bill.total != null ? Money.format(bill.total!, currency: bill.currency == 'MYR' ? 'RM' : bill.currency) : 'Build your split', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white)),
+                Text(bill.total != null ? Money.format(bill.total!, currency: bill.currency == 'MYR' ? 'RM' : bill.currency) : 'Build your split', style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: context.duitlahColors.balanceText)),
                 const SizedBox(height: 8),
-                Text(bill.status == BillStatus.DRAFT ? 'Add items, invite people and choose your shares.' : 'Your shared expense, all in one place.', style: const TextStyle(color: Color(0xFFDCE8E2), fontSize: 13)),
+                Text(bill.status == BillStatus.DRAFT ? 'Add items, invite people and choose your shares.' : 'Your shared expense, all in one place.', style: TextStyle(color: context.duitlahColors.balanceSecondary, fontSize: 13)),
               ])))),
               const SizedBox(height: 16),
               Row(

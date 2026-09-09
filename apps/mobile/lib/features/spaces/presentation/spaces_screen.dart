@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,11 +52,11 @@ class SpacesScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 if (businesses.isEmpty)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
                     child: Text(
                       'No business workspaces yet.',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: context.duitlahColors.textTertiary),
                     ),
                   ),
                 for (final space in businesses)

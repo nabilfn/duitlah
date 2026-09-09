@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
@@ -296,7 +297,7 @@ initialValue: destinationId,
                               child: ListTile(
                                 leading: DuitlahIcon(
                                   e.direction == EntryDirection.IN ? Icons.arrow_downward : Icons.arrow_upward,
-                                  color: e.direction == EntryDirection.IN ? Colors.green : Colors.red,
+                                  color: e.direction == EntryDirection.IN ? context.duitlahColors.positive : context.duitlahColors.negative,
                                 ),
                                 title: Text(e.description ?? (e.direction == EntryDirection.IN ? 'Money in' : 'Money out')),
                                 subtitle: Text(e.occurredOn),

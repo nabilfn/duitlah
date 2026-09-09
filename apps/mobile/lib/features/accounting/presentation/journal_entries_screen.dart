@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -108,7 +109,7 @@ class _JournalEntriesScreenState extends ConsumerState<JournalEntriesScreen> {
                       Text(
                         '${line.direction == LedgerDirection.DEBIT ? 'Dr' : 'Cr'} RM ${line.amount}',
                         style: TextStyle(
-                          color: line.direction == LedgerDirection.DEBIT ? Colors.blue : Colors.orange,
+                          color: line.direction == LedgerDirection.DEBIT ? context.duitlahColors.information : context.duitlahColors.warning,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -307,7 +308,7 @@ class _JournalEntryFormSheetState extends ConsumerState<_JournalEntryFormSheet> 
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: (_difference.abs() < 0.005 ? Colors.green : Colors.red).withValues(alpha: 0.08),
+                  color: (_difference.abs() < 0.005 ? context.duitlahColors.positive : context.duitlahColors.negative).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Column(
@@ -324,7 +325,7 @@ class _JournalEntryFormSheetState extends ConsumerState<_JournalEntryFormSheet> 
                       'Difference: ${_difference.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: _difference.abs() < 0.005 ? Colors.green : Colors.red,
+                        color: _difference.abs() < 0.005 ? context.duitlahColors.positive : context.duitlahColors.negative,
                       ),
                     ),
                   ],

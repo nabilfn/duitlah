@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,7 @@ import '../domain/contacts.dart';
 import '../domain/sales.dart';
 
 Color creditNoteStatusColor(BuildContext context, CreditNoteStatus status) {
-  return status == CreditNoteStatus.VOID ? Theme.of(context).colorScheme.error : Colors.green;
+  return status == CreditNoteStatus.VOID ? Theme.of(context).colorScheme.error : context.duitlahColors.positive;
 }
 
 /// Reachable both standalone (from the business dashboard) and from an

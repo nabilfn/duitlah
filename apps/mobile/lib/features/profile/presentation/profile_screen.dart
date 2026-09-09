@@ -1,5 +1,6 @@
 import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
 import 'package:flutter/material.dart';
+import '../../../core/widgets/appearance_preference.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -247,6 +248,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Card(
                 child: Column(
                   children: [
+                    const AppearancePreference(),
                     if (_biometricSupported)
                       SwitchListTile(
                         title: Text(

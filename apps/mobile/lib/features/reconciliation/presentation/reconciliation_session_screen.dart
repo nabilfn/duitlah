@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -354,16 +355,16 @@ class _SummaryCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Expanded(child: _Count(label: 'Unmatched', value: summary.unmatchedCount, color: Colors.orange)),
-                Expanded(child: _Count(label: 'Matched', value: summary.matchedCount, color: Colors.blue)),
-                Expanded(child: _Count(label: 'Created', value: summary.createdCount, color: Colors.green)),
+                Expanded(child: _Count(label: 'Unmatched', value: summary.unmatchedCount, color: context.duitlahColors.warning)),
+                Expanded(child: _Count(label: 'Matched', value: summary.matchedCount, color: context.duitlahColors.information)),
+                Expanded(child: _Count(label: 'Created', value: summary.createdCount, color: context.duitlahColors.positive)),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
-                Expanded(child: _Count(label: 'Ignored', value: summary.ignoredCount, color: Colors.grey)),
-                Expanded(child: _Count(label: 'Split', value: summary.splitCount, color: Colors.purple)),
+                Expanded(child: _Count(label: 'Ignored', value: summary.ignoredCount, color: context.duitlahColors.textTertiary)),
+                Expanded(child: _Count(label: 'Split', value: summary.splitCount, color: context.duitlahColors.primary)),
                 const Expanded(child: SizedBox()),
               ],
             ),
@@ -393,7 +394,7 @@ class _SummaryCard extends StatelessWidget {
                     difference,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: (double.tryParse(difference) ?? 0).abs() < 0.005 ? Colors.green : Colors.red,
+                      color: (double.tryParse(difference) ?? 0).abs() < 0.005 ? context.duitlahColors.positive : context.duitlahColors.negative,
                     ),
                   ),
                 ],
@@ -438,7 +439,7 @@ class _LineTile extends StatelessWidget {
       child: ListTile(
         leading: DuitlahIcon(
           isOutflow ? Icons.arrow_upward : Icons.arrow_downward,
-          color: isOutflow ? Colors.red : Colors.green,
+          color: isOutflow ? context.duitlahColors.negative : context.duitlahColors.positive,
         ),
         title: Text(line.description ?? line.occurredOn),
         subtitle: Text(line.occurredOn),
@@ -666,7 +667,7 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: (_diff.abs() < 0.005 ? Colors.green : Colors.red).withValues(alpha: 0.08),
+                  color: (_diff.abs() < 0.005 ? context.duitlahColors.positive : context.duitlahColors.negative).withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Column(
@@ -683,7 +684,7 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
                       'Remaining: ${_diff.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: _diff.abs() < 0.005 ? Colors.green : Colors.red,
+                        color: _diff.abs() < 0.005 ? context.duitlahColors.positive : context.duitlahColors.negative,
                       ),
                     ),
                   ],

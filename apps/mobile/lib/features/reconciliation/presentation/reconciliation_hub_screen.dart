@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -171,7 +172,7 @@ class _StatusChip extends StatelessWidget {
     }
     final label = session?.status.name ?? 'PARSED';
     final color = session?.status == ReconciliationSessionStatus.COMPLETED
-        ? Colors.green.withValues(alpha: 0.15)
+        ? context.duitlahColors.positive.withValues(alpha: 0.15)
         : Theme.of(context).colorScheme.primaryContainer;
     return Chip(label: Text(label), backgroundColor: color, visualDensity: VisualDensity.compact);
   }

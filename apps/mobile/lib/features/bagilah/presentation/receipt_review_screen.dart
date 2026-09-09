@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -176,13 +177,13 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.12),
+        color: context.duitlahColors.warning.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
+        border: Border.all(color: context.duitlahColors.warning.withValues(alpha: 0.4)),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          DuitlahIcon(Icons.info_outline, color: Colors.orange, size: 20),
+          DuitlahIcon(Icons.info_outline, color: context.duitlahColors.warning, size: 20),
           SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(

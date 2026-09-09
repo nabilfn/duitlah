@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:duitlah_mobile/core/theme/app_theme.dart';
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/balance_card.dart';
 import 'package:duitlah_mobile/core/widgets/list_rows.dart';
 import 'package:duitlah_mobile/core/widgets/app_state_views.dart';
@@ -44,7 +45,7 @@ void main() {
       final money = tester
           .widgetList<Text>(find.byType(Text))
           .where((t) => t.data?.contains('9,999,999,999.99') ?? false);
-      expect(money.first.style?.color, theme.colorScheme.onPrimary);
+      expect(money.first.style?.color, theme.extension<DuitlahColors>()!.balanceText);
     });
   }
   testWidgets('Loading respects reduced motion', (tester) async {

@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -223,7 +224,7 @@ class _MovementTile extends StatelessWidget {
       child: ListTile(
         leading: DuitlahIcon(
           isInbound ? Icons.arrow_downward : Icons.arrow_upward,
-          color: isInbound ? Colors.green : Colors.red,
+          color: isInbound ? context.duitlahColors.positive : context.duitlahColors.negative,
         ),
         title: Text(movement.type.name),
         subtitle: Text(movement.notes != null ? '${movement.occurredOn} · ${movement.notes}' : movement.occurredOn),
@@ -271,7 +272,7 @@ class _RecipeCostCard extends StatelessWidget {
                 const Text('Gross margin'),
                 Text(
                   '${cost.grossMargin} (${cost.grossMarginPercent}%)',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: marginPositive ? Colors.green : Colors.red),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: marginPositive ? context.duitlahColors.positive : context.duitlahColors.negative),
                 ),
               ],
             ),

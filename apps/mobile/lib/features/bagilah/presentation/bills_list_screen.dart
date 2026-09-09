@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/routing/app_routes.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/duitlah_colors.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/app_state_views.dart';
 import '../../../core/widgets/duitlah_icon.dart';
@@ -233,14 +233,8 @@ class BagilahBlob extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final participants = ref.watch(billParticipantsProvider(bill.id));
     final theme = Theme.of(context);
-    final dark = index == 0;
-    final foreground = dark ? Colors.white : AppColors.lightInk;
-    final colors = [
-      const Color(0xFF355E55),
-      AppColors.cream,
-      const Color(0xFFE0E7D5),
-      AppColors.lilac,
-    ];
+    final colors = DuitlahColors.participants;
+    final foreground = context.duitlahColors.onParticipant(colors[index % 4]);
     final radius = [
       const BorderRadius.only(
         topLeft: Radius.elliptical(85, 100),
@@ -363,7 +357,7 @@ class AvatarStack extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 1.5),
+                  border: Border.all(color: context.duitlahColors.borderSubtle, width: 1.5),
                 ),
                 child: ParticipantAvatar(name: visible[i], size: 25),
               ),
@@ -373,10 +367,10 @@ class AvatarStack extends StatelessWidget {
               left: 63,
               child: CircleAvatar(
                 radius: 14,
-                backgroundColor: AppColors.sage,
+                backgroundColor: context.duitlahColors.primarySoft,
                 child: Text(
                   '+${names.length - 3}',
-                  style: const TextStyle(fontSize: 10, color: AppColors.forest),
+                  style: TextStyle(fontSize: 10, color: context.duitlahColors.textPrimary),
                 ),
               ),
             ),

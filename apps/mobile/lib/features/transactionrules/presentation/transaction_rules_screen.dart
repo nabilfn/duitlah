@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -102,14 +103,14 @@ class TransactionRulesScreen extends ConsumerWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (rule.learned)
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.only(right: AppSpacing.xs),
-                                child: StatusChip(label: 'Auto-learned', color: Colors.teal, icon: Icons.auto_awesome),
+                                child: StatusChip(label: 'Auto-learned', color: context.duitlahColors.primary, icon: Icons.auto_awesome),
                               ),
                             if (!rule.active)
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.only(right: AppSpacing.xs),
-                                child: StatusChip(label: 'Inactive', color: Colors.grey),
+                                child: StatusChip(label: 'Inactive', color: context.duitlahColors.textTertiary),
                               ),
                             IconButton(
                               icon: const DuitlahIcon(Icons.delete_outline, size: 18),

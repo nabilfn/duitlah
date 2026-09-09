@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -131,7 +132,7 @@ class _Body extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: (netIncome >= 0 ? Colors.green : Colors.red).withValues(alpha: 0.1),
+            color: (netIncome >= 0 ? context.duitlahColors.positive : context.duitlahColors.negative).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
           child: Row(
@@ -143,7 +144,7 @@ class _Body extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: netIncome >= 0 ? Colors.green : Colors.red,
+                  color: netIncome >= 0 ? context.duitlahColors.positive : context.duitlahColors.negative,
                 ),
               ),
             ],

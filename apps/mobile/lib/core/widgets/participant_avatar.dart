@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 
@@ -12,17 +13,12 @@ class ParticipantAvatar extends StatelessWidget {
   final double size;
   final bool isGuest;
 
-  static const _palette = [
-    Color(0xFFD1E0D6), Color(0xFFF0E6D4), Color(0xFFDED8EE),
-    Color(0xFFE9D6CF), Color(0xFFD3E1E6), Color(0xFFE1E7D6),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final trimmed = name.trim();
     final words = trimmed.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
     final initial = words.isEmpty ? '?' : (words.first[0] + (words.length > 1 ? words.last[0] : '')).toUpperCase();
-    final color = _palette[trimmed.codeUnits.fold<int>(0, (a, b) => a + b) % _palette.length];
+    final color = DuitlahColors.participants[trimmed.codeUnits.fold<int>(0, (a, b) => a + b) % DuitlahColors.participants.length];
 
     return Stack(
       clipBehavior: Clip.none,
@@ -42,7 +38,7 @@ class ParticipantAvatar extends StatelessWidget {
           child: Text(
             initial,
             style: TextStyle(
-              color: const Color(0xFF1D4D46),
+              color: context.duitlahColors.onParticipant(color),
               fontWeight: FontWeight.w700,
               fontSize: size * 0.32,
             ),

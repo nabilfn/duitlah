@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import '../theme/duitlah_colors.dart';
 import 'amount_text.dart';
 
-/// The premium hero balance card used on Home / Wallet — a solid teal
+/// The existing balance card with the dedicated balance palette — a solid
 /// surface, not a gradient (the redesign spec explicitly calls out
 /// "excessive gradients" as something to avoid), so the primary number
 /// reads as the page's focal point through contrast and typography alone.
-/// Colored via `colorScheme.primary`/`onPrimary` rather than a hardcoded
-/// constant so it stays correct in both light mode (white text on teal) and
-/// dark mode (dark text on the brightened dark-mode teal).
+/// Its background and text use separate balance tokens in both themes.
 class BalanceCard extends StatelessWidget {
   const BalanceCard({
     super.key,
@@ -27,12 +26,13 @@ class BalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final onPrimary = theme.colorScheme.onPrimary;
+    final palette = context.duitlahColors;
+    final onPrimary = palette.balanceText;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary,
+        color: palette.balanceBackground,
         borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
       ),
       child: Row(
@@ -45,7 +45,7 @@ class BalanceCard extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    color: onPrimary.withValues(alpha: 0.9),
+                    color: palette.balanceSecondary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -61,7 +61,7 @@ class BalanceCard extends StatelessWidget {
                   Text(
                     subtitle!,
                     style: TextStyle(
-                      color: onPrimary.withValues(alpha: 0.9),
+                      color: palette.balanceSecondary,
                       fontSize: 13,
                     ),
                   ),

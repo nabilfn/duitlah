@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
+import 'duitlah_colors.dart';
 import 'app_semantic_colors.dart';
 
 /// Spacing scale used throughout the design system instead of ad-hoc magic
@@ -34,8 +34,7 @@ class AppRadius {
   static const pill = 999.0;
 }
 
-/// Plus Jakarta Sans, forest-green actions, warm neutral surfaces and soft
-/// botanical accents. Dark mode uses independently tuned green surfaces.
+/// The existing design with the supplied berry light/dark colour palettes.
 class AppTheme {
   AppTheme._();
 
@@ -47,34 +46,48 @@ class AppTheme {
   static ThemeData _build(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
 
-    final background = isDark
-        ? AppColors.darkBackground
-        : AppColors.lightBackground;
-    final card = isDark ? AppColors.darkCard : AppColors.lightCard;
-    final ink = isDark ? AppColors.darkInk : AppColors.lightInk;
-    final muted = isDark
-        ? AppColors.darkMutedForeground
-        : AppColors.lightMutedForeground;
-    final border = isDark ? AppColors.darkBorder : AppColors.lightBorder;
-    final tealSoft = isDark ? AppColors.darkTealSoft : AppColors.lightTealSoft;
-    final teal = isDark ? AppColors.tealBright : AppColors.tealDark;
-    final negative = isDark ? AppColors.negativeBright : AppColors.negative;
+    final palette = isDark ? DuitlahColors.dark : DuitlahColors.light;
+    final background = palette.background;
+    final card = palette.surface;
+    final ink = palette.textPrimary;
+    final muted = palette.textSecondary;
+    final border = palette.border;
+    final tealSoft = palette.primarySoft;
+    final teal = palette.primary;
+    final negative = palette.negative;
 
     final colorScheme = ColorScheme(
       brightness: brightness,
       surface: background,
       onSurface: ink,
       primary: teal,
-      onPrimary: isDark ? AppColors.darkBackground : Colors.white,
+      onPrimary: palette.textOnPrimary,
       secondary: tealSoft,
-      onSecondary: isDark ? AppColors.tealBright : AppColors.tealDark,
+      onSecondary: palette.primary,
       error: negative,
-      onError: isDark ? AppColors.darkBackground : Colors.white,
+      onError: palette.onParticipant(negative),
       outline: border,
       onSurfaceVariant: muted,
       surfaceContainerLow: card,
-      surfaceContainer: tealSoft,
+      surfaceContainer: palette.surfaceSecondary,
       surfaceContainerHighest: card,
+      surfaceContainerLowest: background,
+      surfaceContainerHigh: palette.surfaceElevated,
+      primaryContainer: palette.primarySubtle,
+      onPrimaryContainer: palette.primary,
+      secondaryContainer: palette.primarySoft,
+      onSecondaryContainer: ink,
+      tertiary: palette.information,
+      onTertiary: palette.onParticipant(palette.information),
+      tertiaryContainer: palette.informationSoft,
+      onTertiaryContainer: palette.information,
+      errorContainer: palette.negativeSoft,
+      onErrorContainer: palette.negative,
+      outlineVariant: palette.borderSubtle,
+      inverseSurface: palette.primaryDark,
+      onInverseSurface: palette.textOnPrimary,
+      inversePrimary: palette.primarySoft,
+      surfaceTint: Colors.transparent,
     );
 
     return ThemeData(
@@ -83,7 +96,14 @@ class AppTheme {
       fontFamily: _fontFamily,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: background,
-      extensions: [isDark ? AppSemanticColors.dark : AppSemanticColors.light],
+      extensions: [palette, isDark ? AppSemanticColors.dark : AppSemanticColors.light],
+      disabledColor: palette.textTertiary,
+      hintColor: palette.textTertiary,
+      focusColor: palette.primarySoft.withValues(alpha: .35),
+      hoverColor: palette.primarySubtle,
+      textSelectionTheme: TextSelectionThemeData(cursorColor: palette.primary, selectionColor: palette.primarySoft, selectionHandleColor: palette.primary),
+      popupMenuTheme: PopupMenuThemeData(color: palette.surfaceElevated, surfaceTintColor: Colors.transparent),
+      menuTheme: MenuThemeData(style: MenuStyle(backgroundColor: WidgetStatePropertyAll(palette.surfaceElevated), surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent))),
       appBarTheme: AppBarTheme(
         backgroundColor: background,
         foregroundColor: ink,
@@ -104,7 +124,7 @@ class AppTheme {
         style: ButtonStyle(
           side: const WidgetStatePropertyAll(BorderSide.none),
           shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))),
-          backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? teal : (isDark ? card : const Color(0xFFEEF0ED))),
+          backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? teal : palette.surfaceSecondary),
           foregroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? colorScheme.onPrimary : muted),
           minimumSize: const WidgetStatePropertyAll(Size(48, 44)),
           textStyle: const WidgetStatePropertyAll(TextStyle(fontFamily: _fontFamily, fontSize: 13, fontWeight: FontWeight.w500)),
@@ -139,7 +159,7 @@ class AppTheme {
         iconColor: teal,
         minVerticalPadding: 8,
       ),
-      dividerTheme: DividerThemeData(color: border, thickness: 1, space: 1),
+      dividerTheme: DividerThemeData(color: palette.borderSubtle, thickness: 1, space: 1),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style:
             ElevatedButton.styleFrom(
@@ -161,7 +181,7 @@ class AppTheme {
               // generic opacity overlay on the primary color.
               overlayColor: WidgetStateProperty.resolveWith(
                 (states) => states.contains(WidgetState.pressed)
-                    ? AppColors.tealDark.withValues(alpha: 0.12)
+                    ? palette.primaryDark.withValues(alpha: 0.12)
                     : null,
               ),
             ),
@@ -183,7 +203,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: isDark ? AppColors.tealBright : AppColors.tealDark,
+          foregroundColor: palette.primary,
           textStyle: const TextStyle(
             fontFamily: _fontFamily,
             fontSize: 15,
@@ -217,7 +237,7 @@ class AppTheme {
         hintStyle: TextStyle(fontFamily: _fontFamily, color: muted),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: card,
+        backgroundColor: palette.surfaceElevated,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(AppRadius.lg),
@@ -238,7 +258,7 @@ class AppTheme {
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
             color: states.contains(WidgetState.selected)
-                ? (isDark ? AppColors.tealBright : AppColors.tealDark)
+                ? (palette.primary)
                 : muted,
           ),
         ),
@@ -248,16 +268,16 @@ class AppTheme {
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: states.contains(WidgetState.selected)
-                ? (isDark ? AppColors.tealBright : AppColors.tealDark)
+                ? (palette.primary)
                 : muted,
           ),
         ),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: isDark ? AppColors.darkCard : AppColors.lightInk,
+        backgroundColor: palette.surfaceElevated,
         contentTextStyle: TextStyle(
           fontFamily: _fontFamily,
-          color: isDark ? AppColors.darkInk : Colors.white,
+          color: palette.textPrimary,
         ),
         behavior: SnackBarBehavior.floating,
         shape: const RoundedRectangleBorder(
@@ -265,7 +285,7 @@ class AppTheme {
         ),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: card,
+        backgroundColor: palette.surfaceElevated,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(AppRadius.lg)),
         ),

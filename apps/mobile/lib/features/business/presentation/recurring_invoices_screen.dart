@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -99,9 +100,9 @@ class RecurringInvoicesScreen extends ConsumerWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             if (!schedule.active)
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.only(right: AppSpacing.xs),
-                                child: StatusChip(label: 'Paused', color: Colors.grey),
+                                child: StatusChip(label: 'Paused', color: context.duitlahColors.textTertiary),
                               ),
                             IconButton(
                               icon: DuitlahIcon(schedule.active ? Icons.pause_circle_outline : Icons.play_circle_outline),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../features/accounts/domain/finance.dart';
-import '../theme/app_colors.dart';
+import '../theme/duitlah_colors.dart';
 import '../utils/money.dart';
 import 'duitlah_icon.dart';
 
@@ -43,9 +43,7 @@ class TransactionRow extends StatelessWidget {
     final color = transfer
         ? theme.colorScheme.onSurface
         : incoming
-        ? (theme.brightness == Brightness.dark
-              ? AppColors.positiveBright
-              : AppColors.positive)
+        ? context.duitlahColors.positive
         : theme.colorScheme.onSurface;
     final sign = incoming ? '+' : '−';
     final text =
@@ -61,10 +59,10 @@ class TransactionRow extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 color: incoming
-                    ? AppColors.sage
+                    ? context.duitlahColors.positiveSoft
                     : transfer
-                    ? AppColors.blue
-                    : AppColors.coral,
+                    ? context.duitlahColors.informationSoft
+                    : context.duitlahColors.negativeSoft,
                 shape: BoxShape.circle,
               ),
               child: DuitlahIcon(
@@ -73,7 +71,7 @@ class TransactionRow extends StatelessWidget {
                     : incoming
                     ? Icons.account_balance_wallet_outlined
                     : Icons.receipt_outlined,
-                color: AppColors.forest,
+                color: context.duitlahColors.primary,
                 size: 22,
               ),
             ),

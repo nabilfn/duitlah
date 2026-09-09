@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,13 +49,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                                 padding: EdgeInsets.all(14),
                                 child: DuitlahIcon(Icons.search, size: 20),
                               ),
-                              fillColor:
-                                  Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Theme.of(context)
-                                        .colorScheme
-                                        .surfaceContainerHighest
-                                  : const Color(0xFFEEF0ED),
+                              fillColor: context.duitlahColors.surfaceSecondary,
                             ),
                           ),
                         ),

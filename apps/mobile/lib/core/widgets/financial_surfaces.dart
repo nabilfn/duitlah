@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
+import '../theme/duitlah_colors.dart';
 import 'duitlah_icon.dart';
 
 class SectionHeader extends StatelessWidget {
@@ -37,9 +37,7 @@ class FinancialModule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final surface = theme.brightness == Brightness.dark
-        ? theme.colorScheme.surfaceContainerHighest
-        : color ?? const Color(0xFFECF0EA);
+    final surface = color ?? context.duitlahColors.surfaceSecondary;
     return Material(
       color: surface,
       borderRadius: BorderRadius.circular(18),
@@ -97,12 +95,12 @@ class QuickAction extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.onTap,
-    this.color = AppColors.sage,
+    this.color,
   });
   final String label;
   final IconData icon;
   final VoidCallback onTap;
-  final Color color;
+  final Color? color;
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
@@ -115,8 +113,8 @@ class QuickAction extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-              child: DuitlahIcon(icon, color: AppColors.forest, size: 25),
+              decoration: BoxDecoration(color: color ?? context.duitlahColors.primarySoft, shape: BoxShape.circle),
+              child: DuitlahIcon(icon, color: context.duitlahColors.primary, size: 25),
             ),
             const SizedBox(height: 8),
             Text(
@@ -141,17 +139,19 @@ class ForestSurface extends StatelessWidget {
   Widget build(BuildContext context) => ClipRRect(
     borderRadius: BorderRadius.circular(radius),
     child: ColoredBox(
-      color: AppColors.forest,
-      child: CustomPaint(painter: _ForestPainter(), child: child),
+      color: context.duitlahColors.balanceBackground,
+      child: CustomPaint(painter: _ForestPainter(context.duitlahColors.balanceHighlight), child: child),
     ),
   );
 }
 
 class _ForestPainter extends CustomPainter {
+  const _ForestPainter(this.highlight);
+  final Color highlight;
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF92BCAA).withValues(alpha: .16);
+      ..color = highlight.withValues(alpha: .16);
     canvas.drawOval(
       Rect.fromLTWH(
         -size.width * .4,
@@ -184,5 +184,5 @@ class _ForestPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_ForestPainter oldDelegate) => false;
+  bool shouldRepaint(_ForestPainter oldDelegate) => oldDelegate.highlight != highlight;
 }

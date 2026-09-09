@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'dart:io';
@@ -193,7 +194,7 @@ class _ReadinessCard extends StatelessWidget {
                     DuitlahIcon(
                       item.ready ? Icons.check_circle : Icons.warning_amber_rounded,
                       size: 18,
-                      color: item.ready ? Colors.green : Colors.orange,
+                      color: item.ready ? context.duitlahColors.positive : context.duitlahColors.warning,
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(child: Text(item.label)),

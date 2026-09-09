@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/routing/app_routes.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/duitlah_colors.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/app_state_views.dart';
 import '../../../core/widgets/duitlah_icon.dart';
@@ -31,7 +31,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: AppColors.forest,
+        backgroundColor: context.duitlahColors.balanceBackground,
         body: RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(settlementSummaryProvider);
@@ -55,8 +55,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               TextButton(
                                 onPressed: () => context.push(AppRoutes.spaces),
                                 style: TextButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  backgroundColor: Colors.black.withValues(
+                                  foregroundColor: context.duitlahColors.balanceText,
+                                  backgroundColor: context.duitlahColors.primaryDark.withValues(
                                     alpha: .14,
                                   ),
                                 ),
@@ -65,12 +65,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Material(
-                                  color: Colors.white.withValues(alpha: .86),
+                                  color: context.duitlahColors.surfaceElevated.withValues(alpha: .86),
                                   borderRadius: BorderRadius.circular(28),
                                   child: InkWell(
                                     borderRadius: BorderRadius.circular(28),
                                     onTap: () => context.push(AppRoutes.more),
-                                    child: const Padding(
+                                    child: Padding(
                                       padding: EdgeInsets.symmetric(
                                         horizontal: 14,
                                         vertical: 12,
@@ -80,15 +80,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           DuitlahIcon(
                                             Icons.search,
                                             size: 18,
-                                            color: AppColors.forest,
+                                            color: context.duitlahColors.primary,
                                           ),
                                           SizedBox(width: 8),
                                           Expanded(
                                             child: Text(
                                               'Find a tool…',
                                               style: TextStyle(
-                                                color: AppColors
-                                                    .lightMutedForeground,
+                                                color: context.duitlahColors.textSecondary,
                                                 fontSize: 12,
                                               ),
                                             ),
@@ -103,9 +102,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 tooltip: 'Notifications',
                                 onPressed: () =>
                                     context.push(AppRoutes.notifications),
-                                icon: const DuitlahIcon(
+                                icon: DuitlahIcon(
                                   Icons.notifications_outlined,
-                                  color: Colors.white,
+                                  color: context.duitlahColors.balanceText,
                                 ),
                               ),
                             ],
@@ -113,10 +112,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           const SizedBox(height: 20),
                           Row(
                             children: [
-                              const Text(
+                              Text(
                                 'Available balance',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: context.duitlahColors.balanceText,
                                   fontSize: 13,
                                 ),
                               ),
@@ -135,7 +134,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         ? Icons.visibility_outlined
                                         : Icons.visibility_off_outlined,
                                     size: 18,
-                                    color: Colors.white,
+                                    color: context.duitlahColors.balanceText,
                                   ),
                                 ),
                               ),
@@ -152,7 +151,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         : 'RM •••••',
                                     style: theme.textTheme.headlineMedium
                                         ?.copyWith(
-                                          color: Colors.white,
+                                          color: context.duitlahColors.balanceText,
                                           fontSize: 28,
                                           fontFeatures: const [
                                             FontFeature.tabularFigures(),
@@ -166,9 +165,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   error: (e, _) => TextButton(
                                     onPressed: () =>
                                         ref.invalidate(dashboardProvider),
-                                    child: const Text(
+                                    child: Text(
                                       'Retry balance',
-                                      style: TextStyle(color: Colors.white),
+                                      style: TextStyle(color: context.duitlahColors.balanceText),
                                     ),
                                   ),
                                 ),
@@ -180,8 +179,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   initialType: TransactionType.INCOME,
                                 ),
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: AppColors.forest,
+                                  backgroundColor: context.duitlahColors.surfaceElevated,
+                                  foregroundColor: context.duitlahColors.primary,
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 12,
                                   ),
@@ -226,7 +225,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: QuickAction(
                               label: 'Add income',
                               icon: Icons.add_circle_outline,
-                              color: AppColors.coral,
+                              color: context.duitlahColors.negativeSoft,
                               onTap: () => showTransactionForm(
                                 context,
                                 initialType: TransactionType.INCOME,
@@ -237,7 +236,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: QuickAction(
                               label: 'Transfer',
                               icon: Icons.swap_horiz_outlined,
-                              color: AppColors.blue,
+                              color: context.duitlahColors.informationSoft,
                               onTap: () => showTransactionForm(
                                 context,
                                 initialType: TransactionType.TRANSFER,
@@ -248,7 +247,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: QuickAction(
                               label: 'Bills',
                               icon: Icons.request_page_outlined,
-                              color: const Color(0xFFE5E9DC),
+                              color: context.duitlahColors.warningSoft,
                               onTap: () => context.push(AppRoutes.bills),
                             ),
                           ),
@@ -271,7 +270,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               subtitle: 'A little planning goes a long way',
                               icon: Icons.pie_chart_outline,
                               compact: true,
-                              color: AppColors.sage,
+                              color: context.duitlahColors.primarySubtle,
                               onTap: () => context.push(AppRoutes.budgets),
                             ),
                           ),
@@ -309,13 +308,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       Text(
                                         'Split. Settle. Simple.',
                                         style: theme.textTheme.titleMedium
-                                            ?.copyWith(color: Colors.white),
+                                            ?.copyWith(color: context.duitlahColors.balanceText),
                                       ),
                                       const SizedBox(height: 6),
-                                      const Text(
+                                      Text(
                                         'Shared moments. Fair shares.\nBring everyone together with Bagilah.',
                                         style: TextStyle(
-                                          color: Color(0xFFDCE8E2),
+                                          color: context.duitlahColors.balanceSecondary,
                                           fontSize: 13,
                                           height: 1.5,
                                         ),
@@ -323,9 +322,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ],
                                   ),
                                 ),
-                                const DuitlahIcon(
+                                DuitlahIcon(
                                   Icons.chevron_right,
-                                  color: Colors.white,
+                                  color: context.duitlahColors.balanceText,
                                 ),
                               ],
                             ),

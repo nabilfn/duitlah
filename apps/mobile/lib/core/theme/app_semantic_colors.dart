@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
+import 'duitlah_colors.dart';
 
 /// Status/brand colors the standard Material [ColorScheme] has no slot for
 /// (success, warning, info, and Bagilah's own accent) — accessed via
@@ -20,22 +20,15 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color bagilah;
   final Color bagilahForeground;
 
-  /// Bagilah shares the forest/sage palette; its signature is the organic
-  /// composition rather than a competing saturated brand color.
-  static const light = AppSemanticColors(
-    success: AppColors.positive,
-    warning: Color(0xFF945000),
-    info: AppColors.tealDark,
-    bagilah: AppColors.sage,
-    bagilahForeground: AppColors.lightInk,
-  );
+  static final light = _fromPalette(DuitlahColors.light);
+  static final dark = _fromPalette(DuitlahColors.dark);
 
-  static const dark = AppSemanticColors(
-    success: AppColors.positiveBright,
-    warning: AppColors.orangeBright,
-    info: AppColors.tealBright,
-    bagilah: AppColors.tealBright,
-    bagilahForeground: AppColors.lightInk,
+  static AppSemanticColors _fromPalette(DuitlahColors palette) => AppSemanticColors(
+    success: palette.positive,
+    warning: palette.warning,
+    info: palette.information,
+    bagilah: palette.primarySoft,
+    bagilahForeground: palette.textPrimary,
   );
 
   @override

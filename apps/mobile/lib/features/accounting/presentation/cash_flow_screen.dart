@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -73,8 +74,8 @@ class _CashFlowScreenState extends ConsumerState<CashFlowScreen> {
                   children: [
                     _row(context, 'Opening cash', r.openingCash),
                     const Divider(),
-                    _row(context, 'Total cash in', r.totalCashIn, color: Colors.green),
-                    _row(context, 'Total cash out', r.totalCashOut, color: Colors.red),
+                    _row(context, 'Total cash in', r.totalCashIn, color: context.duitlahColors.positive),
+                    _row(context, 'Total cash out', r.totalCashOut, color: context.duitlahColors.negative),
                     const Divider(),
                     _row(context, 'Net change', r.netChange),
                     const Divider(),

@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,11 +88,11 @@ class _HeadlineCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ForestSurface(radius: 20, child: SizedBox(width: double.infinity, child: Padding(padding: const EdgeInsets.all(24), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Business cash position', style: TextStyle(color: Colors.white)),
+              Text('Business cash position', style: TextStyle(color: context.duitlahColors.balanceText)),
               const SizedBox(height: 8),
-              Text(Money.format(dashboard.cashPosition), style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white)),
+              Text(Money.format(dashboard.cashPosition), style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: context.duitlahColors.balanceText)),
               const SizedBox(height: 8),
-              const Text('Your business, in balance.', style: TextStyle(color: Color(0xFFDCE8E2), fontSize: 13)),
+              Text('Your business, in balance.', style: TextStyle(color: context.duitlahColors.balanceSecondary, fontSize: 13)),
             ])))),
             const Divider(height: AppSpacing.lg),
             Row(

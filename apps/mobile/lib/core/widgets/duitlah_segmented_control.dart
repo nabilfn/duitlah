@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:flutter/material.dart';
 
 /// Independent rounded selection pills, matching the reference on every form.
@@ -18,9 +19,7 @@ class DuitlahSegmentedControl<T> extends StatelessWidget {
     final theme = Theme.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark
-            ? theme.colorScheme.surfaceContainerHighest
-            : const Color(0xFFEEF0ED),
+        color: context.duitlahColors.surfaceSecondary,
         borderRadius: BorderRadius.circular(28),
       ),
       child: Row(

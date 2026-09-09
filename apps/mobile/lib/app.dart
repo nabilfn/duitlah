@@ -5,6 +5,7 @@ import 'core/routing/app_router.dart';
 import 'core/routing/app_routes.dart';
 import 'core/routing/deep_link_service.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/appearance_provider.dart';
 import 'core/api/providers.dart';
 
 class DuitlahApp extends ConsumerStatefulWidget {
@@ -44,7 +45,7 @@ class _DuitlahAppState extends ConsumerState<DuitlahApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: ref.watch(appearanceProvider),
       routerConfig: router,
     );
   }

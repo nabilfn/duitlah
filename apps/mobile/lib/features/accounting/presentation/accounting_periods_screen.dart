@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -145,7 +146,7 @@ class AccountingPeriodsScreen extends ConsumerWidget {
                         subtitle: closed ? null : const Text('Tap to close this period'),
                         trailing: Chip(
                           label: Text(p.status.name),
-                          backgroundColor: (closed ? Colors.grey : Colors.green).withValues(alpha: 0.15),
+                          backgroundColor: (closed ? context.duitlahColors.textTertiary : context.duitlahColors.positive).withValues(alpha: 0.15),
                         ),
                         onTap: closed ? null : () => _close(context, ref, p),
                       ),

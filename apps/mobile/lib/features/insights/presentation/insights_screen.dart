@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
 import 'dart:math' as math;
 
@@ -296,16 +297,9 @@ class SpendingDonut extends StatefulWidget {
 
 class _SpendingDonutState extends State<SpendingDonut> {
   int? _selected;
-  static const palette = [
-    Color(0xFF447EF4),
-    Color(0xFF45ACC9),
-    Color(0xFFFFC477),
-    Color(0xFF9B89D4),
-    Color(0xFF67A494),
-    Color(0xFFB8BBB8),
-  ];
   @override
   Widget build(BuildContext context) {
+    final palette = DuitlahColors.participants;
     final amounts = widget.items
         .map(
           (i) => (double.tryParse(i.amount) ?? 0).clamp(0.0, double.infinity),

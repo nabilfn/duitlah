@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -444,11 +446,26 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
+        const capture = String.fromEnvironment('CAPTURE_LAYOUT');
+        if (capture.isNotEmpty && entry.key != 'profile') {
+          final geometry = <Map<String, dynamic>>[];
+          for (final element in find.byWidgetPredicate((widget) => widget is Text || widget is Card || widget is CustomPaint).evaluate()) {
+            final box = element.findRenderObject();
+            if (box is! RenderBox || !box.hasSize || !box.attached) continue;
+            final widget = element.widget;
+            final origin = box.localToGlobal(Offset.zero);
+            geometry.add({'widget': widget.runtimeType.toString(), 'text': widget is Text ? widget.data : null,
+              'x': origin.dx, 'y': origin.dy, 'width': box.size.width, 'height': box.size.height});
+          }
+          final file = File('$capture/${entry.key}_${size.width}_$dark.json');
+          file.parent.createSync(recursive: true);
+          file.writeAsStringSync(jsonEncode(geometry));
+        }
         if (const bool.fromEnvironment('RENDER_UI') && size.width == 390) {
           await expectLater(
             find.byType(MaterialApp),
             matchesGoldenFile(
-              '../../../../docs/mobile-redesign/${entry.key}${dark ? '_dark' : ''}.png',
+              '${const String.fromEnvironment('UI_PREVIEW_DIR', defaultValue: '../../../../docs/mobile-redesign')}/${entry.key}${dark ? '_dark' : ''}.png',
             ),
           );
         }

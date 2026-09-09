@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -367,7 +368,7 @@ class _LogTile extends StatelessWidget {
       dense: true,
       leading: DuitlahIcon(
         entry.success ? Icons.check_circle_outline : Icons.error_outline,
-        color: entry.success ? Colors.green : Theme.of(context).colorScheme.error,
+        color: entry.success ? context.duitlahColors.positive : Theme.of(context).colorScheme.error,
         size: 20,
       ),
       title: Text('${entry.operation.name}${entry.providerName != null ? ' · ${entry.providerName}' : ''}'),

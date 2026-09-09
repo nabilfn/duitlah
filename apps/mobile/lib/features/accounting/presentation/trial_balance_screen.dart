@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -126,7 +127,7 @@ class _Table extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
-            color: (balanced ? Colors.green : Colors.red).withValues(alpha: 0.1),
+            color: (balanced ? context.duitlahColors.positive : context.duitlahColors.negative).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
           child: Row(
@@ -134,12 +135,12 @@ class _Table extends StatelessWidget {
             children: [
               DuitlahIcon(
                 balanced ? Icons.check_circle_outline : Icons.error_outline,
-                color: balanced ? Colors.green : Colors.red,
+                color: balanced ? context.duitlahColors.positive : context.duitlahColors.negative,
               ),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 balanced ? 'Debits equal credits — books balance' : 'Debits and credits do not match',
-                style: TextStyle(color: balanced ? Colors.green : Colors.red, fontWeight: FontWeight.w600),
+                style: TextStyle(color: balanced ? context.duitlahColors.positive : context.duitlahColors.negative, fontWeight: FontWeight.w600),
               ),
             ],
           ),

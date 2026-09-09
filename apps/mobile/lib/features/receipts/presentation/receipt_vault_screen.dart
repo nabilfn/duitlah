@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -157,10 +158,10 @@ class _ReceiptCard extends StatelessWidget {
                 children: [
                   Image.network(receipt.imageUrl, fit: BoxFit.cover),
                   if (receipt.needsReview)
-                    const Positioned(
+                    Positioned(
                       top: 4,
                       right: 4,
-                      child: DuitlahIcon(Icons.warning_amber_rounded, color: Colors.orange, size: 18),
+                      child: DuitlahIcon(Icons.warning_amber_rounded, color: context.duitlahColors.warning, size: 18),
                     ),
                 ],
               ),

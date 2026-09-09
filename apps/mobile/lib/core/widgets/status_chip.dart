@@ -1,5 +1,6 @@
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
+import '../theme/duitlah_colors.dart';
 
 class StatusChip extends StatelessWidget {
   const StatusChip({super.key, required this.label, required this.color, this.icon});
@@ -13,7 +14,7 @@ class StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.14),
+        color: context.duitlahColors.softFor(color),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(

@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -18,9 +19,9 @@ import '../domain/expenses.dart';
 Color expenseStatusColor(BuildContext context, ExpenseStatus status) {
   switch (status) {
     case ExpenseStatus.PAID:
-      return Colors.green;
+      return context.duitlahColors.positive;
     case ExpenseStatus.PARTIALLY_PAID:
-      return Colors.orange;
+      return context.duitlahColors.warning;
     case ExpenseStatus.UNPAID:
       return Theme.of(context).colorScheme.error;
   }
