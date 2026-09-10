@@ -71,6 +71,50 @@ class _GlyphPainter extends CustomPainter {
     }
 
     switch (glyph) {
+      case 'coffee':
+        box(3, 7, 13, 12, 4);
+        canvas.drawArc(Rect.fromLTWH(13, 8, 8, 7), -1.5, 3, false, pen);
+        line(3, 22, 19, 22);
+        line(7, 2, 7, 4);
+        line(12, 2, 12, 4);
+      case 'utensils':
+        line(4, 3, 4, 8);
+        line(7, 3, 7, 21);
+        line(10, 3, 10, 8);
+        path([const Offset(4, 8), const Offset(7, 11), const Offset(10, 8)]);
+        path([
+          const Offset(19, 3),
+          const Offset(15, 10),
+          const Offset(19, 12),
+          const Offset(19, 21),
+        ]);
+        line(19, 3, 19, 12);
+      case 'shopping-bag':
+        path([
+          const Offset(5, 8),
+          const Offset(19, 8),
+          const Offset(21, 21),
+          const Offset(3, 21),
+          const Offset(5, 8),
+        ]);
+        canvas.drawArc(Rect.fromLTWH(8, 2, 8, 12), 3.14, 3.14, false, pen);
+      case 'shopping-cart':
+        path([
+          const Offset(2, 3),
+          const Offset(5, 3),
+          const Offset(8, 16),
+          const Offset(19, 16),
+          const Offset(22, 6),
+          const Offset(6, 6),
+        ]);
+        line(8, 11, 20, 11);
+        line(12, 6, 13, 16);
+        line(17, 6, 17, 16);
+        circle(9, 21, 1);
+        circle(18, 21, 1);
+      case 'equals':
+        line(4, 8, 20, 8);
+        line(4, 16, 20, 16);
       case 'home':
         path([const Offset(3, 10), const Offset(12, 3), const Offset(21, 10)]);
         path([
@@ -407,6 +451,14 @@ final _glyphs = <IconData, String>{
   Icons.account_balance_outlined: 'bank',
   Icons.account_balance_wallet_outlined: 'wallet',
   Icons.account_tree_outlined: 'document',
+  Icons.local_cafe_outlined: 'coffee',
+  Icons.restaurant: 'utensils',
+  Icons.shopping_cart_outlined: 'shopping-cart',
+  Icons.shopping_bag_outlined: 'shopping-bag',
+  Icons.north: 'out',
+  Icons.drag_handle: 'equals',
+  Icons.eco_outlined: 'leaf',
+  Icons.bar_chart: 'chart',
   Icons.add: 'plus',
   Icons.add_a_photo_outlined: 'camera',
   Icons.add_circle_outline: 'plus',

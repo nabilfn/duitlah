@@ -283,7 +283,10 @@ class PersonalFinanceFlowTests {
             .put("accountId", accountId)
             .put("type", type)
             .put("amount", amount)
-            .put("occurredOn", "2026-08-01");
+            // "This month," not a fixed past date -- dashboardSummarizesBalanceAndMonthTotals
+            // asserts against /api/v1/dashboard's current-month totals, which a hardcoded date
+            // silently falls outside of once the real calendar month rolls past it.
+            .put("occurredOn", java.time.LocalDate.now().toString());
     mockMvc
         .perform(
             auth(MockMvcRequestBuilders.post("/api/v1/transactions"))

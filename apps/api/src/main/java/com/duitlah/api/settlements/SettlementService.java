@@ -108,17 +108,16 @@ public class SettlementService {
         settlements
             .findByIdInvolvingUserForUpdate(settlementId, userId)
             .orElseThrow(
-                () ->
-                    new NotFoundException("SETTLEMENT_NOT_FOUND", "Settlement not found."));
+                () -> new NotFoundException("SETTLEMENT_NOT_FOUND", "Settlement not found."));
     if (settlement.getCancelledAt() != null) {
       throw new ConflictException(
           "SETTLEMENT_CANCELLED", "This settlement was cancelled and can't take payments.");
     }
-    BigDecimal remaining = settlement.getAmount().subtract(payments.sumBySettlementId(settlementId));
+    BigDecimal remaining =
+        settlement.getAmount().subtract(payments.sumBySettlementId(settlementId));
     if (request.amount().compareTo(remaining) > 0) {
       throw new ConflictException(
-          "PAYMENT_EXCEEDS_REMAINING",
-          "Payment cannot exceed the settlement's remaining amount.");
+          "PAYMENT_EXCEEDS_REMAINING", "Payment cannot exceed the settlement's remaining amount.");
     }
     payments.save(new SettlementPayment(settlementId, request.amount(), userId, request.note()));
     auditLogService.record(

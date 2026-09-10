@@ -74,6 +74,7 @@ import '../../features/home/presentation/home_screen.dart';
 import '../../features/home/presentation/more_menu_screen.dart';
 import '../../features/insights/presentation/calendar_screen.dart';
 import '../../features/insights/presentation/insights_screen.dart';
+import '../../features/wrapped/presentation/monthly_wrapped_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/notificationrules/presentation/notification_rules_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
@@ -161,10 +162,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: AppRoutes.categories, builder: (context, state) => const CategoriesScreen()),
       GoRoute(path: AppRoutes.accounts, builder: (context, state) => const AccountsScreen()),
       GoRoute(path: AppRoutes.budgets, builder: (context, state) => const BudgetsScreen()),
-      GoRoute(path: AppRoutes.goals, builder: (context, state) => const GoalsScreen()),
+      GoRoute(path: AppRoutes.goals, builder: (context, state) => GoalsScreen(wrappedAmount: state.uri.queryParameters['wrappedAmount'], wrappedMonth: state.uri.queryParameters['wrappedMonth'])),
       GoRoute(path: AppRoutes.notifications, builder: (context, state) => const NotificationsScreen()),
       GoRoute(path: AppRoutes.recurring, builder: (context, state) => const RecurringTransactionsScreen()),
       GoRoute(path: AppRoutes.calendar, builder: (context, state) => const CalendarScreen()),
+      GoRoute(
+        path: '/wrapped/:year/:month',
+        builder: (context, state) => MonthlyWrappedScreen(
+          year: int.parse(state.pathParameters['year']!),
+          month: int.parse(state.pathParameters['month']!),
+        ),
+      ),
       GoRoute(path: AppRoutes.assistant, builder: (context, state) => const AssistantScreen()),
       GoRoute(path: AppRoutes.duitlahPlus, builder: (context, state) => const DuitlahPlusScreen()),
       GoRoute(path: AppRoutes.helpSupport, builder: (context, state) => const HelpSupportScreen()),

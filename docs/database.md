@@ -1071,3 +1071,20 @@ a cached paid-total column.
 Backup/restore uses PostgreSQL custom format without owner/privilege metadata.
 The smoke check restores into an isolated `duitlah_restore_check` database,
 compares Flyway version and public-table count, then drops only that database.
+
+## Monthly Wrapped design decisions
+
+`V30__monthly_wrapped.sql` adds a single `monthly_wrapped` table:
+`user_id` + `year` + `month` (`UNIQUE`, the real backstop against a
+duplicate under concurrent requests), a denormalized `persona_id` so the
+history list can render "August — Cafe Hunter" without deserializing
+every row's full payload, `sufficient_data`, a `payload TEXT` column
+holding the full `WrappedResult` as a JSON blob — the same "hand the
+whole computed artifact to a JSON column" precedent as
+`receipts.parsed_result_json`, chosen because this data is a versioned,
+read-only computed artifact only ever fetched whole and rendered, never
+queried by individual field — plus `wrapped_version`, `generated_at`,
+and a nullable `viewed_at`. No join tables: a dozen tightly-coupled
+tables for the persona/insights/goal breakdown would add real schema
+complexity this codebase never needs to query relationally. See
+[monthly-wrapped.md](monthly-wrapped.md).

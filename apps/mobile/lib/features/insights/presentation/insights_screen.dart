@@ -16,6 +16,7 @@ import '../../../core/widgets/app_state_views.dart';
 import '../../../core/widgets/duitlah_icon.dart';
 import '../../../core/widgets/financial_surfaces.dart';
 import '../../networth/application/net_worth_providers.dart';
+import '../../wrapped/presentation/widgets/wrapped_history_section.dart';
 import '../application/insights_providers.dart';
 import '../domain/insights.dart';
 
@@ -280,6 +281,8 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                 onRetry: () => ref.invalidate(topMerchantsProvider),
               ),
             ),
+            const SizedBox(height: 24),
+            const WrappedHistorySection(),
           ],
         ),
       ),

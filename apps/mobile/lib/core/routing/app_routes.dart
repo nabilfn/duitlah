@@ -41,6 +41,7 @@ class AppRoutes {
   static const recurring = '/recurring';
   static const calendar = '/calendar';
   static const insights = '/insights';
+  static String wrapped(int year, int month) => '/wrapped/$year/$month';
   static const assistant = '/assistant';
   static const duitlahPlus = '/duitlah-plus';
   static const helpSupport = '/help-support';

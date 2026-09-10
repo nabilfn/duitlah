@@ -861,3 +861,18 @@ Phase 14 adds no domain module and no migration. It strengthens settlement
 payments with locked aggregate validation, adds fixed financial/tax
 regressions, and supplies deployment smoke gates for latency and PostgreSQL
 recovery. See [final-hardening.md](final-hardening.md).
+
+## Duitlah Monthly Wrapped
+
+A standalone post-Phase-15 feature, not part of the numbered V2 master
+spec. `com.duitlah.api.wrapped` is a single new backend module composing
+four already-existing services (`AnalyticsService`, `BudgetService`,
+`RecurringTransactionService`, plus one new `GoalContributionRepository`
+query) through one aggregation entry point
+(`MonthlyAggregationService.summarize`) rather than introducing a
+parallel read path into any of them. Its own four internal engines
+(`MoneyPersonaEngine`, `MonthlyInsightEngine`, `GoalRecommendationEngine`,
+plus the orchestrating `WrappedGenerationService`) are deliberately
+LLM-free and deterministic — the one place in this codebase's feature set
+where "AI-feeling" output is produced entirely by ordinary Java scoring
+logic. See [monthly-wrapped.md](monthly-wrapped.md).

@@ -461,3 +461,15 @@ unpaid balance. The check holds a database lock on the settlement, so
 concurrent requests cannot both spend the same remaining amount. The
 controller-derived OpenAPI contract remains at `GET /v3/api-docs`; see
 [final-hardening.md](final-hardening.md).
+
+## Monthly Wrapped
+
+`GET /api/v1/wrapped/promo` — the Home promo card's data source; reads
+only what already exists, never generates as a side effect. `GET
+/api/v1/wrapped` — every completed month's Wrapped, newest first,
+`personaId`/`personaName` null for a month judged insufficient. `GET
+/api/v1/wrapped/{year}/{month}` — the full story payload, generated
+lazily on first request if the nightly scheduler hasn't already; `400
+MONTH_NOT_COMPLETED` for the current or a future month. `POST
+/api/v1/wrapped/{year}/{month}/viewed` — marks a month viewed. See
+[monthly-wrapped.md](monthly-wrapped.md).

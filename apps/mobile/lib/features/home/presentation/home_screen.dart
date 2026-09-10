@@ -14,6 +14,7 @@ import '../../accounts/application/finance_providers.dart';
 import '../../accounts/domain/finance.dart';
 import '../../settlements/application/settlements_providers.dart';
 import '../../transactions/presentation/transaction_form_sheet.dart';
+import '../../wrapped/presentation/widgets/wrapped_promo_card.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -292,6 +293,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ],
                       ),
                       const SizedBox(height: 12),
+                      const WrappedPromoCard(),
                       ForestSurface(
                         radius: 18,
                         child: InkWell(

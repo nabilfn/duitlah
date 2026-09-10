@@ -980,3 +980,16 @@ opt-in only since it needs a user-supplied threshold to mean
 anything). 21 new backend integration tests (388 total) all pass; full
 regression suite reconfirmed clean. Live-verified against a rebuilt
 Docker image.
+
+**Duitlah Monthly Wrapped**, a standalone feature built after Phase
+15 (not part of the numbered phase plan above), adds a
+Spotify-Wrapped-*paced* but never Spotify-*styled* monthly financial
+recap: a deterministic, LLM-free Money Persona reveal (10 named
+personas, four distinct scoring shapes), up to 4 ranked insights out
+of 9 candidate types, and a supportive next-month suggestion chosen by
+6 ordered rules — generated once per user per completed month by a
+nightly scheduler and never silently regenerated afterward. See
+[docs/monthly-wrapped.md](docs/monthly-wrapped.md). 30 new backend
+tests (420 total) and 5 new mobile JSON tests (142 mobile tests total)
+all pass; both full suites and `flutter analyze` reconfirmed clean.
+Live-verified against a rebuilt Docker image.

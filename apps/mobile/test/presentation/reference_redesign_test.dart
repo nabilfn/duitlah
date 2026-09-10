@@ -34,6 +34,8 @@ import 'package:duitlah_mobile/features/networth/domain/net_worth.dart';
 import 'package:duitlah_mobile/features/profile/presentation/profile_screen.dart';
 import 'package:duitlah_mobile/features/settlements/application/settlements_providers.dart';
 import 'package:duitlah_mobile/features/settlements/domain/settlement.dart';
+import 'package:duitlah_mobile/features/wrapped/application/wrapped_providers.dart';
+import 'package:duitlah_mobile/features/wrapped/domain/wrapped.dart';
 
 // Fixtures are confined to tests. Production screens continue to read their repositories.
 class _Auth extends AuthNotifier {
@@ -244,6 +246,15 @@ List<Override> _overrides() => [
       assetsBreakdown: [],
       liabilitiesBreakdown: [],
     ),
+  ),
+  wrappedPromoProvider.overrideWith(
+    (ref) async => const WrappedPromo(available: true, year: 2026, month: 8, personaName: 'Cafe Hunter'),
+  ),
+  wrappedHistoryProvider.overrideWith(
+    (ref) async => const [
+      WrappedHistoryItem(year: 2026, month: 8, personaId: 'CAFE_HUNTER', personaName: 'Cafe Hunter', viewed: false),
+      WrappedHistoryItem(year: 2026, month: 7, personaId: null, personaName: null, viewed: true),
+    ],
   ),
 ];
 

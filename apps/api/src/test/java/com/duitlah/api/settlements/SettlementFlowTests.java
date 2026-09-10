@@ -229,13 +229,18 @@ class SettlementFlowTests {
     String settlementId = finalizedBillSettlementId();
 
     mockMvc.perform(
-        as(otherToken, MockMvcRequestBuilders.post("/api/v1/settlements/" + settlementId + "/payments"))
+        as(
+                otherToken,
+                MockMvcRequestBuilders.post("/api/v1/settlements/" + settlementId + "/payments"))
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.createObjectNode().put("amount", "4.00").toString()));
 
     mockMvc
         .perform(
-            as(otherToken, MockMvcRequestBuilders.post("/api/v1/settlements/" + settlementId + "/payments"))
+            as(
+                    otherToken,
+                    MockMvcRequestBuilders.post(
+                        "/api/v1/settlements/" + settlementId + "/payments"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.createObjectNode().put("amount", "6.01").toString()))
         .andExpect(MockMvcResultMatchers.status().isConflict())

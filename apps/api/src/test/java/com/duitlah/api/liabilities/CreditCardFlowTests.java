@@ -132,13 +132,18 @@ class CreditCardFlowTests {
 
   @Test
   void repayingTheCardIsATransferNotASecondExpense() throws Exception {
+    // "This month," not a fixed past date -- the assertion below reads /api/v1/dashboard's
+    // current-month total, which a hardcoded date silently falls outside of once the real
+    // calendar month rolls past it. Day 1 anchors both dates safely inside the current month
+    // regardless of what day "today" actually is (every month has at least 28 days).
+    java.time.LocalDate purchaseDate = java.time.LocalDate.now().withDayOfMonth(1);
     var purchaseBody =
         objectMapper
             .createObjectNode()
             .put("accountId", cardAccountId)
             .put("type", "EXPENSE")
             .put("amount", "1000.00")
-            .put("occurredOn", "2026-08-05");
+            .put("occurredOn", purchaseDate.toString());
     mockMvc.perform(
         as(accessToken, MockMvcRequestBuilders.post("/api/v1/transactions"))
             .contentType(MediaType.APPLICATION_JSON)
@@ -150,7 +155,7 @@ class CreditCardFlowTests {
             .put("fromAccountId", cashAccountId)
             .put("toAccountId", cardAccountId)
             .put("amount", "400.00")
-            .put("occurredOn", "2026-08-10");
+            .put("occurredOn", purchaseDate.plusDays(5).toString());
     mockMvc
         .perform(
             as(accessToken, MockMvcRequestBuilders.post("/api/v1/transactions/transfer"))
@@ -167,8 +172,7 @@ class CreditCardFlowTests {
         .andExpect(MockMvcResultMatchers.jsonPath("$.currentOutstanding").value(600.00));
 
     mockMvc
-        .perform(
-            as(accessToken, MockMvcRequestBuilders.get("/api/v1/dashboard")))
+        .perform(as(accessToken, MockMvcRequestBuilders.get("/api/v1/dashboard")))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.jsonPath("$.monthExpense").value(1000.00));
   }

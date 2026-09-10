@@ -132,6 +132,10 @@ flutter:
   # named weight so Flutter/Skia picks the right instance off the variable
   # font rather than shipping five separate static files.
   fonts:
+    - family: Bodoni Moda
+      fonts:
+        - asset: assets/fonts/BodoniModa-Variable.ttf
+          weight: 400
     - family: Plus Jakarta Sans
       fonts:
         - asset: assets/fonts/PlusJakartaSans-Variable.ttf
