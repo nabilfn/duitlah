@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +57,9 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
   @override
   void initState() {
     super.initState();
-    _selectedParticipantId = widget.participants.isNotEmpty ? widget.participants.first.id : null;
+    _selectedParticipantId = widget.participants.isNotEmpty
+        ? widget.participants.first.id
+        : null;
     _equalSplitSelection.addAll(widget.participants.map((p) => p.id));
   }
 
@@ -72,18 +76,27 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
             .read(guestBagilahRepositoryProvider)
             .removeClaim(widget.guestToken!, widget.item.id, claimId);
       } else {
-        await ref.read(bagilahRepositoryProvider).removeClaim(widget.billId, widget.item.id, claimId);
+        await ref
+            .read(bagilahRepositoryProvider)
+            .removeClaim(widget.billId, widget.item.id, claimId);
       }
       _invalidate();
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
   void _invalidate() {
     if (_isGuest) {
       ref.invalidate(guestBreakdownProvider(widget.guestToken!));
-      ref.invalidate(guestBillItemClaimsProvider((widget.guestToken!, widget.item.id)));
+      ref.invalidate(
+        guestBillItemClaimsProvider((widget.guestToken!, widget.item.id)),
+      );
     } else {
       ref.invalidate(billBreakdownProvider(widget.billId));
       ref.invalidate(billItemClaimsProvider((widget.billId, widget.item.id)));
@@ -91,13 +104,17 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
   }
 
   Future<void> _submit() async {
-    if (_selectedParticipantId == null && _mode != _ClaimMode.equalSplit) return;
+    if (_selectedParticipantId == null && _mode != _ClaimMode.equalSplit) {
+      return;
+    }
     setState(() => _submitting = true);
     try {
       switch (_mode) {
         case _ClaimMode.whole:
           if (_isGuest) {
-            await ref.read(guestBagilahRepositoryProvider).addClaim(
+            await ref
+                .read(guestBagilahRepositoryProvider)
+                .addClaim(
                   widget.guestToken!,
                   itemId: widget.item.id,
                   participantId: _selectedParticipantId!,
@@ -105,7 +122,9 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
                   value: widget.item.quantity,
                 );
           } else {
-            await ref.read(bagilahRepositoryProvider).addClaim(
+            await ref
+                .read(bagilahRepositoryProvider)
+                .addClaim(
                   widget.billId,
                   widget.item.id,
                   participantId: _selectedParticipantId!,
@@ -127,11 +146,17 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
           }
           await ref
               .read(bagilahRepositoryProvider)
-              .equalSplit(widget.billId, widget.item.id, _equalSplitSelection.toList());
+              .equalSplit(
+                widget.billId,
+                widget.item.id,
+                _equalSplitSelection.toList(),
+              );
         case _ClaimMode.custom:
           final value = _customValueController.text.trim();
           if (_isGuest) {
-            await ref.read(guestBagilahRepositoryProvider).addClaim(
+            await ref
+                .read(guestBagilahRepositoryProvider)
+                .addClaim(
                   widget.guestToken!,
                   itemId: widget.item.id,
                   participantId: _selectedParticipantId!,
@@ -139,7 +164,9 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
                   value: value,
                 );
           } else {
-            await ref.read(bagilahRepositoryProvider).addClaim(
+            await ref
+                .read(bagilahRepositoryProvider)
+                .addClaim(
                   widget.billId,
                   widget.item.id,
                   participantId: _selectedParticipantId!,
@@ -152,7 +179,12 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
       _invalidate();
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -162,22 +194,28 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final claims = _isGuest
-        ? ref.watch(guestBillItemClaimsProvider((widget.guestToken!, widget.item.id)))
+        ? ref.watch(
+            guestBillItemClaimsProvider((widget.guestToken!, widget.item.id)),
+          )
         : ref.watch(billItemClaimsProvider((widget.billId, widget.item.id)));
     return Padding(
       padding: EdgeInsets.only(
-        left: AppSpacing.lg,
-        right: AppSpacing.lg,
+        left: AppSpacing.pageMargin,
+        right: AppSpacing.pageMargin,
         top: AppSpacing.lg,
         bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
       child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(widget.item.name, style: theme.textTheme.titleLarge),
-            Text('Qty ${widget.item.quantity} · RM ${widget.item.totalPrice}', style: theme.textTheme.bodySmall),
+            Text(
+              'Qty ${widget.item.quantity} · ${Money.format(widget.item.totalPrice)}',
+              style: theme.textTheme.bodySmall,
+            ),
             const SizedBox(height: AppSpacing.md),
             claims.when(
               data: (list) => list.isEmpty
@@ -185,19 +223,27 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Already claimed', style: theme.textTheme.labelMedium),
+                        Text(
+                          'Already claimed',
+                          style: theme.textTheme.labelMedium,
+                        ),
                         const SizedBox(height: AppSpacing.xs),
-                        ...list.map((c) => ListTile(
-                              dense: true,
-                              contentPadding: EdgeInsets.zero,
-                              leading: ParticipantAvatar(name: c.displayName, size: 28),
-                              title: Text(c.displayName),
-                              subtitle: Text('${c.claimType.name} · ${c.value}'),
-                              trailing: IconButton(
-                                icon: const DuitlahIcon(Icons.close, size: 18),
-                                onPressed: () => _removeClaim(c.id),
-                              ),
-                            )),
+                        ...list.map(
+                          (c) => ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            leading: ParticipantAvatar(
+                              name: c.displayName,
+                              size: 28,
+                            ),
+                            title: Text(c.displayName),
+                            subtitle: Text('${c.claimType.name} · ${c.value}'),
+                            trailing: IconButton(
+                              icon: const DuitlahIcon(Icons.close, size: 18),
+                              onPressed: () => _removeClaim(c.id),
+                            ),
+                          ),
+                        ),
                         const Divider(height: AppSpacing.xl),
                       ],
                     ),
@@ -209,8 +255,14 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
             ),
             DuitlahSegmentedControl<_ClaimMode>(
               segments: const [
-                ButtonSegment(value: _ClaimMode.whole, label: Text('Whole item')),
-                ButtonSegment(value: _ClaimMode.equalSplit, label: Text('Split equally')),
+                ButtonSegment(
+                  value: _ClaimMode.whole,
+                  label: Text('Whole item'),
+                ),
+                ButtonSegment(
+                  value: _ClaimMode.equalSplit,
+                  label: Text('Split equally'),
+                ),
                 ButtonSegment(value: _ClaimMode.custom, label: Text('Custom')),
               ],
               selected: {_mode},
@@ -221,39 +273,58 @@ class _ClaimItemSheetState extends ConsumerState<ClaimItemSheet> {
               Wrap(
                 spacing: 8,
                 children: widget.participants
-                    .map((p) => FilterChip(
-                          label: Text(p.displayName),
-                          selected: _equalSplitSelection.contains(p.id),
-                          onSelected: (sel) => setState(() {
-                            if (sel) {
-                              _equalSplitSelection.add(p.id);
-                            } else {
-                              _equalSplitSelection.remove(p.id);
-                            }
-                          }),
-                        ))
+                    .map(
+                      (p) => FilterChip(
+                        label: Text(p.displayName),
+                        selected: _equalSplitSelection.contains(p.id),
+                        onSelected: (sel) => setState(() {
+                          if (sel) {
+                            _equalSplitSelection.add(p.id);
+                          } else {
+                            _equalSplitSelection.remove(p.id);
+                          }
+                        }),
+                      ),
+                    )
                     .toList(),
               )
             else ...[
-              DropdownButtonFormField<String>(
-                icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _selectedParticipantId,
-                decoration: const InputDecoration(labelText: 'Participant'),
-                items: widget.participants
-                    .map((p) => DropdownMenuItem(value: p.id, child: Text(p.displayName)))
-                    .toList(),
-                onChanged: (v) => setState(() => _selectedParticipantId = v),
+              AppFieldGroup(
+                label: 'Participant',
+                child: DropdownButtonFormField<String>(
+                  itemHeight: null,
+                  isExpanded: true,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                  initialValue: _selectedParticipantId,
+                  decoration: const InputDecoration(),
+                  items: widget.participants
+                      .map(
+                        (p) => DropdownMenuItem(
+                          value: p.id,
+                          child: Text(p.displayName),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) => setState(() => _selectedParticipantId = v),
+                ),
               ),
               if (_mode == _ClaimMode.custom) ...[
                 const SizedBox(height: AppSpacing.md),
                 DuitlahSegmentedControl<ClaimType>(
                   segments: const [
-                    ButtonSegment(value: ClaimType.PERCENTAGE, label: Text('%')),
-                    ButtonSegment(value: ClaimType.QUANTITY, label: Text('Qty')),
+                    ButtonSegment(
+                      value: ClaimType.PERCENTAGE,
+                      label: Text('%'),
+                    ),
+                    ButtonSegment(
+                      value: ClaimType.QUANTITY,
+                      label: Text('Qty'),
+                    ),
                     ButtonSegment(value: ClaimType.AMOUNT, label: Text('RM')),
                   ],
                   selected: {_customType},
-                  onSelectionChanged: (s) => setState(() => _customType = s.first),
+                  onSelectionChanged: (s) =>
+                      setState(() => _customType = s.first),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 AppTextField(
@@ -263,12 +334,18 @@ initialValue: _selectedParticipantId,
                     ClaimType.AMOUNT => 'Amount (RM)',
                   },
                   controller: _customValueController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                 ),
               ],
             ],
             const SizedBox(height: AppSpacing.xl),
-            PrimaryButton(label: 'Confirm claim', onPressed: _submit, loading: _submitting),
+            PrimaryButton(
+              label: 'Confirm claim',
+              onPressed: _submit,
+              loading: _submitting,
+            ),
           ],
         ),
       ),

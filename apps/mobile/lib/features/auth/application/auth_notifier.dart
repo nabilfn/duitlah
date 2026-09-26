@@ -10,7 +10,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> bootstrap() async {
     final user = await _repository.bootstrapSession();
-    state = user != null ? AuthState.authenticated(user) : const AuthState.unauthenticated();
+    state = user != null
+        ? AuthState.authenticated(user)
+        : const AuthState.unauthenticated();
   }
 
   Future<void> login(String email, String password) async {
@@ -18,7 +20,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = AuthState.authenticated(user);
   }
 
-  Future<void> register(String email, String password, String displayName) async {
+  Future<void> register(
+    String email,
+    String password,
+    String displayName,
+  ) async {
     final user = await _repository.register(email, password, displayName);
     state = AuthState.authenticated(user);
   }

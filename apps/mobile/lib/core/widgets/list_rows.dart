@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import 'amount_text.dart';
+import 'app_adaptive_row.dart';
 
 /// A generic row (transaction, group expense, settlement) with a leading
 /// icon badge, title/subtitle, and a trailing amount — the one shape reused
@@ -31,63 +32,36 @@ class MoneyRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return InkWell(
+    return AppRecordTile(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppRadius.sm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.md,
-          horizontal: AppSpacing.xs,
-        ),
-        child: Row(
-          children: [
-            if (leadingIcon != null) ...[
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
-                  shape: BoxShape.circle,
-                ),
-                child: DuitlahIcon(
-                  leadingIcon,
-                  size: 20,
-                  color: theme.colorScheme.onSurface,
-                ),
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: AppSpacing.md,
+        horizontal: AppSpacing.xs,
+      ),
+      leading: leadingIcon == null
+          ? null
+          : Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
+                shape: BoxShape.circle,
               ),
-              const SizedBox(width: AppSpacing.md),
-            ],
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.bodyLarge,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (subtitle != null)
-                    Text(
-                      subtitle!,
-                      style: theme.textTheme.bodySmall,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                ],
+              child: DuitlahIcon(
+                leadingIcon,
+                size: 20,
+                color: theme.colorScheme.onSurface,
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
-            Flexible(
-              child: AmountText(
-                amount,
-                currency: currency,
-                tone: tone,
-                style: theme.textTheme.titleSmall,
-              ),
-            ),
-          ],
-        ),
+      title: Text(title, style: theme.textTheme.bodyLarge),
+      subtitle: subtitle == null
+          ? null
+          : Text(subtitle!, style: theme.textTheme.bodySmall),
+      trailing: AmountText(
+        amount,
+        currency: currency,
+        tone: tone,
+        style: theme.textTheme.titleSmall,
       ),
     );
   }

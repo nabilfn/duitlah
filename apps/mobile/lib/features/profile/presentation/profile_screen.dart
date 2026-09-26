@@ -1,6 +1,10 @@
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
 import 'package:flutter/material.dart';
+
+import '../../../core/widgets/dock_insets.dart';
 import '../../../core/widgets/appearance_preference.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -97,13 +101,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 'This permanently deletes your account and everything in it. This cannot be undone.',
               ),
               const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                autofocus: true,
-                decoration: InputDecoration(
-                  labelText: 'Confirm your password',
-                  errorText: errorText,
+              AppFieldGroup(
+                label: 'Confirm your password',
+                child: TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  autofocus: true,
+                  decoration: InputDecoration(errorText: errorText),
                 ),
               ),
             ],
@@ -175,7 +179,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           loading: () => const Center(child: CircularProgressIndicator()),
           unauthenticated: () => const SizedBox.shrink(),
           authenticated: (user) => ListView(
-            padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: EdgeInsets.fromLTRB(
+              20,
+              32,
+              20,
+              32 + DuitlahDockInsets.of(context),
+            ),
             children: [
               Row(
                 children: [

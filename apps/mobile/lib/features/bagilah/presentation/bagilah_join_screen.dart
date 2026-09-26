@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -60,11 +61,19 @@ class _BagilahJoinScreenState extends ConsumerState<BagilahJoinScreen> {
       _error = null;
     });
     try {
-      final result = await ref.read(bagilahRepositoryProvider).joinViaInvite(token: widget.token);
+      final result = await ref
+          .read(bagilahRepositoryProvider)
+          .joinViaInvite(token: widget.token);
       ref.invalidate(billListProvider);
-      if (mounted) context.pushReplacement(AppRoutes.bagilahDetail(result.billId));
+      if (mounted) {
+        context.pushReplacement(AppRoutes.bagilahDetail(result.billId));
+      }
     } catch (e) {
-      setState(() => _error = e is AppException ? e.message : 'Could not join this bill.');
+      setState(
+        () => _error = e is AppException
+            ? e.message
+            : 'Could not join this bill.',
+      );
     } finally {
       if (mounted) setState(() => _joining = false);
     }
@@ -78,18 +87,31 @@ class _BagilahJoinScreenState extends ConsumerState<BagilahJoinScreen> {
       _error = null;
     });
     try {
-      final result = await GuestBagilahRepository.join(widget.token, displayName: name);
+      final result = await GuestBagilahRepository.join(
+        widget.token,
+        displayName: name,
+      );
       if (result.guestToken != null) {
-        await ref.read(guestSessionStoreProvider).save(GuestSession(
-              billId: result.billId,
-              participantId: result.participantId,
-              guestToken: result.guestToken!,
-              displayName: result.displayName,
-            ));
+        await ref
+            .read(guestSessionStoreProvider)
+            .save(
+              GuestSession(
+                billId: result.billId,
+                participantId: result.participantId,
+                guestToken: result.guestToken!,
+                displayName: result.displayName,
+              ),
+            );
       }
-      if (mounted) context.pushReplacement(AppRoutes.bagilahGuest(result.billId));
+      if (mounted) {
+        context.pushReplacement(AppRoutes.bagilahGuest(result.billId));
+      }
     } catch (e) {
-      setState(() => _error = e is AppException ? e.message : 'Could not join this bill.');
+      setState(
+        () => _error = e is AppException
+            ? e.message
+            : 'Could not join this bill.',
+      );
     } finally {
       if (mounted) setState(() => _joining = false);
     }
@@ -101,43 +123,61 @@ class _BagilahJoinScreenState extends ConsumerState<BagilahJoinScreen> {
     final theme = Theme.of(context);
 
     if (authState is AuthAuthenticated && _joining) {
-      return const Scaffold(body: LoadingView());
+      return const Scaffold(body: AppPageBody(child: LoadingView()));
     }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Join Bagilah')),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            DuitlahIcon(Icons.receipt_long_rounded, size: 56, color: theme.colorScheme.primary),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              "You've been invited to split a bill",
-              style: theme.textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            if (authState is AuthAuthenticated)
-              PrimaryButton(label: 'Join as ${authState.user.displayName}', onPressed: _joinAuthenticated, loading: _joining)
-            else ...[
-              AppTextField(label: 'Your name', controller: _nameController),
+      body: AppPageBody(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              DuitlahIcon(
+                Icons.receipt_long_rounded,
+                size: 56,
+                color: theme.colorScheme.primary,
+              ),
               const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(label: 'Join', onPressed: _joinAsGuest, loading: _joining),
-              const SizedBox(height: AppSpacing.sm),
               Text(
-                'No account needed — you can create one afterward to keep track of everything.',
-                style: theme.textTheme.bodySmall,
+                "You've been invited to split a bill",
+                style: theme.textTheme.titleLarge,
                 textAlign: TextAlign.center,
               ),
+              const SizedBox(height: AppSpacing.xl),
+              if (authState is AuthAuthenticated)
+                PrimaryButton(
+                  label: 'Join as ${authState.user.displayName}',
+                  onPressed: _joinAuthenticated,
+                  loading: _joining,
+                )
+              else ...[
+                AppTextField(label: 'Your name', controller: _nameController),
+                const SizedBox(height: AppSpacing.lg),
+                PrimaryButton(
+                  label: 'Join',
+                  onPressed: _joinAsGuest,
+                  loading: _joining,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'No account needed — you can create one afterward to keep track of everything.',
+                  style: theme.textTheme.bodySmall,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              if (_error != null) ...[
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  _error!,
+                  style: TextStyle(color: theme.colorScheme.error),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ],
-            if (_error != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              Text(_error!, style: TextStyle(color: theme.colorScheme.error), textAlign: TextAlign.center),
-            ],
-          ],
+          ),
         ),
       ),
     );

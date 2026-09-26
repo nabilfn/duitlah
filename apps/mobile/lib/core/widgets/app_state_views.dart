@@ -99,38 +99,44 @@ class EmptyView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            DuitlahIcon(
-              icon,
-              size: 48,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: theme.textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            if (message != null) ...[
-              const SizedBox(height: 6),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DuitlahIcon(
+                icon,
+                size: 32,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+              ),
+              const SizedBox(height: 16),
               Text(
-                message!,
-                style: theme.textTheme.bodySmall,
+                title,
+                style: theme.textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
+              if (message != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  message!,
+                  style: theme.textTheme.bodySmall,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+              if (actionLabel != null && onAction != null) ...[
+                const SizedBox(height: 20),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 280),
+                  child: PrimaryButton(
+                    label: actionLabel!,
+                    onPressed: onAction,
+                  ),
+                ),
+              ],
             ],
-            if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 20),
-              SizedBox(
-                width: 200,
-                child: PrimaryButton(label: actionLabel!, onPressed: onAction),
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );
@@ -152,7 +158,10 @@ class ErrorView extends StatelessWidget {
       icon: error is AppException && (error as AppException).isNetworkError
           ? Icons.wifi_off_rounded
           : Icons.error_outline_rounded,
-      title: message,
+      title: error is AppException && (error as AppException).isNetworkError
+          ? 'You’re offline'
+          : 'Couldn’t load this',
+      message: message,
       actionLabel: onRetry != null ? 'Try again' : null,
       onAction: onRetry,
     );

@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,10 +14,12 @@ class CreateBusinessSpaceScreen extends ConsumerStatefulWidget {
   const CreateBusinessSpaceScreen({super.key});
 
   @override
-  ConsumerState<CreateBusinessSpaceScreen> createState() => _CreateBusinessSpaceScreenState();
+  ConsumerState<CreateBusinessSpaceScreen> createState() =>
+      _CreateBusinessSpaceScreenState();
 }
 
-class _CreateBusinessSpaceScreenState extends ConsumerState<CreateBusinessSpaceScreen> {
+class _CreateBusinessSpaceScreenState
+    extends ConsumerState<CreateBusinessSpaceScreen> {
   final _nameController = TextEditingController();
   final _legalNameController = TextEditingController();
   final _registrationController = TextEditingController();
@@ -44,19 +47,29 @@ class _CreateBusinessSpaceScreenState extends ConsumerState<CreateBusinessSpaceS
 
     setState(() => _loading = true);
     try {
-      await ref.read(spacesRepositoryProvider).createBusinessSpace(
+      await ref
+          .read(spacesRepositoryProvider)
+          .createBusinessSpace(
             name: name,
             legalName: legalName,
-            registrationNumber:
-                _registrationController.text.trim().isEmpty ? null : _registrationController.text.trim(),
-            tin: _tinController.text.trim().isEmpty ? null : _tinController.text.trim(),
-            industry: _industryController.text.trim().isEmpty ? null : _industryController.text.trim(),
+            registrationNumber: _registrationController.text.trim().isEmpty
+                ? null
+                : _registrationController.text.trim(),
+            tin: _tinController.text.trim().isEmpty
+                ? null
+                : _tinController.text.trim(),
+            industry: _industryController.text.trim().isEmpty
+                ? null
+                : _industryController.text.trim(),
           );
       ref.invalidate(spaceListProvider);
       if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
-        showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -67,28 +80,44 @@ class _CreateBusinessSpaceScreenState extends ConsumerState<CreateBusinessSpaceS
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add a business')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'The essentials now — everything else can be filled in later from Business Settings.',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            AppTextField(label: 'Business name', controller: _nameController),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(label: 'Legal name (SSM)', controller: _legalNameController),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(label: 'Registration number (optional)', controller: _registrationController),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(label: 'TIN (optional)', controller: _tinController),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(label: 'Industry (optional)', controller: _industryController),
-            const SizedBox(height: AppSpacing.xl),
-            PrimaryButton(label: 'Create business workspace', onPressed: _submit, loading: _loading),
-          ],
+      body: AppPageBody(
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: AppSpacing.scrollInsets(context, floatingAction: false),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'The essentials now — everything else can be filled in later from Business Settings.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              AppTextField(label: 'Business name', controller: _nameController),
+              const SizedBox(height: AppSpacing.md),
+              AppTextField(
+                label: 'Legal name (SSM)',
+                controller: _legalNameController,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              AppTextField(
+                label: 'Registration number (optional)',
+                controller: _registrationController,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              AppTextField(label: 'TIN (optional)', controller: _tinController),
+              const SizedBox(height: AppSpacing.md),
+              AppTextField(
+                label: 'Industry (optional)',
+                controller: _industryController,
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              PrimaryButton(
+                label: 'Create business workspace',
+                onPressed: _submit,
+                loading: _loading,
+              ),
+            ],
+          ),
         ),
       ),
     );

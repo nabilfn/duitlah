@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,10 +10,10 @@ import '../application/spaces_providers.dart';
 import '../domain/financial_space.dart';
 import 'widgets/business_profile_form_sheet.dart';
 
-final _businessProfileProvider =
-    FutureProvider.autoDispose.family<BusinessProfile, String>((ref, spaceId) {
-  return ref.watch(spacesRepositoryProvider).getBusinessProfile(spaceId);
-});
+final _businessProfileProvider = FutureProvider.autoDispose
+    .family<BusinessProfile, String>((ref, spaceId) {
+      return ref.watch(spacesRepositoryProvider).getBusinessProfile(spaceId);
+    });
 
 /// Read-only through Phase 9 — Phase 10 (LHDN / MyInvois / SST) adds the
 /// first-ever edit path for this resource (a real server-enforced
@@ -25,14 +26,21 @@ class BusinessProfileScreen extends ConsumerWidget {
 
   final String spaceId;
 
-  Future<void> _openEditForm(BuildContext context, WidgetRef ref, BusinessProfile profile) async {
+  Future<void> _openEditForm(
+    BuildContext context,
+    WidgetRef ref,
+    BusinessProfile profile,
+  ) async {
     final saved = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => BusinessProfileFormSheet(spaceId: spaceId, existing: profile),
+      builder: (context) =>
+          BusinessProfileFormSheet(spaceId: spaceId, existing: profile),
     );
     if (saved == true) {
       ref.invalidate(_businessProfileProvider(spaceId));
-      if (context.mounted) showSuccessSnackBar(context, 'Business profile updated.');
+      if (context.mounted) {
+        showSuccessSnackBar(context, 'Business profile updated.');
+      }
     }
   }
 
@@ -52,7 +60,7 @@ class BusinessProfileScreen extends ConsumerWidget {
       ),
       body: profile.when(
         data: (p) => ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: AppSpacing.scrollInsets(context, floatingAction: false),
           children: [
             _Field('Legal name', p.legalName),
             _Field('Trade name', p.tradeName),
@@ -61,7 +69,10 @@ class BusinessProfileScreen extends ConsumerWidget {
             _Field('Business type', p.businessType),
             _Field('Industry', p.industry),
             _Field('SST number', p.sstNumber),
-            _Field('Annual revenue', p.annualRevenue != null ? 'RM ${p.annualRevenue}' : null),
+            _Field(
+              'Annual revenue',
+              p.annualRevenue != null ? Money.format(p.annualRevenue!) : null,
+            ),
             _Field('Financial year start', p.financialYearStart),
             _Field('Financial year end', p.financialYearEnd),
             _Field('Currency', p.currency),

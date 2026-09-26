@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,10 +36,9 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   Future<void> _submit() async {
     setState(() => _loading = true);
     try {
-      final group = await ref.read(groupsRepositoryProvider).createGroup(
-            name: _nameController.text.trim(),
-            type: _type,
-          );
+      final group = await ref
+          .read(groupsRepositoryProvider)
+          .createGroup(name: _nameController.text.trim(), type: _type);
       ref.invalidate(groupListProvider);
       if (mounted) context.pushReplacement(AppRoutes.groupDetail(group.id));
     } catch (e) {
@@ -45,7 +46,10 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
         if (e is AppException && e.code == 'GROUP_LIMIT_REACHED') {
           showUpgradeDialog(context, message: e.message);
         } else {
-          showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+          showErrorSnackBar(
+            context,
+            e is AppException ? e.message : 'Something went wrong.',
+          );
         }
       }
     } finally {
@@ -57,25 +61,39 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('New group')),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AppTextField(label: 'Group name', controller: _nameController),
-            const SizedBox(height: AppSpacing.md),
-            DropdownButtonFormField<GroupType>(
-              icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _type,
-              decoration: const InputDecoration(labelText: 'Type'),
-              items: GroupType.values
-                  .map((t) => DropdownMenuItem(value: t, child: Text(t.name)))
-                  .toList(),
-              onChanged: (v) => setState(() => _type = v ?? GroupType.GENERAL),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            PrimaryButton(label: 'Create group', onPressed: _submit, loading: _loading),
-          ],
+      body: AppPageBody(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppTextField(label: 'Group name', controller: _nameController),
+              const SizedBox(height: AppSpacing.md),
+              AppFieldGroup(
+                label: 'Type',
+                child: DropdownButtonFormField<GroupType>(
+                  itemHeight: null,
+                  isExpanded: true,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                  initialValue: _type,
+                  decoration: const InputDecoration(),
+                  items: GroupType.values
+                      .map(
+                        (t) => DropdownMenuItem(value: t, child: Text(t.name)),
+                      )
+                      .toList(),
+                  onChanged: (v) =>
+                      setState(() => _type = v ?? GroupType.GENERAL),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              PrimaryButton(
+                label: 'Create group',
+                onPressed: _submit,
+                loading: _loading,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -18,7 +18,12 @@ class GuestBagilahRepository {
 
   final Dio _dio;
 
-  Future<dynamic> _request(String method, String guestToken, String path, {dynamic data}) async {
+  Future<dynamic> _request(
+    String method,
+    String guestToken,
+    String path, {
+    dynamic data,
+  }) async {
     late Response response;
     try {
       response = await _dio.request(
@@ -27,9 +32,14 @@ class GuestBagilahRepository {
         options: Options(method: method, validateStatus: (_) => true),
       );
     } on DioException {
-      throw AppException.local('NO_CONNECTION', 'Connection required. Check your internet and try again.');
+      throw AppException.local(
+        'NO_CONNECTION',
+        'Connection required. Check your internet and try again.',
+      );
     }
-    if (response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300) {
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
       return response.data;
     }
     final body = response.data;
@@ -51,7 +61,10 @@ class GuestBagilahRepository {
   /// The request field is `guestName`, not `displayName` — a real
   /// asymmetry with the response shape (`JoinBillResponse.displayName`),
   /// confirmed by hitting the live API directly.
-  static Future<JoinBillResponse> join(String token, {String? displayName}) async {
+  static Future<JoinBillResponse> join(
+    String token, {
+    String? displayName,
+  }) async {
     final dio = Dio(BaseOptions(baseUrl: Env.apiBaseUrl));
     final response = await dio.post(
       '/api/v1/bagilah/join',
@@ -69,26 +82,33 @@ class GuestBagilahRepository {
     );
   }
 
-  Future<Bill> getBill(String guestToken) async =>
-      Bill.fromJson(await _request('GET', guestToken, '') as Map<String, dynamic>);
+  Future<Bill> getBill(String guestToken) async => Bill.fromJson(
+    await _request('GET', guestToken, '') as Map<String, dynamic>,
+  );
 
   Future<List<ReceiptItem>> getItems(String guestToken) async {
     final data = await _request('GET', guestToken, '/items') as List;
-    return data.map((e) => ReceiptItem.fromJson(e as Map<String, dynamic>)).toList();
+    return data
+        .map((e) => ReceiptItem.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<List<Participant>> getParticipants(String guestToken) async {
     final data = await _request('GET', guestToken, '/participants') as List;
-    return data.map((e) => Participant.fromJson(e as Map<String, dynamic>)).toList();
+    return data
+        .map((e) => Participant.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<List<Claim>> getClaims(String guestToken, String itemId) async {
-    final data = await _request('GET', guestToken, '/items/$itemId/claims') as List;
+    final data =
+        await _request('GET', guestToken, '/items/$itemId/claims') as List;
     return data.map((e) => Claim.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  Future<Breakdown> getBreakdown(String guestToken) async =>
-      Breakdown.fromJson(await _request('GET', guestToken, '/breakdown') as Map<String, dynamic>);
+  Future<Breakdown> getBreakdown(String guestToken) async => Breakdown.fromJson(
+    await _request('GET', guestToken, '/breakdown') as Map<String, dynamic>,
+  );
 
   Future<Claim> addClaim(
     String guestToken, {
@@ -97,11 +117,16 @@ class GuestBagilahRepository {
     required ClaimType claimType,
     required String value,
   }) async {
-    final data = await _request('POST', guestToken, '/items/$itemId/claims', data: {
-      'participantId': participantId,
-      'claimType': claimType.name,
-      'value': value,
-    });
+    final data = await _request(
+      'POST',
+      guestToken,
+      '/items/$itemId/claims',
+      data: {
+        'participantId': participantId,
+        'claimType': claimType.name,
+        'value': value,
+      },
+    );
     return Claim.fromJson(data as Map<String, dynamic>);
   }
 

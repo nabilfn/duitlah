@@ -1,5 +1,9 @@
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
 import 'package:flutter/material.dart';
+
+import '../../../core/widgets/dialogs.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -16,7 +20,7 @@ import '../../insights/application/insights_providers.dart';
 Future<void> showTransactionForm(
   BuildContext context, {
   TransactionType initialType = TransactionType.EXPENSE,
-}) => showModalBottomSheet<void>(
+}) => showDuitlahGlassSheet<void>(
   context: context,
   isScrollControlled: true,
   useSafeArea: true,
@@ -229,48 +233,20 @@ class _TransactionFormSheetState extends ConsumerState<TransactionFormSheet> {
                             },
                           ),
                           const SizedBox(height: 28),
-                          DropdownButtonFormField<String>(
-                            icon: const DuitlahIcon(
-                              Icons.expand_more,
-                              size: 18,
-                            ),
-                            initialValue: account,
-                            isExpanded: true,
-                            decoration: InputDecoration(
-                              labelText: _type == TransactionType.TRANSFER
-                                  ? 'From account'
-                                  : 'Account',
-                            ),
-                            items: accounts
-                                .map(
-                                  (a) => DropdownMenuItem(
-                                    value: a.id,
-                                    child: Text(a.name),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: _saving
-                                ? null
-                                : (v) => setState(() {
-                                    _account = v;
-                                    if (_destination == v) _destination = null;
-                                  }),
-                          ),
-                          const SizedBox(height: 16),
-                          if (_type == TransactionType.TRANSFER) ...[
-                            DropdownButtonFormField<String>(
+                          AppFieldGroup(
+                            label: _type == TransactionType.TRANSFER
+                                ? 'From account'
+                                : 'Account',
+                            child: DropdownButtonFormField<String>(
+                              itemHeight: null,
                               icon: const DuitlahIcon(
                                 Icons.expand_more,
                                 size: 18,
                               ),
-                              key: ValueKey(account),
-                              initialValue: _destination,
+                              initialValue: account,
                               isExpanded: true,
-                              decoration: const InputDecoration(
-                                labelText: 'To account',
-                              ),
+                              decoration: InputDecoration(),
                               items: accounts
-                                  .where((a) => a.id != account)
                                   .map(
                                     (a) => DropdownMenuItem(
                                       value: a.id,
@@ -280,10 +256,44 @@ class _TransactionFormSheetState extends ConsumerState<TransactionFormSheet> {
                                   .toList(),
                               onChanged: _saving
                                   ? null
-                                  : (v) => setState(() => _destination = v),
-                              validator: (v) => v == null
-                                  ? 'Choose a different destination account.'
-                                  : null,
+                                  : (v) => setState(() {
+                                      _account = v;
+                                      if (_destination == v) {
+                                        _destination = null;
+                                      }
+                                    }),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          if (_type == TransactionType.TRANSFER) ...[
+                            AppFieldGroup(
+                              label: 'To account',
+                              child: DropdownButtonFormField<String>(
+                                itemHeight: null,
+                                icon: const DuitlahIcon(
+                                  Icons.expand_more,
+                                  size: 18,
+                                ),
+                                key: ValueKey(account),
+                                initialValue: _destination,
+                                isExpanded: true,
+                                decoration: const InputDecoration(),
+                                items: accounts
+                                    .where((a) => a.id != account)
+                                    .map(
+                                      (a) => DropdownMenuItem(
+                                        value: a.id,
+                                        child: Text(a.name),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: _saving
+                                    ? null
+                                    : (v) => setState(() => _destination = v),
+                                validator: (v) => v == null
+                                    ? 'Choose a different destination account.'
+                                    : null,
+                              ),
                             ),
                             const SizedBox(height: 16),
                           ] else ...[
@@ -302,28 +312,30 @@ class _TransactionFormSheetState extends ConsumerState<TransactionFormSheet> {
                                   ),
                                 ],
                               ),
-                            DropdownButtonFormField<String>(
-                              icon: const DuitlahIcon(
-                                Icons.expand_more,
-                                size: 18,
+                            AppFieldGroup(
+                              label: 'Category (optional)',
+                              child: DropdownButtonFormField<String>(
+                                itemHeight: null,
+                                icon: const DuitlahIcon(
+                                  Icons.expand_more,
+                                  size: 18,
+                                ),
+                                key: ValueKey(_type),
+                                initialValue: _category,
+                                isExpanded: true,
+                                decoration: const InputDecoration(),
+                                items: categories
+                                    .map(
+                                      (c) => DropdownMenuItem(
+                                        value: c.id,
+                                        child: Text(c.name),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: _saving
+                                    ? null
+                                    : (v) => setState(() => _category = v),
                               ),
-                              key: ValueKey(_type),
-                              initialValue: _category,
-                              isExpanded: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Category (optional)',
-                              ),
-                              items: categories
-                                  .map(
-                                    (c) => DropdownMenuItem(
-                                      value: c.id,
-                                      child: Text(c.name),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: _saving
-                                  ? null
-                                  : (v) => setState(() => _category = v),
                             ),
                             const SizedBox(height: 16),
                           ],
@@ -356,23 +368,28 @@ class _TransactionFormSheetState extends ConsumerState<TransactionFormSheet> {
                           ),
                           if (_type != TransactionType.TRANSFER) ...[
                             const SizedBox(height: 16),
-                            TextFormField(
-                              controller: _merchant,
-                              enabled: !_saving,
-                              textInputAction: TextInputAction.next,
-                              decoration: const InputDecoration(
-                                labelText: 'Merchant / payee (optional)',
-                                hintText: 'e.g. Lunch with friends',
+                            AppFieldGroup(
+                              label: 'Merchant / payee (optional)',
+                              child: TextFormField(
+                                controller: _merchant,
+                                enabled: !_saving,
+                                textInputAction: TextInputAction.next,
+                                decoration: const InputDecoration(
+                                  hintText: 'e.g. Lunch with friends',
+                                ),
                               ),
                             ),
                             const SizedBox(height: 16),
-                            TextFormField(
-                              controller: _note,
-                              enabled: !_saving,
-                              maxLines: 3,
-                              decoration: const InputDecoration(
-                                labelText: 'Note (optional)',
-                                hintText: 'Anything you would like to remember',
+                            AppFieldGroup(
+                              label: 'Note (optional)',
+                              child: TextFormField(
+                                controller: _note,
+                                enabled: !_saving,
+                                maxLines: 3,
+                                decoration: const InputDecoration(
+                                  hintText:
+                                      'Anything you would like to remember',
+                                ),
                               ),
                             ),
                           ],

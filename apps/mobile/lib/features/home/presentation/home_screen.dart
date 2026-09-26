@@ -1,20 +1,45 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/widgets/dock_insets.dart';
+import '../../../core/widgets/editorial_surfaces.dart';
+import '../../../core/widgets/glass_account_selector.dart';
+import '../../../core/theme/glass_tokens.dart';
+
+import '../../../core/widgets/duitlah_icon.dart';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
+import '../../../core/api/providers.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/duitlah_colors.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/widgets/app_state_views.dart';
-import '../../../core/widgets/duitlah_icon.dart';
+import '../../../core/widgets/digital_canvas.dart';
 import '../../../core/widgets/financial_surfaces.dart';
 import '../../../core/widgets/transaction_row.dart';
 import '../../accounts/application/finance_providers.dart';
 import '../../accounts/domain/finance.dart';
+import '../../auth/application/auth_state.dart';
+import '../../budgets/application/budgets_providers.dart';
+import '../../insights/application/insights_providers.dart';
+import '../../insights/domain/insights.dart';
 import '../../settlements/application/settlements_providers.dart';
 import '../../transactions/presentation/transaction_form_sheet.dart';
 import '../../wrapped/presentation/widgets/wrapped_promo_card.dart';
+import 'budget_trajectory.dart';
+
+/// Home always tells the current-month story, independently of Analytics' filter.
+final homeSpendingProvider = FutureProvider.autoDispose<List<CategorySpending>>(
+  (ref) {
+    final now = DateTime.now();
+    return ref
+        .watch(insightsRepositoryProvider)
+        .spendingByCategory(year: now.year, month: now.month);
+  },
+);
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -24,372 +49,263 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _showBalance = true;
+  final _scroll = ScrollController();
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.duitlahColors;
     final dashboard = ref.watch(dashboardProvider);
     final summary = ref.watch(settlementSummaryProvider);
+    final auth = ref.watch(authProvider);
+    final name = auth is AuthAuthenticated
+        ? auth.user.displayName.trim().split(' ').first
+        : '';
+    final hour = DateTime.now().hour;
+    final greeting = hour < 12
+        ? 'Morning'
+        : hour < 18
+        ? 'Afternoon'
+        : 'Evening';
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: theme.brightness == Brightness.dark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
       child: Scaffold(
-        backgroundColor: context.duitlahColors.balanceBackground,
-        body: RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(settlementSummaryProvider);
-            ref.invalidate(dashboardProvider);
-            await ref.read(dashboardProvider.future);
-          },
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(
-                child: ForestSurface(
-                  child: SafeArea(
-                    bottom: false,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            children: [
-                              TextButton(
-                                onPressed: () => context.push(AppRoutes.spaces),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: context.duitlahColors.balanceText,
-                                  backgroundColor: context.duitlahColors.primaryDark.withValues(
-                                    alpha: .14,
-                                  ),
-                                ),
-                                child: const Text('Personal'),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Material(
-                                  color: context.duitlahColors.surfaceElevated.withValues(alpha: .86),
-                                  borderRadius: BorderRadius.circular(28),
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(28),
-                                    onTap: () => context.push(AppRoutes.more),
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 12,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          DuitlahIcon(
-                                            Icons.search,
-                                            size: 18,
-                                            color: context.duitlahColors.primary,
-                                          ),
-                                          SizedBox(width: 8),
-                                          Expanded(
-                                            child: Text(
-                                              'Find a tool…',
-                                              style: TextStyle(
-                                                color: context.duitlahColors.textSecondary,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                tooltip: 'Notifications',
-                                onPressed: () =>
-                                    context.push(AppRoutes.notifications),
-                                icon: DuitlahIcon(
-                                  Icons.notifications_outlined,
-                                  color: context.duitlahColors.balanceText,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            children: [
-                              Text(
-                                'Available balance',
-                                style: TextStyle(
-                                  color: context.duitlahColors.balanceText,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              SizedBox(
-                                width: 40,
-                                height: 40,
-                                child: IconButton(
-                                  tooltip: _showBalance
-                                      ? 'Hide balance'
-                                      : 'Show balance',
-                                  onPressed: () => setState(
-                                    () => _showBalance = !_showBalance,
-                                  ),
-                                  icon: DuitlahIcon(
-                                    _showBalance
-                                        ? Icons.visibility_outlined
-                                        : Icons.visibility_off_outlined,
-                                    size: 18,
-                                    color: context.duitlahColors.balanceText,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: dashboard.when(
-                                  data: (d) => Text(
-                                    _showBalance
-                                        ? Money.format(d.availableBalance)
-                                        : 'RM •••••',
-                                    style: theme.textTheme.headlineMedium
-                                        ?.copyWith(
-                                          color: context.duitlahColors.balanceText,
-                                          fontSize: 28,
-                                          fontFeatures: const [
-                                            FontFeature.tabularFigures(),
-                                          ],
-                                        ),
-                                  ),
-                                  loading: () => const SizedBox(
-                                    height: 34,
-                                    child: LinearProgressIndicator(),
-                                  ),
-                                  error: (e, _) => TextButton(
-                                    onPressed: () =>
-                                        ref.invalidate(dashboardProvider),
-                                    child: Text(
-                                      'Retry balance',
-                                      style: TextStyle(color: context.duitlahColors.balanceText),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              FilledButton.icon(
-                                onPressed: () => showTransactionForm(
-                                  context,
-                                  initialType: TransactionType.INCOME,
-                                ),
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: context.duitlahColors.surfaceElevated,
-                                  foregroundColor: context.duitlahColors.primary,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                  ),
-                                ),
-                                icon: const DuitlahIcon(Icons.add, size: 16),
-                                label: const Text(
-                                  'Add income',
-                                  style: TextStyle(fontSize: 12),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+        body: SafeArea(
+          bottom: false,
+          child: RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(settlementSummaryProvider);
+              ref.invalidate(budgetListProvider);
+              ref.invalidate(homeSpendingProvider);
+              ref.invalidate(dashboardProvider);
+              await ref.read(dashboardProvider.future);
+            },
+            child: CustomScrollView(
+              controller: _scroll,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    18,
+                    24,
+                    32 + DuitlahDockInsets.of(context),
                   ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: theme.scaffoldBackgroundColor,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(32),
-                    ),
-                  ),
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  sliver: SliverList.list(
                     children: [
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: QuickAction(
-                              label: 'Scan receipt',
-                              icon: Icons.qr_code_scanner_rounded,
-                              onTap: () => context.push(AppRoutes.bagilahScan),
+                            child: Text(
+                              DateFormat('d MMMM').format(DateTime.now()),
+                              style: theme.textTheme.bodySmall,
                             ),
                           ),
-                          Expanded(
-                            child: QuickAction(
-                              label: 'Add income',
-                              icon: Icons.add_circle_outline,
-                              color: context.duitlahColors.negativeSoft,
-                              onTap: () => showTransactionForm(
-                                context,
-                                initialType: TransactionType.INCOME,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: QuickAction(
-                              label: 'Transfer',
-                              icon: Icons.swap_horiz_outlined,
-                              color: context.duitlahColors.informationSoft,
-                              onTap: () => showTransactionForm(
-                                context,
-                                initialType: TransactionType.TRANSFER,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: QuickAction(
-                              label: 'Bills',
-                              icon: Icons.request_page_outlined,
-                              color: context.duitlahColors.warningSoft,
-                              onTap: () => context.push(AppRoutes.bills),
+                          const GlassAccountSelector(),
+                          IconButton(
+                            tooltip: 'Notifications',
+                            onPressed: () =>
+                                context.push(AppRoutes.notifications),
+                            icon: const DuitlahIcon(
+                              Icons.notifications_outlined,
+                              size: 21,
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 14),
-                      FinancialModule(
-                        title: 'Grow your savings',
-                        subtitle: 'Make room for what matters',
-                        icon: Icons.favorite_outline,
-                        onTap: () => context.push(AppRoutes.goals),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: FinancialModule(
-                              title: 'Your budgets',
-                              subtitle: 'A little planning goes a long way',
-                              icon: Icons.pie_chart_outline,
-                              compact: true,
-                              color: context.duitlahColors.primarySubtle,
-                              onTap: () => context.push(AppRoutes.budgets),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: FinancialModule(
-                              title: 'Daily spending',
-                              subtitle: dashboard.maybeWhen(
-                                data: (d) => _showBalance
-                                    ? '${Money.format(d.monthExpense)} this month'
-                                    : 'Explore your activity',
-                                orElse: () => 'See where your money goes',
-                              ),
-                              icon: Icons.insights_outlined,
-                              compact: true,
-                              onTap: () => context.go(AppRoutes.insights),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      const WrappedPromoCard(),
-                      ForestSurface(
-                        radius: 18,
-                        child: InkWell(
-                          onTap: () => context.go(AppRoutes.bagilah),
-                          child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Split. Settle. Simple.',
-                                        style: theme.textTheme.titleMedium
-                                            ?.copyWith(color: context.duitlahColors.balanceText),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        'Shared moments. Fair shares.\nBring everyone together with Bagilah.',
-                                        style: TextStyle(
-                                          color: context.duitlahColors.balanceSecondary,
-                                          fontSize: 13,
-                                          height: 1.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                DuitlahIcon(
-                                  Icons.chevron_right,
-                                  color: context.duitlahColors.balanceText,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                       ),
                       const SizedBox(height: 20),
-                      SectionHeader(
-                        'Your month',
-                        action: 'Analytics',
-                        onAction: () => context.go(AppRoutes.insights),
-                      ),
-                      dashboard.maybeWhen(
-                        data: (d) => Row(
+                      DuitlahReveal(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: _HomeAmount(
-                                label: 'Income',
-                                amount: _showBalance
-                                    ? Money.format(d.monthIncome)
-                                    : '••••',
-                                positive: true,
+                            Text(
+                              name.isEmpty ? '$greeting.' : '$greeting, $name.',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Your money,\nat ease.',
+                              style: theme.textTheme.displaySmall?.copyWith(
+                                height: 1.12,
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _HomeAmount(
-                                label: 'Expenses',
-                                amount: _showBalance
-                                    ? Money.format(d.monthExpense)
-                                    : '••••',
-                              ),
+                            const SizedBox(height: 12),
+                            TextButton(
+                              onPressed: () => context.push(AppRoutes.more),
+                              child: const Text('Find a tool  ↗'),
                             ),
                           ],
                         ),
-                        orElse: () => const SizedBox.shrink(),
                       ),
                       const SizedBox(height: 20),
-                      SectionHeader(
-                        'Shared money',
-                        action: 'Settle up',
-                        onAction: () => context.push(AppRoutes.settlements),
-                      ),
-                      summary.when(
-                        data: (s) => Row(
-                          children: [
-                            Expanded(
-                              child: _HomeAmount(
-                                label: "You're owed",
-                                amount: _showBalance
-                                    ? Money.format(s.totalOwedToMe)
-                                    : '••••',
-                                positive: true,
-                              ),
+                      dashboard.when(
+                        data: (data) => AnimatedBuilder(
+                          animation: _scroll,
+                          child: _FinancialCanvas(
+                            data: data,
+                            visible: _showBalance,
+                            onVisibility: () {
+                              HapticFeedback.selectionClick();
+                              setState(() => _showBalance = !_showBalance);
+                            },
+                          ),
+                          builder: (context, child) => Transform.translate(
+                            offset: Offset(
+                              0,
+                              MediaQuery.disableAnimationsOf(context) ||
+                                      !_scroll.hasClients
+                                  ? 0
+                                  : (_scroll.offset * .015).clamp(0, 3),
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: _HomeAmount(
-                                label: 'You owe',
-                                amount: _showBalance
-                                    ? Money.format(s.totalIOwe)
+                            child: child,
+                          ),
+                        ),
+                        loading: () => const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 36),
+                          child: LoadingView(),
+                        ),
+                        error: (e, _) => ErrorView(
+                          error: e,
+                          onRetry: () => ref.invalidate(dashboardProvider),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const _HomeCommands(),
+                      const SizedBox(height: 44),
+                      Text(
+                        'THIS MONTH',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          letterSpacing: 1.8,
+                        ),
+                      ),
+                      BudgetTrajectory(showAmounts: _showBalance),
+                      dashboard.maybeWhen(
+                        data: (data) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _showBalance
+                                    ? Money.format(data.monthExpense)
                                     : '••••',
+                                style: theme.textTheme.headlineMedium,
                               ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'spent across your accounts',
+                                style: theme.textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        orElse: () => const SizedBox.shrink(),
+                      ),
+                      SectionHeader(
+                        "Where it's going",
+                        action: 'Analytics',
+                        onAction: () => context.go(AppRoutes.insights),
+                      ),
+                      ref
+                          .watch(homeSpendingProvider)
+                          .when(
+                            data: (items) => items.isEmpty
+                                ? const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 20),
+                                    child: Text('Nothing spent here yet.'),
+                                  )
+                                : Column(
+                                    children: [
+                                      for (final item in items.take(4))
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 12,
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  item.categoryName,
+                                                  style: theme
+                                                      .textTheme
+                                                      .bodyMedium,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 16),
+                                              Flexible(
+                                                child: Text(
+                                                  _showBalance
+                                                      ? Money.format(
+                                                          item.amount,
+                                                        )
+                                                      : '••••',
+                                                  textAlign: TextAlign.end,
+                                                  style: theme
+                                                      .textTheme
+                                                      .titleSmall,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                            loading: () => const LoadingView(),
+                            error: (_, _) => TextButton(
+                              onPressed: () =>
+                                  ref.invalidate(homeSpendingProvider),
+                              child: const Text('Retry spending categories'),
+                            ),
+                          ),
+                      const SizedBox(height: 24),
+                      const Divider(),
+                      DuitlahEditorialLink(
+                        title: 'Make room for what matters.',
+                        subtitle: 'Your savings goals',
+                        onTap: () => context.push(AppRoutes.goals),
+                      ),
+                      DuitlahEditorialLink(
+                        title: 'Plan a little. Breathe easier.',
+                        subtitle: 'Your budgets',
+                        onTap: () => context.push(AppRoutes.budgets),
+                      ),
+                      const Divider(),
+                      const SizedBox(height: 40),
+                      Text(
+                        'BETTER, TOGETHER',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          letterSpacing: 1.8,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Good times.\nFair shares.',
+                        style: theme.textTheme.headlineMedium,
+                      ),
+                      const SizedBox(height: 22),
+                      summary.when(
+                        data: (s) => Wrap(
+                          spacing: 32,
+                          runSpacing: 20,
+                          children: [
+                            _HomeAmount(
+                              label: "You're owed",
+                              amount: _showBalance
+                                  ? Money.format(s.totalOwedToMe)
+                                  : '••••',
+                            ),
+                            _HomeAmount(
+                              label: 'You owe',
+                              amount: _showBalance
+                                  ? Money.format(s.totalIOwe)
+                                  : '••••',
                             ),
                           ],
                         ),
@@ -400,14 +316,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ref.invalidate(settlementSummaryProvider),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          TextButton(
+                            onPressed: () => context.go(AppRoutes.bagilah),
+                            child: const Text('Open Bagilah ↗'),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                context.push(AppRoutes.settlements),
+                            child: const Text('Settle up'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                      const WrappedPromoCard(),
                       SectionHeader(
-                        'Recent transactions',
+                        'Recent activity',
                         action: 'See all',
                         onAction: () => context.go(AppRoutes.transactions),
                       ),
                       dashboard.when(
-                        data: (d) => d.recentTransactions.isEmpty
+                        data: (data) => data.recentTransactions.isEmpty
                             ? EmptyView(
                                 icon: Icons.receipt_outlined,
                                 title: 'Your money story starts here',
@@ -416,10 +348,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 onAction: () => showTransactionForm(context),
                               )
                             : Column(
-                                children: d.recentTransactions
-                                    .take(5)
-                                    .map((t) => TransactionRow(transaction: t))
-                                    .toList(),
+                                children: [
+                                  for (final transaction
+                                      in data.recentTransactions.take(5))
+                                    TransactionRow(transaction: transaction),
+                                ],
                               ),
                         loading: () => const LoadingView(),
                         error: (e, _) => ErrorView(
@@ -427,15 +360,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           onRetry: () => ref.invalidate(dashboardProvider),
                         ),
                       ),
+                      const SizedBox(height: 32),
+                      Text(
+                        'A little clarity. Every day.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colors.textSecondary,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ),
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: ColoredBox(color: theme.scaffoldBackgroundColor),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -443,26 +379,220 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _HomeAmount extends StatelessWidget {
-  const _HomeAmount({
-    required this.label,
-    required this.amount,
-    this.positive = false,
+class _FinancialCanvas extends StatelessWidget {
+  const _FinancialCanvas({
+    required this.data,
+    required this.visible,
+    required this.onVisibility,
   });
+  final DashboardSummary data;
+  final bool visible;
+  final VoidCallback onVisibility;
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.duitlahColors;
+    final theme = Theme.of(context);
+    final income = double.tryParse(data.monthIncome) ?? 0;
+    final expense = double.tryParse(data.monthExpense) ?? 0;
+    final ratio = income > 0 ? expense / income : 0.0;
+    return DuitlahReveal(
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(48),
+          bottomLeft: Radius.circular(28),
+          bottomRight: Radius.circular(12),
+        ),
+        child: ColoredBox(
+          color: colors.balanceBackground,
+          child: DuitlahSignalField(
+            onDark: true,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'AVAILABLE NOW',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: colors.balanceSecondary,
+                            letterSpacing: 1.4,
+                          ),
+                        ),
+                      ),
+                      Tooltip(
+                        message: visible ? 'Hide balance' : 'Show balance',
+                        child: DuitlahGlassButton(
+                          label: visible ? 'Hide balance' : 'Show balance',
+                          onPressed: onVisibility,
+                          material: GlassMaterial.hero,
+                          radius: 24,
+                          elevated: false,
+                          padding: const EdgeInsets.all(12),
+                          child: AnimatedSwitcher(
+                            duration: EditorialMotion.of(context),
+                            child: DuitlahIcon(
+                              visible
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              key: ValueKey(visible),
+                              color: colors.balanceSecondary,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  TweenAnimationBuilder<double>(
+                    key: ValueKey(visible),
+                    tween: Tween(begin: 0, end: 1),
+                    duration: EditorialMotion.of(context),
+                    builder: (_, value, child) =>
+                        Opacity(opacity: value, child: child),
+                    child: Text(
+                      visible
+                          ? Money.format(data.availableBalance)
+                          : 'RM •••••',
+                      style: theme.textTheme.displaySmall?.copyWith(
+                        color: colors.balanceText,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  DuitlahGlassSurface(
+                    material: GlassMaterial.hero,
+                    blur: false,
+                    radius: 12,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      child: Text(
+                        visible
+                            ? '${Money.format(data.monthIncome)} income this month'
+                            : 'Your amounts are hidden',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colors.balanceSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  if (visible && income > 0) ...[
+                    DuitlahTrajectory(
+                      progress: ratio,
+                      label:
+                          '${(ratio * 100).round()} percent of monthly income spent',
+                      onDark: true,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${(ratio * 100).round()}% of this month’s income spent',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colors.balanceSecondary,
+                      ),
+                    ),
+                  ] else
+                    Text(
+                      visible
+                          ? 'Your month, in view.'
+                          : 'Tap the eye to reveal.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colors.balanceSecondary,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeCommands extends StatelessWidget {
+  const _HomeCommands();
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      DuitlahGlassButton(
+        onPressed: () => showTransactionForm(context),
+        material: GlassMaterial.strong,
+        padding: const EdgeInsets.all(18),
+        child: Row(
+          children: [
+            DuitlahIcon(
+              Icons.add,
+              size: 18,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Add expense',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
+            const Text('↗'),
+          ],
+        ),
+      ),
+      const SizedBox(height: 8),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            TextButton(
+              onPressed: () => context.push(AppRoutes.bagilahScan),
+              child: const Text('Scan receipt ↗'),
+            ),
+            TextButton(
+              onPressed: () => showTransactionForm(
+                context,
+                initialType: TransactionType.INCOME,
+              ),
+              child: const Text('Add income'),
+            ),
+            TextButton(
+              onPressed: () => showTransactionForm(
+                context,
+                initialType: TransactionType.TRANSFER,
+              ),
+              child: const Text('Transfer'),
+            ),
+            TextButton(
+              onPressed: () => context.push(AppRoutes.bills),
+              child: const Text('Bills'),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+class _HomeAmount extends StatelessWidget {
+  const _HomeAmount({required this.label, required this.amount});
   final String label, amount;
-  final bool positive;
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(label, style: Theme.of(context).textTheme.bodySmall),
-      const SizedBox(height: 6),
+      const SizedBox(height: 8),
       Text(
         amount,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          color: positive ? Theme.of(context).colorScheme.primary : null,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ),
+        style: Theme.of(context).textTheme.titleLarge
+            ?.copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
       ),
     ],
   );

@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,18 +11,18 @@ import '../application/notification_rule_providers.dart';
 import '../domain/notification_rule.dart';
 
 String _label(NotificationRuleType type) => switch (type) {
-      NotificationRuleType.BILL_DUE_SOON => 'Bill due soon',
-      NotificationRuleType.BILL_OVERDUE => 'Bill overdue',
-      NotificationRuleType.LOW_STOCK_ALERT => 'Low stock alert',
-      NotificationRuleType.BUDGET_EXCEEDED => 'Budget exceeded',
-      NotificationRuleType.LOW_BALANCE => 'Low balance',
-    };
+  NotificationRuleType.BILL_DUE_SOON => 'Bill due soon',
+  NotificationRuleType.BILL_OVERDUE => 'Bill overdue',
+  NotificationRuleType.LOW_STOCK_ALERT => 'Low stock alert',
+  NotificationRuleType.BUDGET_EXCEEDED => 'Budget exceeded',
+  NotificationRuleType.LOW_BALANCE => 'Low balance',
+};
 
 String? _description(NotificationRuleType type) => switch (type) {
-      NotificationRuleType.LOW_BALANCE =>
-        'Notify when an account balance drops below the amount you set.',
-      _ => null,
-    };
+  NotificationRuleType.LOW_BALANCE =>
+    'Notify when an account balance drops below the amount you set.',
+  _ => null,
+};
 
 /// Notification rules (Phase 13) — per-type opt in/out for what
 /// `NotificationService.notify` fans out. Every type is always shown (the
@@ -31,29 +32,53 @@ String? _description(NotificationRuleType type) => switch (type) {
 class NotificationRulesScreen extends ConsumerWidget {
   const NotificationRulesScreen({super.key});
 
-  Future<void> _toggle(BuildContext context, WidgetRef ref, NotificationRule rule, bool enabled) async {
+  Future<void> _toggle(
+    BuildContext context,
+    WidgetRef ref,
+    NotificationRule rule,
+    bool enabled,
+  ) async {
     try {
-      await ref.read(notificationRuleRepositoryProvider).update(
+      await ref
+          .read(notificationRuleRepositoryProvider)
+          .update(
             rule.type,
             enabled: enabled,
             thresholdAmount: rule.thresholdAmount,
           );
       ref.invalidate(notificationRuleListProvider);
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
-  Future<void> _setThreshold(BuildContext context, WidgetRef ref, NotificationRule rule, String threshold) async {
+  Future<void> _setThreshold(
+    BuildContext context,
+    WidgetRef ref,
+    NotificationRule rule,
+    String threshold,
+  ) async {
     try {
-      await ref.read(notificationRuleRepositoryProvider).update(
+      await ref
+          .read(notificationRuleRepositoryProvider)
+          .update(
             rule.type,
             enabled: rule.enabled,
             thresholdAmount: threshold.isEmpty ? null : threshold,
           );
       ref.invalidate(notificationRuleListProvider);
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
@@ -62,46 +87,62 @@ class NotificationRulesScreen extends ConsumerWidget {
     final rules = ref.watch(notificationRuleListProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Notification Settings')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(notificationRuleListProvider),
-        child: rules.when(
-          data: (items) => ListView.separated(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            itemCount: items.length,
-            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-            itemBuilder: (context, index) {
-              final rule = items[index];
-              final description = _description(rule.type);
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(_label(rule.type)),
-                        subtitle: description == null ? null : Text(description),
-                        value: rule.enabled,
-                        onChanged: (v) => _toggle(context, ref, rule, v),
-                      ),
-                      if (rule.type == NotificationRuleType.LOW_BALANCE && rule.enabled)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                          child: _ThresholdField(
-                            key: ValueKey('${rule.type}-${rule.thresholdAmount}'),
-                            initialValue: rule.thresholdAmount,
-                            onSubmitted: (value) => _setThreshold(context, ref, rule, value),
-                          ),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(notificationRuleListProvider),
+          child: rules.when(
+            data: (items) => ListView.separated(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: AppSpacing.scrollInsets(context, floatingAction: false),
+              itemCount: items.length,
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+              itemBuilder: (context, index) {
+                final rule = items[index];
+                final description = _description(rule.type);
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(_label(rule.type)),
+                          subtitle: description == null
+                              ? null
+                              : Text(description),
+                          value: rule.enabled,
+                          onChanged: (v) => _toggle(context, ref, rule, v),
                         ),
-                    ],
+                        if (rule.type == NotificationRuleType.LOW_BALANCE &&
+                            rule.enabled)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: AppSpacing.md,
+                            ),
+                            child: _ThresholdField(
+                              key: ValueKey(
+                                '${rule.type}-${rule.thresholdAmount}',
+                              ),
+                              initialValue: rule.thresholdAmount,
+                              onSubmitted: (value) =>
+                                  _setThreshold(context, ref, rule, value),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(notificationRuleListProvider),
+            ),
           ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(notificationRuleListProvider)),
         ),
       ),
     );
@@ -109,7 +150,11 @@ class NotificationRulesScreen extends ConsumerWidget {
 }
 
 class _ThresholdField extends StatefulWidget {
-  const _ThresholdField({super.key, this.initialValue, required this.onSubmitted});
+  const _ThresholdField({
+    super.key,
+    this.initialValue,
+    required this.onSubmitted,
+  });
 
   final String? initialValue;
   final ValueChanged<String> onSubmitted;
@@ -119,7 +164,9 @@ class _ThresholdField extends StatefulWidget {
 }
 
 class _ThresholdFieldState extends State<_ThresholdField> {
-  late final _controller = TextEditingController(text: widget.initialValue ?? '');
+  late final _controller = TextEditingController(
+    text: widget.initialValue ?? '',
+  );
 
   @override
   void dispose() {

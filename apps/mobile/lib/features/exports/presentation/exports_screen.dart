@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,7 +29,12 @@ class _ExportsScreenState extends ConsumerState<ExportsScreen> {
       final file = await action();
       await Share.shareXFiles([XFile(file.path)]);
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Export failed.');
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Export failed.',
+        );
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -41,48 +47,58 @@ class _ExportsScreenState extends ConsumerState<ExportsScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Export data')),
-      body: AbsorbPointer(
-        absorbing: _busy,
-        child: Opacity(
-          opacity: _busy ? 0.5 : 1,
-          child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            children: [
-              _ExportTile(
-                icon: Icons.receipt_long_outlined,
-                title: 'Transactions (CSV)',
-                onTap: () => _run(() => repo.transactions(
-                      from: DateTime(now.year - 1, now.month, now.day).toIso8601String().split('T').first,
+      body: AppPageBody(
+        child: AbsorbPointer(
+          absorbing: _busy,
+          child: Opacity(
+            opacity: _busy ? 0.5 : 1,
+            child: ListView(
+              padding: AppSpacing.scrollInsets(context, floatingAction: false),
+              children: [
+                _ExportTile(
+                  icon: Icons.receipt_long_outlined,
+                  title: 'Transactions (CSV)',
+                  onTap: () => _run(
+                    () => repo.transactions(
+                      from: DateTime(
+                        now.year - 1,
+                        now.month,
+                        now.day,
+                      ).toIso8601String().split('T').first,
                       to: now.toIso8601String().split('T').first,
-                    )),
-              ),
-              _ExportTile(
-                icon: Icons.request_page_outlined,
-                title: 'Bills (CSV)',
-                onTap: () => _run(() => repo.bills()),
-              ),
-              _ExportTile(
-                icon: Icons.account_balance_outlined,
-                title: 'Loans (CSV)',
-                onTap: () => _run(() => repo.loans()),
-              ),
-              _ExportTile(
-                icon: Icons.trending_up_outlined,
-                title: 'Net worth (CSV)',
-                onTap: () => _run(() => repo.netWorth()),
-              ),
-              _ExportTile(
-                icon: Icons.pie_chart_outline,
-                title: 'Budgets — this month (CSV)',
-                onTap: () => _run(() => repo.budgets(year: now.year, month: now.month)),
-              ),
-              const Divider(height: AppSpacing.xl),
-              _ExportTile(
-                icon: Icons.archive_outlined,
-                title: 'Full account archive (ZIP)',
-                onTap: () => _run(() => repo.fullArchive()),
-              ),
-            ],
+                    ),
+                  ),
+                ),
+                _ExportTile(
+                  icon: Icons.request_page_outlined,
+                  title: 'Bills (CSV)',
+                  onTap: () => _run(() => repo.bills()),
+                ),
+                _ExportTile(
+                  icon: Icons.account_balance_outlined,
+                  title: 'Loans (CSV)',
+                  onTap: () => _run(() => repo.loans()),
+                ),
+                _ExportTile(
+                  icon: Icons.trending_up_outlined,
+                  title: 'Net worth (CSV)',
+                  onTap: () => _run(() => repo.netWorth()),
+                ),
+                _ExportTile(
+                  icon: Icons.pie_chart_outline,
+                  title: 'Budgets — this month (CSV)',
+                  onTap: () => _run(
+                    () => repo.budgets(year: now.year, month: now.month),
+                  ),
+                ),
+                const Divider(height: AppSpacing.xl),
+                _ExportTile(
+                  icon: Icons.archive_outlined,
+                  title: 'Full account archive (ZIP)',
+                  onTap: () => _run(() => repo.fullArchive()),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -91,7 +107,11 @@ class _ExportsScreenState extends ConsumerState<ExportsScreen> {
 }
 
 class _ExportTile extends StatelessWidget {
-  const _ExportTile({required this.icon, required this.title, required this.onTap});
+  const _ExportTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
 
   final IconData icon;
   final String title;

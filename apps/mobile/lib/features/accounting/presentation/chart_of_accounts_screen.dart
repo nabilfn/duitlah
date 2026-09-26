@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,11 +52,20 @@ class ChartOfAccountsScreen extends ConsumerWidget {
       await ref.read(chartOfAccountsRepositoryProvider).seedDefaults(spaceId);
       ref.invalidate(chartOfAccountsListProvider(spaceId));
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
-  Future<void> _addOrEdit(BuildContext context, WidgetRef ref, {LedgerAccount? existing}) async {
+  Future<void> _addOrEdit(
+    BuildContext context,
+    WidgetRef ref, {
+    LedgerAccount? existing,
+  }) async {
     final codeController = TextEditingController(text: existing?.code ?? '');
     final nameController = TextEditingController(text: existing?.name ?? '');
     var type = existing?.type ?? LedgerAccountType.ASSET;
@@ -63,87 +74,121 @@ class ChartOfAccountsScreen extends ConsumerWidget {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            top: AppSpacing.lg,
-            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                existing == null ? 'Add ledger account' : 'Edit ledger account',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              AppTextField(label: 'Code (e.g. 1000)', controller: codeController),
-              const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Name', controller: nameController),
-              const SizedBox(height: AppSpacing.sm),
-              DropdownButtonFormField<LedgerAccountType>(
-                icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: type,
-                decoration: const InputDecoration(labelText: 'Type'),
-                items: _sectionOrder.map((t) => DropdownMenuItem(value: t, child: Text(sectionTitle(t)))).toList(),
-                onChanged: (v) => setSheetState(() => type = v ?? type),
-              ),
-              if (type == LedgerAccountType.ASSET) ...[
+        builder: (context, setSheetState) => SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: AppSpacing.pageMargin,
+              right: AppSpacing.pageMargin,
+              top: AppSpacing.lg,
+              bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  existing == null
+                      ? 'Add ledger account'
+                      : 'Edit ledger account',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                AppTextField(
+                  label: 'Code (e.g. 1000)',
+                  controller: codeController,
+                ),
                 const SizedBox(height: AppSpacing.sm),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Cash-equivalent'),
-                  subtitle: const Text('Included in the Cash Flow report'),
-                  value: cashEquivalent,
-                  onChanged: (v) => setSheetState(() => cashEquivalent = v),
+                AppTextField(label: 'Name', controller: nameController),
+                const SizedBox(height: AppSpacing.sm),
+                AppFieldGroup(
+                  label: 'Type',
+                  child: DropdownButtonFormField<LedgerAccountType>(
+                    itemHeight: null,
+                    isExpanded: true,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                    initialValue: type,
+                    decoration: const InputDecoration(),
+                    items: _sectionOrder
+                        .map(
+                          (t) => DropdownMenuItem(
+                            value: t,
+                            child: Text(sectionTitle(t)),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) => setSheetState(() => type = v ?? type),
+                  ),
+                ),
+                if (type == LedgerAccountType.ASSET) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Cash-equivalent'),
+                    subtitle: const Text('Included in the Cash Flow report'),
+                    value: cashEquivalent,
+                    onChanged: (v) => setSheetState(() => cashEquivalent = v),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.lg),
+                PrimaryButton(
+                  label: existing == null ? 'Add' : 'Save',
+                  onPressed: () async {
+                    final code = codeController.text.trim();
+                    final name = nameController.text.trim();
+                    if (code.isEmpty || name.isEmpty) return;
+                    final effectiveCashEquivalent =
+                        type == LedgerAccountType.ASSET && cashEquivalent;
+                    try {
+                      if (existing == null) {
+                        await ref
+                            .read(chartOfAccountsRepositoryProvider)
+                            .createAccount(
+                              spaceId,
+                              code: code,
+                              name: name,
+                              type: type,
+                              cashEquivalent: effectiveCashEquivalent,
+                            );
+                      } else {
+                        await ref
+                            .read(chartOfAccountsRepositoryProvider)
+                            .updateAccount(
+                              spaceId,
+                              existing.id,
+                              code: code,
+                              name: name,
+                              type: type,
+                              cashEquivalent: effectiveCashEquivalent,
+                            );
+                      }
+                      if (context.mounted) Navigator.of(context).pop(true);
+                    } catch (e) {
+                      if (context.mounted) {
+                        showErrorSnackBar(
+                          context,
+                          e is AppException
+                              ? e.message
+                              : 'Something went wrong.',
+                        );
+                      }
+                    }
+                  },
                 ),
               ],
-              const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(
-                label: existing == null ? 'Add' : 'Save',
-                onPressed: () async {
-                  final code = codeController.text.trim();
-                  final name = nameController.text.trim();
-                  if (code.isEmpty || name.isEmpty) return;
-                  final effectiveCashEquivalent = type == LedgerAccountType.ASSET && cashEquivalent;
-                  try {
-                    if (existing == null) {
-                      await ref.read(chartOfAccountsRepositoryProvider).createAccount(
-                            spaceId,
-                            code: code,
-                            name: name,
-                            type: type,
-                            cashEquivalent: effectiveCashEquivalent,
-                          );
-                    } else {
-                      await ref.read(chartOfAccountsRepositoryProvider).updateAccount(
-                            spaceId,
-                            existing.id,
-                            code: code,
-                            name: name,
-                            type: type,
-                            cashEquivalent: effectiveCashEquivalent,
-                          );
-                    }
-                    if (context.mounted) Navigator.of(context).pop(true);
-                  } catch (e) {
-                    if (context.mounted) {
-                      showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
-                    }
-                  }
-                },
-              ),
-            ],
+            ),
           ),
-        )),
+        ),
       ),
     );
     if (saved == true) ref.invalidate(chartOfAccountsListProvider(spaceId));
   }
 
-  Future<void> _archive(BuildContext context, WidgetRef ref, LedgerAccount account) async {
+  Future<void> _archive(
+    BuildContext context,
+    WidgetRef ref,
+    LedgerAccount account,
+  ) async {
     final confirmed = await showConfirmDialog(
       context,
       title: 'Archive ${account.name}?',
@@ -153,10 +198,17 @@ initialValue: type,
     );
     if (!confirmed) return;
     try {
-      await ref.read(chartOfAccountsRepositoryProvider).archiveAccount(spaceId, account.id);
+      await ref
+          .read(chartOfAccountsRepositoryProvider)
+          .archiveAccount(spaceId, account.id);
       ref.invalidate(chartOfAccountsListProvider(spaceId));
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
@@ -165,81 +217,106 @@ initialValue: type,
     final accounts = ref.watch(chartOfAccountsListProvider(spaceId));
     return Scaffold(
       appBar: AppBar(title: const Text('Chart of Accounts')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(chartOfAccountsListProvider(spaceId)),
-        child: accounts.when(
-          data: (items) {
-            if (items.isEmpty) {
-              return ListView(
-                children: [
-                  const SizedBox(height: 60),
-                  const EmptyView(
-                    icon: Icons.account_tree_outlined,
-                    title: 'Set up your Chart of Accounts',
-                    message: 'Seed a standard set of asset, liability, equity, revenue and expense '
-                        'accounts to start recording double-entry journals.',
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-                    child: PrimaryButton(
-                      label: 'Set up Chart of Accounts',
-                      onPressed: () => _seedDefaults(context, ref),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async =>
+              ref.invalidate(chartOfAccountsListProvider(spaceId)),
+          child: accounts.when(
+            data: (items) {
+              if (items.isEmpty) {
+                return ListView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  children: [
+                    const SizedBox(height: 60),
+                    const EmptyView(
+                      icon: Icons.account_tree_outlined,
+                      title: 'Set up your Chart of Accounts',
+                      message:
+                          'Seed a standard set of asset, liability, equity, revenue and expense '
+                          'accounts to start recording double-entry journals.',
                     ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xxl,
+                      ),
+                      child: PrimaryButton(
+                        label: 'Set up Chart of Accounts',
+                        onPressed: () => _seedDefaults(context, ref),
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: AppSpacing.scrollInsets(context, floatingAction: true),
+                children: [
+                  Text(
+                    'Accounts marked "Default" can still be edited or archived — doing so just means '
+                    'automatic posting for this space stops finding them by their well-known code.',
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
-                ],
-              );
-            }
-            return ListView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              children: [
-                Text(
-                  'Accounts marked "Default" can still be edited or archived — doing so just means '
-                  'automatic posting for this space stops finding them by their well-known code.',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                for (final section in _sectionOrder)
-                  if (items.any((a) => a.type == section)) ...[
-                    Text(sectionTitle(section), style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: AppSpacing.sm),
-                    for (final a in items.where((a) => a.type == section))
-                      Card(
-                        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: ListTile(
-                          title: Row(
-                            children: [
-                              Flexible(child: Text(a.name)),
-                              if (a.systemDefault) ...[
-                                const SizedBox(width: AppSpacing.xs),
-                                const Chip(
-                                  label: Text('Default', style: TextStyle(fontSize: 10)),
-                                  visualDensity: VisualDensity.compact,
-                                  padding: EdgeInsets.zero,
-                                ),
+                  const SizedBox(height: AppSpacing.md),
+                  for (final section in _sectionOrder)
+                    if (items.any((a) => a.type == section)) ...[
+                      Text(
+                        sectionTitle(section),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      for (final a in items.where((a) => a.type == section))
+                        Card(
+                          margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                          child: ListTile(
+                            title: Row(
+                              children: [
+                                Flexible(child: Text(a.name)),
+                                if (a.systemDefault) ...[
+                                  const SizedBox(width: AppSpacing.xs),
+                                  const Chip(
+                                    label: Text(
+                                      'Default',
+                                      style: TextStyle(fontSize: 10),
+                                    ),
+                                    visualDensity: VisualDensity.compact,
+                                    padding: EdgeInsets.zero,
+                                  ),
+                                ],
                               ],
-                            ],
-                          ),
-                          subtitle: Text(
-                            '${a.code}${a.cashEquivalent ? ' · Cash-equivalent' : ''}${a.archived ? ' · Archived' : ''}',
-                          ),
-                          onTap: () => _addOrEdit(context, ref, existing: a),
-                          trailing: IconButton(
-                            icon: const DuitlahIcon(Icons.archive_outlined),
-                            onPressed: a.archived ? null : () => _archive(context, ref, a),
+                            ),
+                            subtitle: Text(
+                              '${a.code}${a.cashEquivalent ? ' · Cash-equivalent' : ''}${a.archived ? ' · Archived' : ''}',
+                            ),
+                            onTap: () => _addOrEdit(context, ref, existing: a),
+                            trailing: IconButton(
+                              icon: const DuitlahIcon(Icons.archive_outlined),
+                              onPressed: a.archived
+                                  ? null
+                                  : () => _archive(context, ref, a),
+                            ),
                           ),
                         ),
-                      ),
-                    const SizedBox(height: AppSpacing.md),
-                  ],
-              ],
-            );
-          },
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(chartOfAccountsListProvider(spaceId))),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+                ],
+              );
+            },
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () =>
+                  ref.invalidate(chartOfAccountsListProvider(spaceId)),
+            ),
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addOrEdit(context, ref), child: const DuitlahIcon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _addOrEdit(context, ref),
+        child: const DuitlahIcon(Icons.add),
+      ),
     );
   }
 }

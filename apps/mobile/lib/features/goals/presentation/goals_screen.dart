@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_progress.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,10 +59,11 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
     await showAppBottomSheet(
       context,
       builder: (context) => SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Padding(
           padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
+            left: AppSpacing.pageMargin,
+            right: AppSpacing.pageMargin,
             top: AppSpacing.lg,
             bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
           ),
@@ -118,87 +121,105 @@ class _GoalsScreenState extends ConsumerState<GoalsScreen> {
     final goals = ref.watch(goalListProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Goals')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(goalListProvider),
-        child: goals.when(
-          data: (list) => list.isEmpty
-              ? ListView(
-                  children: const [
-                    SizedBox(height: 80),
-                    EmptyView(icon: Icons.flag_outlined, title: 'No goals yet'),
-                  ],
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 104),
-                  itemCount: list.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: AppSpacing.md),
-                  itemBuilder: (context, index) {
-                    final g = list[index];
-                    final percentage =
-                        (double.tryParse(g.percentage) ?? 0).clamp(0.0, 100.0) /
-                        100;
-                    return Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    g.name,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium,
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(goalListProvider),
+          child: goals.when(
+            data: (list) => list.isEmpty
+                ? ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: const [
+                      SizedBox(height: 80),
+                      EmptyView(
+                        icon: Icons.flag_outlined,
+                        title: 'No goals yet',
+                      ),
+                    ],
+                  )
+                : ListView.separated(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: AppSpacing.scrollInsets(
+                      context,
+                      floatingAction: true,
+                    ),
+                    itemCount: list.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: AppSpacing.md),
+                    itemBuilder: (context, index) {
+                      final g = list[index];
+                      final percentage =
+                          (double.tryParse(g.percentage) ?? 0).clamp(
+                            0.0,
+                            100.0,
+                          ) /
+                          100;
+                      return Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpacing.lg),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      g.name,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    ),
                                   ),
-                                ),
-                                TextButton(
-                                  onPressed: () =>
-                                      _addContribution(context, ref, g.id),
-                                  child: const Text('Contribute'),
-                                ),
-                              ],
-                            ),
-                            AmountText(
-                              g.currentAmount,
-                              style: Theme.of(context).textTheme.headlineSmall,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'of ${Money.format(g.targetAmount)} · ${g.percentage}% saved',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            if (g.targetDate != null)
+                                  TextButton(
+                                    onPressed: () =>
+                                        _addContribution(context, ref, g.id),
+                                    child: const Text('Contribute'),
+                                  ),
+                                ],
+                              ),
+                              AmountText(
+                                g.currentAmount,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall,
+                              ),
+                              const SizedBox(height: 4),
                               Text(
-                                'Target date ${g.targetDate}',
+                                'of ${Money.format(g.targetAmount)} · ${g.percentage}% saved',
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
-                            const SizedBox(height: AppSpacing.sm),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: LinearProgressIndicator(
-                                value: percentage,
-                                minHeight: 8,
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme
-                                    .outline,
-                                semanticsLabel: g.name,
-                                semanticsValue: "${g.percentage}% saved",
+                              if (g.targetDate != null)
+                                Text(
+                                  'Target date ${g.targetDate}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              const SizedBox(height: AppSpacing.sm),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: AppProgress(
+                                  value: percentage,
+                                  minHeight: 8,
+                                  backgroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .outline,
+                                  semanticsLabel: g.name,
+                                  semanticsValue: "${g.percentage}% saved",
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(
-            error: e,
-            onRetry: () => ref.invalidate(goalListProvider),
+                      );
+                    },
+                  ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(goalListProvider),
+            ),
           ),
         ),
       ),

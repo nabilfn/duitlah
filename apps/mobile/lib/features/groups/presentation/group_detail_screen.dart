@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -86,121 +88,124 @@ class GroupDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(groupDetailProvider(groupId));
-          ref.invalidate(groupMembersProvider(groupId));
-          ref.invalidate(groupExpensesProvider(groupId));
-          ref.invalidate(groupBalancesProvider(groupId));
-          ref.invalidate(groupGoalsProvider(groupId));
-          ref.invalidate(tripSummaryProvider(groupId));
-          final month = ref.read(housemateMonthProvider(groupId));
-          ref.invalidate(
-            housemateDashboardProvider((
-              groupId: groupId,
-              year: month.year,
-              month: month.month,
-            )),
-          );
-        },
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          children: [
-            membersAsync.maybeWhen(
-              data: (members) => Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: members
-                    .map(
-                      (m) => Chip(
-                        avatar: ParticipantAvatar(
-                          name: m.displayName,
-                          size: 24,
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(groupDetailProvider(groupId));
+            ref.invalidate(groupMembersProvider(groupId));
+            ref.invalidate(groupExpensesProvider(groupId));
+            ref.invalidate(groupBalancesProvider(groupId));
+            ref.invalidate(groupGoalsProvider(groupId));
+            ref.invalidate(tripSummaryProvider(groupId));
+            final month = ref.read(housemateMonthProvider(groupId));
+            ref.invalidate(
+              housemateDashboardProvider((
+                groupId: groupId,
+                year: month.year,
+                month: month.month,
+              )),
+            );
+          },
+          child: ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: AppSpacing.scrollInsets(context, floatingAction: true),
+            children: [
+              membersAsync.maybeWhen(
+                data: (members) => Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: members
+                      .map(
+                        (m) => Chip(
+                          avatar: ParticipantAvatar(
+                            name: m.displayName,
+                            size: 24,
+                          ),
+                          label: Text(m.displayName),
                         ),
-                        label: Text(m.displayName),
-                      ),
-                    )
-                    .toList(),
-              ),
-              orElse: () => const SizedBox.shrink(),
-            ),
-            if (groupAsync.valueOrNull?.type == GroupType.COUPLE) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'Mine · Yours · Ours — what you share here is only what you both '
-                'log in this group. Your own personal accounts stay private.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      )
+                      .toList(),
                 ),
+                orElse: () => const SizedBox.shrink(),
+              ),
+              if (groupAsync.valueOrNull?.type == GroupType.COUPLE) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Mine · Yours · Ours — what you share here is only what you both '
+                  'log in this group. Your own personal accounts stay private.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.xl),
+              if (groupAsync.valueOrNull?.type == GroupType.TRIP) ...[
+                TripModeSection(groupId: groupId),
+                const SizedBox(height: AppSpacing.xl),
+              ],
+              if (groupAsync.valueOrNull?.type == GroupType.HOUSEMATES) ...[
+                HousemateModeSection(groupId: groupId),
+                const SizedBox(height: AppSpacing.xl),
+              ],
+              GroupGoalsSection(groupId: groupId),
+              const SizedBox(height: AppSpacing.xl),
+              Text('Balances', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: AppSpacing.sm),
+              balancesAsync.when(
+                data: (balances) => balances.isEmpty
+                    ? const EmptyView(
+                        icon: Icons.balance_outlined,
+                        title: 'No expenses yet',
+                      )
+                    : Column(
+                        children: balances
+                            .map(
+                              (b) => MoneyRow(
+                                title: b.displayName,
+                                amount: b.net,
+                                tone: AmountTone.auto,
+                              ),
+                            )
+                            .toList(),
+                      ),
+                loading: () => const LoadingView(),
+                error: (e, _) => ErrorView(error: e),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              OutlinedButton(
+                onPressed: () => _settle(context, ref),
+                child: const Text('Settle up'),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Text('Expenses', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: AppSpacing.sm),
+              expensesAsync.when(
+                data: (expenses) => expenses.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                        child: EmptyView(
+                          icon: Icons.receipt_long_outlined,
+                          title: 'No expenses yet',
+                        ),
+                      )
+                    : Column(
+                        children: expenses
+                            .map(
+                              (e) => MoneyRow(
+                                title: e.description,
+                                subtitle:
+                                    'Paid by ${e.paidByName} · ${e.occurredOn}',
+                                amount: e.amount,
+                                leadingIcon: Icons.receipt_outlined,
+                              ),
+                            )
+                            .toList(),
+                      ),
+                loading: () => const LoadingView(),
+                error: (e, _) => ErrorView(error: e),
               ),
             ],
-            const SizedBox(height: AppSpacing.xl),
-            if (groupAsync.valueOrNull?.type == GroupType.TRIP) ...[
-              TripModeSection(groupId: groupId),
-              const SizedBox(height: AppSpacing.xl),
-            ],
-            if (groupAsync.valueOrNull?.type == GroupType.HOUSEMATES) ...[
-              HousemateModeSection(groupId: groupId),
-              const SizedBox(height: AppSpacing.xl),
-            ],
-            GroupGoalsSection(groupId: groupId),
-            const SizedBox(height: AppSpacing.xl),
-            Text('Balances', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            balancesAsync.when(
-              data: (balances) => balances.isEmpty
-                  ? const EmptyView(
-                      icon: Icons.balance_outlined,
-                      title: 'No expenses yet',
-                    )
-                  : Column(
-                      children: balances
-                          .map(
-                            (b) => MoneyRow(
-                              title: b.displayName,
-                              amount: b.net,
-                              tone: AmountTone.auto,
-                            ),
-                          )
-                          .toList(),
-                    ),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: () => _settle(context, ref),
-              child: const Text('Settle up'),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Text('Expenses', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            expensesAsync.when(
-              data: (expenses) => expenses.isEmpty
-                  ? const Padding(
-                      padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                      child: EmptyView(
-                        icon: Icons.receipt_long_outlined,
-                        title: 'No expenses yet',
-                      ),
-                    )
-                  : Column(
-                      children: expenses
-                          .map(
-                            (e) => MoneyRow(
-                              title: e.description,
-                              subtitle:
-                                  'Paid by ${e.paidByName} · ${e.occurredOn}',
-                              amount: e.amount,
-                              leadingIcon: Icons.receipt_outlined,
-                            ),
-                          )
-                          .toList(),
-                    ),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e),
-            ),
-          ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -240,10 +245,11 @@ class GroupDetailScreen extends ConsumerWidget {
       context,
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Padding(
             padding: EdgeInsets.only(
-              left: AppSpacing.lg,
-              right: AppSpacing.lg,
+              left: AppSpacing.pageMargin,
+              right: AppSpacing.pageMargin,
               top: AppSpacing.lg,
               bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
             ),
@@ -264,19 +270,24 @@ class GroupDetailScreen extends ConsumerWidget {
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                DropdownButtonFormField<String>(
-                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: paidByUserId,
-                  decoration: const InputDecoration(labelText: 'Paid by'),
-                  items: members
-                      .map(
-                        (m) => DropdownMenuItem(
-                          value: m.userId as String,
-                          child: Text(m.displayName as String),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (v) => setSheetState(() => paidByUserId = v),
+                AppFieldGroup(
+                  label: 'Paid by',
+                  child: DropdownButtonFormField<String>(
+                    itemHeight: null,
+                    isExpanded: true,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                    initialValue: paidByUserId,
+                    decoration: const InputDecoration(),
+                    items: members
+                        .map(
+                          (m) => DropdownMenuItem(
+                            value: m.userId as String,
+                            child: Text(m.displayName as String),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) => setSheetState(() => paidByUserId = v),
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
@@ -302,19 +313,22 @@ initialValue: paidByUserId,
                       .toList(),
                 ),
                 const SizedBox(height: AppSpacing.md),
-                DropdownButtonFormField<GroupExpenseCategory?>(
-                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: category,
-                  decoration: const InputDecoration(
-                    labelText: 'Category (optional)',
+                AppFieldGroup(
+                  label: 'Category (optional)',
+                  child: DropdownButtonFormField<GroupExpenseCategory?>(
+                    itemHeight: null,
+                    isExpanded: true,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                    initialValue: category,
+                    decoration: const InputDecoration(),
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text('None')),
+                      ...GroupExpenseCategory.values.map(
+                        (c) => DropdownMenuItem(value: c, child: Text(c.name)),
+                      ),
+                    ],
+                    onChanged: (v) => setSheetState(() => category = v),
                   ),
-                  items: [
-                    const DropdownMenuItem(value: null, child: Text('None')),
-                    ...GroupExpenseCategory.values.map(
-                      (c) => DropdownMenuItem(value: c, child: Text(c.name)),
-                    ),
-                  ],
-                  onChanged: (v) => setSheetState(() => category = v),
                 ),
                 if (groupType == GroupType.TRIP) ...[
                   const SizedBox(height: AppSpacing.md),

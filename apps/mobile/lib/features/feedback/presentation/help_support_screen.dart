@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -70,22 +71,24 @@ class HelpSupportScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Help & Support')),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        itemCount: items.length,
-        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
-        itemBuilder: (context, index) {
-          final (icon, title, subtitle, onTap) = items[index];
-          return Card(
-            child: ListTile(
-              leading: DuitlahIcon(icon),
-              title: Text(title),
-              subtitle: subtitle == null ? null : Text(subtitle),
-              trailing: const DuitlahIcon(Icons.chevron_right),
-              onTap: onTap,
-            ),
-          );
-        },
+      body: AppPageBody(
+        child: ListView.separated(
+          padding: AppSpacing.scrollInsets(context, floatingAction: false),
+          itemCount: items.length,
+          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
+          itemBuilder: (context, index) {
+            final (icon, title, subtitle, onTap) = items[index];
+            return Card(
+              child: ListTile(
+                leading: DuitlahIcon(icon),
+                title: Text(title),
+                subtitle: subtitle == null ? null : Text(subtitle),
+                trailing: const DuitlahIcon(Icons.chevron_right),
+                onTap: onTap,
+              ),
+            );
+          },
+        ),
       ),
     );
   }

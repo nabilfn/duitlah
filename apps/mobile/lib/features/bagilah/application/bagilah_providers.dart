@@ -44,6 +44,14 @@ final billBalancesProvider = FutureProvider.autoDispose.family<List<BillBalance>
   (ref, billId) => ref.watch(bagilahRepositoryProvider).getBalances(billId),
 );
 
+/// Who actually paid the merchant, as recorded so far. `finalizeBill` rejects
+/// a bill with no payments (`NO_PAYMENTS_RECORDED`) or with payments that
+/// don't add up to the total (`PAYMENTS_DONT_MATCH_TOTAL`), so this has to be
+/// captured before a draft can be closed.
+final billPaymentsProvider = FutureProvider.autoDispose.family<List<BillPayment>, String>(
+  (ref, billId) => ref.watch(bagilahRepositoryProvider).getPayments(billId),
+);
+
 final guestBillDetailProvider = FutureProvider.autoDispose.family<Bill, String>(
   (ref, guestToken) => ref.watch(guestBagilahRepositoryProvider).getBill(guestToken),
 );

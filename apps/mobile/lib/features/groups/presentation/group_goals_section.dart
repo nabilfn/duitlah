@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_progress.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,10 +30,13 @@ class GroupGoalsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        AppAdaptiveRow(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Shared goals', style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              'Shared goals',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             TextButton.icon(
               onPressed: () => _createGoal(context, ref),
               icon: const DuitlahIcon(Icons.add, size: 18),
@@ -43,9 +48,16 @@ class GroupGoalsSection extends ConsumerWidget {
           data: (goals) => goals.isEmpty
               ? const Padding(
                   padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                  child: EmptyView(icon: Icons.flag_outlined, title: 'No shared goals yet'),
+                  child: EmptyView(
+                    icon: Icons.flag_outlined,
+                    title: 'No shared goals yet',
+                  ),
                 )
-              : Column(children: goals.map((g) => _GoalCard(groupId: groupId, goal: g)).toList()),
+              : Column(
+                  children: goals
+                      .map((g) => _GoalCard(groupId: groupId, goal: g))
+                      .toList(),
+                ),
           loading: () => const LoadingView(),
           error: (e, _) => ErrorView(error: e),
         ),
@@ -59,47 +71,58 @@ class GroupGoalsSection extends ConsumerWidget {
 
     final created = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => SingleChildScrollView(child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('New shared goal', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(label: 'Name', controller: nameController),
-            const SizedBox(height: AppSpacing.sm),
-            AppTextField(
-              label: 'Target amount (RM)',
-              controller: targetController,
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            PrimaryButton(
-              label: 'Create goal',
-              onPressed: () async {
-                try {
-                  await ref.read(groupsRepositoryProvider).createGoal(
-                        groupId,
-                        name: nameController.text.trim(),
-                        targetAmount: targetController.text.trim(),
+      builder: (context) => SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.pageMargin,
+            right: AppSpacing.pageMargin,
+            top: AppSpacing.lg,
+            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'New shared goal',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              AppTextField(label: 'Name', controller: nameController),
+              const SizedBox(height: AppSpacing.sm),
+              AppTextField(
+                label: 'Target amount (RM)',
+                controller: targetController,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              PrimaryButton(
+                label: 'Create goal',
+                onPressed: () async {
+                  try {
+                    await ref
+                        .read(groupsRepositoryProvider)
+                        .createGoal(
+                          groupId,
+                          name: nameController.text.trim(),
+                          targetAmount: targetController.text.trim(),
+                        );
+                    if (context.mounted) Navigator.of(context).pop(true);
+                  } catch (e) {
+                    if (context.mounted) {
+                      showErrorSnackBar(
+                        context,
+                        e is AppException ? e.message : 'Something went wrong.',
                       );
-                  if (context.mounted) Navigator.of(context).pop(true);
-                } catch (e) {
-                  if (context.mounted) {
-                    showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+                    }
                   }
-                }
-              },
-            ),
-          ],
+                },
+              ),
+            ],
+          ),
         ),
-      )),
+      ),
     );
     if (created == true) ref.invalidate(groupGoalsProvider(groupId));
   }
@@ -123,7 +146,7 @@ class _GoalCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            AppAdaptiveRow(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(goal.name, style: theme.textTheme.titleSmall),
@@ -136,17 +159,23 @@ class _GoalCard extends ConsumerWidget {
             const SizedBox(height: 4),
             ClipRRect(
               borderRadius: BorderRadius.circular(AppRadius.sm),
-              child: LinearProgressIndicator(
+              child: AppProgress(
                 value: (percentage / 100).clamp(0, 1),
                 minHeight: 8,
               ),
             ),
             const SizedBox(height: 8),
-            Row(
+            AppAdaptiveRow(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                AmountText(goal.currentAmount, style: theme.textTheme.bodyMedium),
-                Text('of ${goal.targetAmount}', style: theme.textTheme.bodySmall),
+                AmountText(
+                  goal.currentAmount,
+                  style: theme.textTheme.bodyMedium,
+                ),
+                Text(
+                  'of ${goal.targetAmount}',
+                  style: theme.textTheme.bodySmall,
+                ),
               ],
             ),
             if (goal.byMember.isNotEmpty) ...[
@@ -155,10 +184,12 @@ class _GoalCard extends ConsumerWidget {
                 spacing: 8,
                 runSpacing: 4,
                 children: goal.byMember
-                    .map((m) => Text(
-                          '${m.displayName}: RM${m.totalContributed}',
-                          style: theme.textTheme.bodySmall,
-                        ))
+                    .map(
+                      (m) => Text(
+                        '${m.displayName}: RM${m.totalContributed}',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    )
                     .toList(),
               ),
             ],
@@ -173,47 +204,61 @@ class _GoalCard extends ConsumerWidget {
 
     final added = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => SingleChildScrollView(child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Contribute to ${goal.name}', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(
-              label: 'Amount (RM)',
-              controller: amountController,
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            PrimaryButton(
-              label: 'Contribute',
-              onPressed: () async {
-                try {
-                  await ref.read(groupsRepositoryProvider).addGoalContribution(
-                        groupId,
-                        goal.id,
-                        amount: amountController.text.trim(),
-                        occurredOn: DateTime.now().toIso8601String().split('T').first,
-                        idempotencyKey: const Uuid().v4(),
+      builder: (context) => SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.pageMargin,
+            right: AppSpacing.pageMargin,
+            top: AppSpacing.lg,
+            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Contribute to ${goal.name}',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              AppTextField(
+                label: 'Amount (RM)',
+                controller: amountController,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              PrimaryButton(
+                label: 'Contribute',
+                onPressed: () async {
+                  try {
+                    await ref
+                        .read(groupsRepositoryProvider)
+                        .addGoalContribution(
+                          groupId,
+                          goal.id,
+                          amount: amountController.text.trim(),
+                          occurredOn: DateTime.now()
+                              .toIso8601String()
+                              .split('T')
+                              .first,
+                          idempotencyKey: const Uuid().v4(),
+                        );
+                    if (context.mounted) Navigator.of(context).pop(true);
+                  } catch (e) {
+                    if (context.mounted) {
+                      showErrorSnackBar(
+                        context,
+                        e is AppException ? e.message : 'Something went wrong.',
                       );
-                  if (context.mounted) Navigator.of(context).pop(true);
-                } catch (e) {
-                  if (context.mounted) {
-                    showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+                    }
                   }
-                }
-              },
-            ),
-          ],
+                },
+              ),
+            ],
+          ),
         ),
-      )),
+      ),
     );
     if (added == true) ref.invalidate(groupGoalsProvider(groupId));
   }

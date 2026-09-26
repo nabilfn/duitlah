@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,7 +41,8 @@ class _InventoryHubScreenState extends ConsumerState<InventoryHubScreen> {
     _to = DateTime(now.year, now.month + 1, 0);
   }
 
-  CogsFilter get _cogsFilter => (spaceId: widget.spaceId, from: _fmtDate(_from), to: _fmtDate(_to));
+  CogsFilter get _cogsFilter =>
+      (spaceId: widget.spaceId, from: _fmtDate(_from), to: _fmtDate(_to));
 
   @override
   Widget build(BuildContext context) {
@@ -48,60 +51,77 @@ class _InventoryHubScreenState extends ConsumerState<InventoryHubScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Inventory')),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(stockValuationListProvider(widget.spaceId));
-          ref.invalidate(cogsReportProvider(_cogsFilter));
-        },
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          children: [
-            Text('Cost of Goods Sold', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            OutlinedButton(
-              onPressed: () async {
-                final picked = await showDateRangePicker(
-                  context: context,
-                  firstDate: DateTime(_from.year - 5),
-                  lastDate: DateTime(_to.year + 5),
-                  initialDateRange: DateTimeRange(start: _from, end: _to),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _from = picked.start;
-                    _to = picked.end;
-                  });
-                }
-              },
-              child: Text('${_fmtDate(_from)} to ${_fmtDate(_to)}'),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            cogs.when(
-              data: (r) => Card(
-                child: ListTile(
-                  title: const Text('Total COGS'),
-                  subtitle: Text('${r.from} to ${r.to}'),
-                  trailing: Text(Money.format(r.totalCogs), style: Theme.of(context).textTheme.titleMedium),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(stockValuationListProvider(widget.spaceId));
+            ref.invalidate(cogsReportProvider(_cogsFilter));
+          },
+          child: ListView(
+            padding: AppSpacing.scrollInsets(context, floatingAction: false),
+            children: [
+              Text(
+                'Cost of Goods Sold',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              OutlinedButton(
+                onPressed: () async {
+                  final picked = await showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(_from.year - 5),
+                    lastDate: DateTime(_to.year + 5),
+                    initialDateRange: DateTimeRange(start: _from, end: _to),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _from = picked.start;
+                      _to = picked.end;
+                    });
+                  }
+                },
+                child: Text('${_fmtDate(_from)} to ${_fmtDate(_to)}'),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              cogs.when(
+                data: (r) => Card(
+                  child: AppRecordTile(
+                    title: const Text('Total COGS'),
+                    subtitle: Text('${r.from} to ${r.to}'),
+                    trailing: Text(
+                      Money.format(r.totalCogs),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                ),
+                loading: () => const LoadingView(),
+                error: (e, _) => ErrorView(
+                  error: e,
+                  onRetry: () =>
+                      ref.invalidate(cogsReportProvider(_cogsFilter)),
                 ),
               ),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(cogsReportProvider(_cogsFilter))),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Text('Stock valuation', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            valuation.when(
-              data: (items) => items.isEmpty
-                  ? const EmptyView(
-                      icon: Icons.inventory_2_outlined,
-                      title: 'No tracked products yet',
-                      message: 'Turn on "Track inventory" on a product to see it here.',
-                    )
-                  : Column(
-                      children: items
-                          .map((row) => Card(
-                                margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                                child: ListTile(
+              const SizedBox(height: AppSpacing.xl),
+              Text(
+                'Stock valuation',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              valuation.when(
+                data: (items) => items.isEmpty
+                    ? const EmptyView(
+                        icon: Icons.inventory_2_outlined,
+                        title: 'No tracked products yet',
+                        message: 'Turn on "Track inventory" on a product to see it here.',
+                      )
+                    : Column(
+                        children: items
+                            .map(
+                              (row) => Card(
+                                margin: const EdgeInsets.only(
+                                  bottom: AppSpacing.sm,
+                                ),
+                                child: AppRecordTile(
                                   title: Text(row.productName),
                                   subtitle: Text(
                                     row.sku != null
@@ -112,24 +132,41 @@ class _InventoryHubScreenState extends ConsumerState<InventoryHubScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      Text(Money.format(row.totalValue), style: Theme.of(context).textTheme.titleSmall),
+                                      Text(
+                                        Money.format(row.totalValue),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall,
+                                      ),
                                       Text(
                                         'WAC ${row.weightedAverageCost}',
-                                        style: Theme.of(context).textTheme.bodySmall,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
                                       ),
                                     ],
                                   ),
-                                  onTap: () =>
-                                      context.push(AppRoutes.inventoryProductDetail(widget.spaceId, row.productId)),
+                                  onTap: () => context.push(
+                                    AppRoutes.inventoryProductDetail(
+                                      widget.spaceId,
+                                      row.productId,
+                                    ),
+                                  ),
                                 ),
-                              ))
-                          .toList(),
-                    ),
-              loading: () => const LoadingView(),
-              error: (e, _) =>
-                  ErrorView(error: e, onRetry: () => ref.invalidate(stockValuationListProvider(widget.spaceId))),
-            ),
-          ],
+                              ),
+                            )
+                            .toList(),
+                      ),
+                loading: () => const LoadingView(),
+                error: (e, _) => ErrorView(
+                  error: e,
+                  onRetry: () => ref.invalidate(
+                    stockValuationListProvider(widget.spaceId),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

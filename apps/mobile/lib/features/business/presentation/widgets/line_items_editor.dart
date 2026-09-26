@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 
@@ -11,10 +13,14 @@ import '../../domain/catalog.dart';
 /// is being edited, whereas [LineItemInput] is the plain immutable value
 /// sent to the server.
 class LineItemDraft {
-  LineItemDraft({this.product, String description = '', String quantity = '1', String unitPrice = ''})
-      : descriptionController = TextEditingController(text: description),
-        quantityController = TextEditingController(text: quantity),
-        unitPriceController = TextEditingController(text: unitPrice);
+  LineItemDraft({
+    this.product,
+    String description = '',
+    String quantity = '1',
+    String unitPrice = '',
+  }) : descriptionController = TextEditingController(text: description),
+       quantityController = TextEditingController(text: quantity),
+       unitPriceController = TextEditingController(text: unitPrice);
 
   Product? product;
   final TextEditingController descriptionController;
@@ -28,11 +34,11 @@ class LineItemDraft {
   }
 
   LineItemInput toInput() => LineItemInput(
-        productId: product?.id,
-        description: descriptionController.text.trim(),
-        quantity: quantityController.text.trim(),
-        unitPrice: unitPriceController.text.trim(),
-      );
+    productId: product?.id,
+    description: descriptionController.text.trim(),
+    quantity: quantityController.text.trim(),
+    unitPrice: unitPriceController.text.trim(),
+  );
 }
 
 /// Dynamic quotation/invoice line-item rows: a product picker (optional,
@@ -67,11 +73,14 @@ class LineItemsEditor extends StatelessWidget {
           label: const Text('Add line item'),
         ),
         const SizedBox(height: AppSpacing.md),
-        Row(
+        AppAdaptiveRow(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Lines total', style: Theme.of(context).textTheme.titleSmall),
-            Text(total.toStringAsFixed(2), style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              total.toStringAsFixed(2),
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
           ],
         ),
       ],
@@ -93,23 +102,35 @@ class LineItemsEditor extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: DropdownButtonFormField<Product?>(
-                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: item.product,
-                  isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Product (optional)'),
-                  items: [
-                    const DropdownMenuItem<Product?>(value: null, child: Text('Custom line')),
-                    ...products.map((p) => DropdownMenuItem<Product?>(value: p, child: Text(p.name))),
-                  ],
-                  onChanged: (p) {
-                    item.product = p;
-                    if (p != null) {
-                      item.descriptionController.text = p.name;
-                      item.unitPriceController.text = p.unitPrice;
-                    }
-                    onChanged(items);
-                  },
+                child: AppFieldGroup(
+                  label: 'Product (optional)',
+                  child: DropdownButtonFormField<Product?>(
+                    itemHeight: null,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                    initialValue: item.product,
+                    isExpanded: true,
+                    decoration: const InputDecoration(),
+                    items: [
+                      const DropdownMenuItem<Product?>(
+                        value: null,
+                        child: Text('Custom line'),
+                      ),
+                      ...products.map(
+                        (p) => DropdownMenuItem<Product?>(
+                          value: p,
+                          child: Text(p.name),
+                        ),
+                      ),
+                    ],
+                    onChanged: (p) {
+                      item.product = p;
+                      if (p != null) {
+                        item.descriptionController.text = p.name;
+                        item.unitPriceController.text = p.unitPrice;
+                      }
+                      onChanged(items);
+                    },
+                  ),
                 ),
               ),
               IconButton(
@@ -118,7 +139,10 @@ initialValue: item.product,
               ),
             ],
           ),
-          AppTextField(label: 'Description', controller: item.descriptionController),
+          AppTextField(
+            label: 'Description',
+            controller: item.descriptionController,
+          ),
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [

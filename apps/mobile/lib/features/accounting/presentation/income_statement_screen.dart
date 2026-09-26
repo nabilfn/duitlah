@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
@@ -23,7 +25,8 @@ class IncomeStatementScreen extends ConsumerStatefulWidget {
   final String spaceId;
 
   @override
-  ConsumerState<IncomeStatementScreen> createState() => _IncomeStatementScreenState();
+  ConsumerState<IncomeStatementScreen> createState() =>
+      _IncomeStatementScreenState();
 }
 
 class _IncomeStatementScreenState extends ConsumerState<IncomeStatementScreen> {
@@ -42,7 +45,9 @@ class _IncomeStatementScreenState extends ConsumerState<IncomeStatementScreen> {
   Future<void> _export(ExportFormat format) async {
     setState(() => _exporting = true);
     try {
-      final file = await ref.read(accountingExportRepositoryProvider).incomeStatement(
+      final file = await ref
+          .read(accountingExportRepositoryProvider)
+          .incomeStatement(
             widget.spaceId,
             from: _fmtDate(_from),
             to: _fmtDate(_to),
@@ -50,7 +55,12 @@ class _IncomeStatementScreenState extends ConsumerState<IncomeStatementScreen> {
           );
       await Share.shareXFiles([XFile(file.path)]);
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Export failed.');
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Export failed.',
+        );
+      }
     } finally {
       if (mounted) setState(() => _exporting = false);
     }
@@ -59,7 +69,11 @@ class _IncomeStatementScreenState extends ConsumerState<IncomeStatementScreen> {
   @override
   Widget build(BuildContext context) {
     final report = ref.watch(
-      incomeStatementReportProvider((spaceId: widget.spaceId, from: _fmtDate(_from), to: _fmtDate(_to))),
+      incomeStatementReportProvider((
+        spaceId: widget.spaceId,
+        from: _fmtDate(_from),
+        to: _fmtDate(_to),
+      )),
     );
     return Scaffold(
       appBar: AppBar(
@@ -69,38 +83,46 @@ class _IncomeStatementScreenState extends ConsumerState<IncomeStatementScreen> {
             enabled: !_exporting,
             icon: const DuitlahIcon(Icons.ios_share),
             onSelected: _export,
-            itemBuilder: (context) =>
-                ExportFormat.values.map((f) => PopupMenuItem(value: f, child: Text('Share as ${f.name}'))).toList(),
+            itemBuilder: (context) => ExportFormat.values
+                .map(
+                  (f) => PopupMenuItem(
+                    value: f,
+                    child: Text('Share as ${f.name}'),
+                  ),
+                )
+                .toList(),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          OutlinedButton(
-            onPressed: () async {
-              final picked = await showDateRangePicker(
-                context: context,
-                firstDate: DateTime(_from.year - 5),
-                lastDate: DateTime(_to.year + 5),
-                initialDateRange: DateTimeRange(start: _from, end: _to),
-              );
-              if (picked != null) {
-                setState(() {
-                  _from = picked.start;
-                  _to = picked.end;
-                });
-              }
-            },
-            child: Text('${_fmtDate(_from)} to ${_fmtDate(_to)}'),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          report.when(
-            data: (r) => _Body(report: r),
-            loading: () => const LoadingView(),
-            error: (e, _) => ErrorView(error: e),
-          ),
-        ],
+      body: AppPageBody(
+        child: ListView(
+          padding: AppSpacing.scrollInsets(context, floatingAction: false),
+          children: [
+            OutlinedButton(
+              onPressed: () async {
+                final picked = await showDateRangePicker(
+                  context: context,
+                  firstDate: DateTime(_from.year - 5),
+                  lastDate: DateTime(_to.year + 5),
+                  initialDateRange: DateTimeRange(start: _from, end: _to),
+                );
+                if (picked != null) {
+                  setState(() {
+                    _from = picked.start;
+                    _to = picked.end;
+                  });
+                }
+              },
+              child: Text('${_fmtDate(_from)} to ${_fmtDate(_to)}'),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            report.when(
+              data: (r) => _Body(report: r),
+              loading: () => const LoadingView(),
+              error: (e, _) => ErrorView(error: e),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -132,19 +154,28 @@ class _Body extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: (netIncome >= 0 ? context.duitlahColors.positive : context.duitlahColors.negative).withValues(alpha: 0.1),
+            color:
+                (netIncome >= 0
+                        ? context.duitlahColors.positive
+                        : context.duitlahColors.negative)
+                    .withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
-          child: Row(
+          child: AppAdaptiveRow(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Net Income', style: Theme.of(context).textTheme.titleMedium),
               Text(
-                'RM ${report.netIncome}',
+                'Net Income',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Text(
+                Money.format(report.netIncome),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: netIncome >= 0 ? context.duitlahColors.positive : context.duitlahColors.negative,
+                  color: netIncome >= 0
+                      ? context.duitlahColors.positive
+                      : context.duitlahColors.negative,
                 ),
               ),
             ],
@@ -155,18 +186,25 @@ class _Body extends StatelessWidget {
   }
 
   Widget _lineRow(BuildContext context, AccountAmountLine l) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text('${l.accountCode} ${l.accountName}'), Text(Money.format(l.amount))],
-        ),
-      );
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: AppAdaptiveRow(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text('${l.accountCode} ${l.accountName}'),
+        Text(Money.format(l.amount)),
+      ],
+    ),
+  );
 
-  Widget _totalRow(BuildContext context, String label, String amount) => Row(
+  Widget _totalRow(BuildContext context, String label, String amount) =>
+      AppAdaptiveRow(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: Theme.of(context).textTheme.titleSmall),
-          Text(Money.format(amount), style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            Money.format(amount),
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
         ],
       );
 }

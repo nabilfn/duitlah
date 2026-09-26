@@ -1,6 +1,9 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -31,22 +34,38 @@ class PersonalTaxScreen extends ConsumerWidget {
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: years
-            .map((y) => ListTile(title: Text('YA $y'), onTap: () => Navigator.of(context).pop(y)))
+            .map(
+              (y) => ListTile(
+                title: Text('YA $y'),
+                onTap: () => Navigator.of(context).pop(y),
+              ),
+            )
             .toList(),
       ),
     );
-    if (picked != null) ref.read(selectedYearOfAssessmentProvider.notifier).state = picked;
+    if (picked != null) {
+      ref.read(selectedYearOfAssessmentProvider.notifier).state = picked;
+    }
   }
 
   Future<void> _downloadSummary(BuildContext context, WidgetRef ref) async {
     try {
       final ya = ref.read(selectedYearOfAssessmentProvider);
-      final bytes = await ref.read(personalTaxRepositoryProvider).downloadPreparationSummary(ya);
-      final file = File('${Directory.systemTemp.path}/tax-preparation-ya$ya.pdf');
+      final bytes = await ref
+          .read(personalTaxRepositoryProvider)
+          .downloadPreparationSummary(ya);
+      final file = File(
+        '${Directory.systemTemp.path}/tax-preparation-ya$ya.pdf',
+      );
       await file.writeAsBytes(bytes);
       await Share.shareXFiles([XFile(file.path)]);
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Could not generate summary.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Could not generate summary.',
+        );
+      }
     }
   }
 
@@ -62,44 +81,78 @@ class PersonalTaxScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => _pickYear(context, ref),
-            child: Text('YA $yearOfAssessment', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+            child: Text(
+              'YA $yearOfAssessment',
+              style: TextStyle(color: Theme.of(context).colorScheme.primary),
+            ),
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(personalTaxCalculationProvider);
-          ref.invalidate(filingReadinessProvider);
-        },
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          children: [
-            calculation.when(
-              data: (c) => _CalculationCard(calculation: c),
-              loading: () => const LoadingView(),
-              error: (e, _) => e is AppException && e.code == 'TAX_YEAR_NOT_CONFIGURED'
-                  ? EmptyView(icon: Icons.calendar_month_outlined, title: 'YA $yearOfAssessment not available', message: e.message)
-                  : ErrorView(error: e, onRetry: () => ref.invalidate(personalTaxCalculationProvider)),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            readiness.when(
-              data: (r) => _ReadinessCard(readiness: r),
-              loading: () => const SizedBox.shrink(),
-              error: (e, _) => const SizedBox.shrink(),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            _NavTile(icon: Icons.payments_outlined, label: 'Income', route: AppRoutes.personalTaxIncome),
-            _NavTile(icon: Icons.receipt_long_outlined, label: 'PCB', route: AppRoutes.personalTaxPcb),
-            _NavTile(icon: Icons.volunteer_activism_outlined, label: 'Zakat', route: AppRoutes.personalTaxZakat),
-            _NavTile(icon: Icons.fact_check_outlined, label: 'Tax Reliefs', route: AppRoutes.personalTaxReliefs),
-            _NavTile(icon: Icons.description_outlined, label: 'Documents', route: AppRoutes.personalTaxDocuments),
-            const SizedBox(height: AppSpacing.lg),
-            OutlinedButton.icon(
-              onPressed: () => _downloadSummary(context, ref),
-              icon: const DuitlahIcon(Icons.picture_as_pdf_outlined),
-              label: const Text('Download preparation summary'),
-            ),
-          ],
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(personalTaxCalculationProvider);
+            ref.invalidate(filingReadinessProvider);
+          },
+          child: ListView(
+            padding: AppSpacing.scrollInsets(context, floatingAction: false),
+            children: [
+              calculation.when(
+                data: (c) => _CalculationCard(calculation: c),
+                loading: () => const LoadingView(),
+                error: (e, _) =>
+                    e is AppException && e.code == 'TAX_YEAR_NOT_CONFIGURED'
+                    ? EmptyView(
+                        icon: Icons.calendar_month_outlined,
+                        title: 'YA $yearOfAssessment not available',
+                        message: e.message,
+                      )
+                    : ErrorView(
+                        error: e,
+                        onRetry: () =>
+                            ref.invalidate(personalTaxCalculationProvider),
+                      ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              readiness.when(
+                data: (r) => _ReadinessCard(readiness: r),
+                loading: () => const SizedBox.shrink(),
+                error: (e, _) => const SizedBox.shrink(),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _NavTile(
+                icon: Icons.payments_outlined,
+                label: 'Income',
+                route: AppRoutes.personalTaxIncome,
+              ),
+              _NavTile(
+                icon: Icons.receipt_long_outlined,
+                label: 'PCB',
+                route: AppRoutes.personalTaxPcb,
+              ),
+              _NavTile(
+                icon: Icons.volunteer_activism_outlined,
+                label: 'Zakat',
+                route: AppRoutes.personalTaxZakat,
+              ),
+              _NavTile(
+                icon: Icons.fact_check_outlined,
+                label: 'Tax Reliefs',
+                route: AppRoutes.personalTaxReliefs,
+              ),
+              _NavTile(
+                icon: Icons.description_outlined,
+                label: 'Documents',
+                route: AppRoutes.personalTaxDocuments,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              OutlinedButton.icon(
+                onPressed: () => _downloadSummary(context, ref),
+                icon: const DuitlahIcon(Icons.picture_as_pdf_outlined),
+                label: const Text('Download preparation summary'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -138,7 +191,8 @@ class _CalculationCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               calculation.disclaimer,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(fontStyle: FontStyle.italic),
             ),
           ],
         ),
@@ -157,7 +211,7 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
+      child: AppAdaptiveRow(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [Text(label), Text(Money.format(amount))],
       ),
@@ -178,10 +232,13 @@ class _ReadinessCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            AppAdaptiveRow(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Filing readiness', style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  'Filing readiness',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 Text('${readiness.readyPercent}% ready'),
               ],
             ),
@@ -192,9 +249,13 @@ class _ReadinessCard extends StatelessWidget {
                 child: Row(
                   children: [
                     DuitlahIcon(
-                      item.ready ? Icons.check_circle : Icons.warning_amber_rounded,
+                      item.ready
+                          ? Icons.check_circle
+                          : Icons.warning_amber_rounded,
                       size: 18,
-                      color: item.ready ? context.duitlahColors.positive : context.duitlahColors.warning,
+                      color: item.ready
+                          ? context.duitlahColors.positive
+                          : context.duitlahColors.warning,
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(child: Text(item.label)),
@@ -210,7 +271,11 @@ class _ReadinessCard extends StatelessWidget {
 }
 
 class _NavTile extends StatelessWidget {
-  const _NavTile({required this.icon, required this.label, required this.route});
+  const _NavTile({
+    required this.icon,
+    required this.label,
+    required this.route,
+  });
 
   final IconData icon;
   final String label;

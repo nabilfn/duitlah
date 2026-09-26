@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,43 +25,49 @@ class AccountingHubScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Accounting')),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          if (needsSetup) ...[
-            Card(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: ListTile(
-                leading: const DuitlahIcon(Icons.rocket_launch_outlined),
-                title: const Text('Set up your Chart of Accounts'),
-                subtitle: const Text('Required before you can post journal entries or run reports.'),
-                trailing: const DuitlahIcon(Icons.chevron_right),
-                onTap: () => context.push(AppRoutes.accountingChartOfAccounts(spaceId)),
+      body: AppPageBody(
+        child: ListView(
+          padding: AppSpacing.scrollInsets(context, floatingAction: false),
+          children: [
+            if (needsSetup) ...[
+              Card(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: ListTile(
+                  leading: const DuitlahIcon(Icons.rocket_launch_outlined),
+                  title: const Text('Set up your Chart of Accounts'),
+                  subtitle: const Text(
+                    'Required before you can post journal entries or run reports.',
+                  ),
+                  trailing: const DuitlahIcon(Icons.chevron_right),
+                  onTap: () => context.push(
+                    AppRoutes.accountingChartOfAccounts(spaceId),
+                  ),
+                ),
               ),
+              const SizedBox(height: AppSpacing.md),
+            ],
+            _Tile(
+              icon: Icons.account_tree_outlined,
+              label: 'Chart of Accounts',
+              route: AppRoutes.accountingChartOfAccounts(spaceId),
             ),
-            const SizedBox(height: AppSpacing.md),
+            _Tile(
+              icon: Icons.event_note_outlined,
+              label: 'Accounting Periods',
+              route: AppRoutes.accountingPeriods(spaceId),
+            ),
+            _Tile(
+              icon: Icons.book_outlined,
+              label: 'Journal Entries',
+              route: AppRoutes.accountingJournalEntries(spaceId),
+            ),
+            _Tile(
+              icon: Icons.assessment_outlined,
+              label: 'Reports',
+              route: AppRoutes.accountingReports(spaceId),
+            ),
           ],
-          _Tile(
-            icon: Icons.account_tree_outlined,
-            label: 'Chart of Accounts',
-            route: AppRoutes.accountingChartOfAccounts(spaceId),
-          ),
-          _Tile(
-            icon: Icons.event_note_outlined,
-            label: 'Accounting Periods',
-            route: AppRoutes.accountingPeriods(spaceId),
-          ),
-          _Tile(
-            icon: Icons.book_outlined,
-            label: 'Journal Entries',
-            route: AppRoutes.accountingJournalEntries(spaceId),
-          ),
-          _Tile(
-            icon: Icons.assessment_outlined,
-            label: 'Reports',
-            route: AppRoutes.accountingReports(spaceId),
-          ),
-        ],
+        ),
       ),
     );
   }

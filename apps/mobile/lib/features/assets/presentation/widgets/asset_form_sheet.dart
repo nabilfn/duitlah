@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,15 +35,26 @@ class AssetFormSheet extends ConsumerStatefulWidget {
 }
 
 class _AssetFormSheetState extends ConsumerState<AssetFormSheet> {
-  late final _nameController = TextEditingController(text: widget.existing?.name);
-  late final _categoryController = TextEditingController(text: widget.existing?.category);
-  late final _costController = TextEditingController(text: widget.existing?.cost);
-  late final _salvageValueController = TextEditingController(text: widget.existing?.salvageValue);
-  late final _usefulLifeController =
-      TextEditingController(text: widget.existing?.usefulLifeMonths.toString());
+  late final _nameController = TextEditingController(
+    text: widget.existing?.name,
+  );
+  late final _categoryController = TextEditingController(
+    text: widget.existing?.category,
+  );
+  late final _costController = TextEditingController(
+    text: widget.existing?.cost,
+  );
+  late final _salvageValueController = TextEditingController(
+    text: widget.existing?.salvageValue,
+  );
+  late final _usefulLifeController = TextEditingController(
+    text: widget.existing?.usefulLifeMonths.toString(),
+  );
   late DateTime _acquisitionDate =
-      DateTime.tryParse(widget.existing?.acquisitionDate ?? '') ?? DateTime.now();
-  late DepreciationMethod _method = widget.existing?.depreciationMethod ?? DepreciationMethod.STRAIGHT_LINE;
+      DateTime.tryParse(widget.existing?.acquisitionDate ?? '') ??
+      DateTime.now();
+  late DepreciationMethod _method =
+      widget.existing?.depreciationMethod ?? DepreciationMethod.STRAIGHT_LINE;
   String? _businessAccountId;
   bool _submitting = false;
 
@@ -51,7 +63,8 @@ class _AssetFormSheetState extends ConsumerState<AssetFormSheet> {
   /// Once any depreciation has been posted, the financial fields are
   /// permanently locked server-side.
   bool get _financialsLocked =>
-      _isEdit && (double.tryParse(widget.existing!.accumulatedDepreciation) ?? 0) > 0;
+      _isEdit &&
+      (double.tryParse(widget.existing!.accumulatedDepreciation) ?? 0) > 0;
 
   @override
   void dispose() {
@@ -72,9 +85,12 @@ class _AssetFormSheetState extends ConsumerState<AssetFormSheet> {
     setState(() => _submitting = true);
     try {
       final repo = ref.read(fixedAssetsRepositoryProvider);
-      final category = _categoryController.text.trim().isEmpty ? null : _categoryController.text.trim();
-      final salvageValue =
-          _salvageValueController.text.trim().isEmpty ? null : _salvageValueController.text.trim();
+      final category = _categoryController.text.trim().isEmpty
+          ? null
+          : _categoryController.text.trim();
+      final salvageValue = _salvageValueController.text.trim().isEmpty
+          ? null
+          : _salvageValueController.text.trim();
       if (_isEdit) {
         await repo.updateAsset(
           widget.spaceId,
@@ -104,34 +120,46 @@ class _AssetFormSheetState extends ConsumerState<AssetFormSheet> {
     } catch (e) {
       if (mounted) {
         setState(() => _submitting = false);
-        showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final accounts = ref.watch(businessAccountListProvider(widget.spaceId)).valueOrNull ?? const [];
+    final accounts =
+        ref.watch(businessAccountListProvider(widget.spaceId)).valueOrNull ??
+        const [];
     final activeAccounts = accounts.where((a) => !a.archived).toList();
     final locked = _financialsLocked;
 
     return Padding(
       padding: EdgeInsets.only(
-        left: AppSpacing.lg,
-        right: AppSpacing.lg,
+        left: AppSpacing.pageMargin,
+        right: AppSpacing.pageMargin,
         top: AppSpacing.lg,
         bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
       child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(_isEdit ? 'Edit asset' : 'New asset', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              _isEdit ? 'Edit asset' : 'New asset',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: AppSpacing.md),
             AppTextField(label: 'Name', controller: _nameController),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'Category (optional)', controller: _categoryController),
+            AppTextField(
+              label: 'Category (optional)',
+              controller: _categoryController,
+            ),
             const SizedBox(height: AppSpacing.sm),
             if (locked) ...[
               Container(
@@ -142,7 +170,11 @@ class _AssetFormSheetState extends ConsumerState<AssetFormSheet> {
                 ),
                 child: Row(
                   children: [
-                    DuitlahIcon(Icons.lock_outline, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    DuitlahIcon(
+                      Icons.lock_outline,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
@@ -160,7 +192,9 @@ class _AssetFormSheetState extends ConsumerState<AssetFormSheet> {
               contentPadding: EdgeInsets.zero,
               title: const Text('Acquisition date'),
               subtitle: Text(_fmtDate(_acquisitionDate)),
-              trailing: locked ? null : const DuitlahIcon(Icons.calendar_month_outlined),
+              trailing: locked
+                  ? null
+                  : const DuitlahIcon(Icons.calendar_month_outlined),
               enabled: !locked,
               onTap: locked
                   ? null
@@ -171,7 +205,9 @@ class _AssetFormSheetState extends ConsumerState<AssetFormSheet> {
                         firstDate: DateTime(_acquisitionDate.year - 20),
                         lastDate: DateTime.now(),
                       );
-                      if (picked != null) setState(() => _acquisitionDate = picked);
+                      if (picked != null) {
+                        setState(() => _acquisitionDate = picked);
+                      }
                     },
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -196,30 +232,59 @@ class _AssetFormSheetState extends ConsumerState<AssetFormSheet> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: AppSpacing.sm),
-            DropdownButtonFormField<DepreciationMethod>(
-              icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _method,
-              decoration: const InputDecoration(labelText: 'Depreciation method'),
-              items: DepreciationMethod.values
-                  .map((m) => DropdownMenuItem(value: m, child: Text(depreciationMethodLabel(m))))
-                  .toList(),
-              onChanged: locked ? null : (v) => setState(() => _method = v ?? _method),
+            AppFieldGroup(
+              label: 'Depreciation method',
+              child: DropdownButtonFormField<DepreciationMethod>(
+                itemHeight: null,
+                isExpanded: true,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                initialValue: _method,
+                decoration: const InputDecoration(),
+                items: DepreciationMethod.values
+                    .map(
+                      (m) => DropdownMenuItem(
+                        value: m,
+                        child: Text(depreciationMethodLabel(m)),
+                      ),
+                    )
+                    .toList(),
+                onChanged: locked
+                    ? null
+                    : (v) => setState(() => _method = v ?? _method),
+              ),
             ),
             if (!_isEdit) ...[
               const SizedBox(height: AppSpacing.sm),
-              DropdownButtonFormField<String?>(
-                icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _businessAccountId,
-                decoration: const InputDecoration(labelText: 'Paid from (optional — omit if bought on credit)'),
-                items: [
-                  const DropdownMenuItem<String?>(value: null, child: Text('On credit / not set')),
-                  ...activeAccounts.map((a) => DropdownMenuItem<String?>(value: a.id, child: Text(a.name))),
-                ],
-                onChanged: (v) => setState(() => _businessAccountId = v),
+              AppFieldGroup(
+                label: 'Paid from (optional — omit if bought on credit)',
+                child: DropdownButtonFormField<String?>(
+                  itemHeight: null,
+                  isExpanded: true,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                  initialValue: _businessAccountId,
+                  decoration: const InputDecoration(),
+                  items: [
+                    const DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text('On credit / not set'),
+                    ),
+                    ...activeAccounts.map(
+                      (a) => DropdownMenuItem<String?>(
+                        value: a.id,
+                        child: Text(a.name),
+                      ),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() => _businessAccountId = v),
+                ),
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
-            PrimaryButton(label: _isEdit ? 'Save' : 'Add asset', loading: _submitting, onPressed: _submit),
+            PrimaryButton(
+              label: _isEdit ? 'Save' : 'Add asset',
+              loading: _submitting,
+              onPressed: _submit,
+            ),
           ],
         ),
       ),

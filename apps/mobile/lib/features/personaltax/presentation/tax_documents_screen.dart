@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,12 @@ class _TaxDocumentsScreenState extends ConsumerState<TaxDocumentsScreen> {
       builder: (context) => ListView(
         shrinkWrap: true,
         children: TaxDocumentType.values
-            .map((t) => ListTile(title: Text(t.name), onTap: () => Navigator.of(context).pop(t)))
+            .map(
+              (t) => ListTile(
+                title: Text(t.name),
+                onTap: () => Navigator.of(context).pop(t),
+              ),
+            )
             .toList(),
       ),
     );
@@ -42,12 +48,19 @@ class _TaxDocumentsScreenState extends ConsumerState<TaxDocumentsScreen> {
     setState(() => _uploading = true);
     try {
       final ya = ref.read(selectedYearOfAssessmentProvider);
-      await ref.read(personalTaxRepositoryProvider).uploadDocument(filePath: path, yearOfAssessment: ya, type: type);
+      await ref
+          .read(personalTaxRepositoryProvider)
+          .uploadDocument(filePath: path, yearOfAssessment: ya, type: type);
       ref.invalidate(taxDocumentListProvider);
       ref.invalidate(filingReadinessProvider);
       if (mounted) showSuccessSnackBar(context, 'Document uploaded.');
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Upload failed.');
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Upload failed.',
+        );
+      }
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
@@ -58,32 +71,56 @@ class _TaxDocumentsScreenState extends ConsumerState<TaxDocumentsScreen> {
     final documents = ref.watch(taxDocumentListProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Tax Documents')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(taxDocumentListProvider),
-        child: documents.when(
-          data: (items) => items.isEmpty
-              ? ListView(children: const [SizedBox(height: 80), EmptyView(icon: Icons.description_outlined, title: 'No documents yet')])
-              : ListView.builder(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final doc = items[index];
-                    return Card(
-                      child: ListTile(
-                        leading: DuitlahIcon(doc.receiptId != null ? Icons.receipt_outlined : Icons.insert_drive_file_outlined),
-                        title: Text(doc.type.name),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(taxDocumentListProvider),
+          child: documents.when(
+            data: (items) => items.isEmpty
+                ? ListView(
+                    children: const [
+                      SizedBox(height: 80),
+                      EmptyView(
+                        icon: Icons.description_outlined,
+                        title: 'No documents yet',
                       ),
-                    );
-                  },
-                ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(taxDocumentListProvider)),
+                    ],
+                  )
+                : ListView.builder(
+                    padding: AppSpacing.scrollInsets(
+                      context,
+                      floatingAction: true,
+                    ),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final doc = items[index];
+                      return Card(
+                        child: ListTile(
+                          leading: DuitlahIcon(
+                            doc.receiptId != null
+                                ? Icons.receipt_outlined
+                                : Icons.insert_drive_file_outlined,
+                          ),
+                          title: Text(doc.type.name),
+                        ),
+                      );
+                    },
+                  ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(taxDocumentListProvider),
+            ),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _uploading ? null : _upload,
         child: _uploading
-            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2.4))
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(strokeWidth: 2.4),
+              )
             : const DuitlahIcon(Icons.upload_file_outlined),
       ),
     );

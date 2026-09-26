@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +28,11 @@ class CrossSpaceHubScreen extends ConsumerWidget {
 
   final String spaceId;
 
-  Future<void> _openLinkForm(BuildContext context, WidgetRef ref, CrossSpaceLinkType linkType) async {
+  Future<void> _openLinkForm(
+    BuildContext context,
+    WidgetRef ref,
+    CrossSpaceLinkType linkType,
+  ) async {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => LinkFormSheet(spaceId: spaceId, linkType: linkType),
@@ -43,32 +49,47 @@ class CrossSpaceHubScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Owner Transactions')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(crossSpaceLinkListProvider(spaceId)),
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          children: [
-            Text(
-              "Link a Personal transaction you've already recorded to this business — the two "
-              'ledgers stay separate, this just records the relationship between them.',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            for (final type in CrossSpaceLinkType.values) ...[
-              _ActionTile(linkType: type, onTap: () => _openLinkForm(context, ref, type)),
-              const SizedBox(height: AppSpacing.xs),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async =>
+              ref.invalidate(crossSpaceLinkListProvider(spaceId)),
+          child: ListView(
+            padding: AppSpacing.scrollInsets(context, floatingAction: false),
+            children: [
+              Text(
+                "Link a Personal transaction you've already recorded to this business — the two "
+                'ledgers stay separate, this just records the relationship between them.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              for (final type in CrossSpaceLinkType.values) ...[
+                _ActionTile(
+                  linkType: type,
+                  onTap: () => _openLinkForm(context, ref, type),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+              ],
+              const SizedBox(height: AppSpacing.lg),
+              Text('History', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: AppSpacing.sm),
+              links.when(
+                data: (items) => items.isEmpty
+                    ? const EmptyView(
+                        icon: Icons.link_outlined,
+                        title: 'No links recorded yet',
+                      )
+                    : Column(
+                        children: items.map((l) => _LinkTile(link: l)).toList(),
+                      ),
+                loading: () => const LoadingView(),
+                error: (e, _) => ErrorView(
+                  error: e,
+                  onRetry: () =>
+                      ref.invalidate(crossSpaceLinkListProvider(spaceId)),
+                ),
+              ),
             ],
-            const SizedBox(height: AppSpacing.lg),
-            Text('History', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            links.when(
-              data: (items) => items.isEmpty
-                  ? const EmptyView(icon: Icons.link_outlined, title: 'No links recorded yet')
-                  : Column(children: items.map((l) => _LinkTile(link: l)).toList()),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(crossSpaceLinkListProvider(spaceId))),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -105,11 +126,14 @@ class _LinkTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: ListTile(
+      child: AppRecordTile(
         leading: DuitlahIcon(crossSpaceLinkTypeIcon(link.linkType)),
         title: Text(crossSpaceLinkTypeLabel(link.linkType)),
         subtitle: Text(link.description ?? link.createdAt),
-        trailing: Text(Money.format(link.amount), style: Theme.of(context).textTheme.titleSmall),
+        trailing: Text(
+          Money.format(link.amount),
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,20 +51,28 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
     _scrollToBottom();
 
     try {
-      final history = _turns.length > 1 ? _turns.sublist(0, _turns.length - 1) : <ChatTurn>[];
+      final history = _turns.length > 1
+          ? _turns.sublist(0, _turns.length - 1)
+          : <ChatTurn>[];
       final activeSpaceId = ref.read(assistantActiveSpaceIdProvider);
       final result = await ref
           .read(assistantRepositoryProvider)
           .chat(message, history, activeSpaceId: activeSpaceId);
       setState(() {
-        _turns.add(ChatTurn(role: ChatMessageRole.ASSISTANT, content: result.reply));
+        _turns.add(
+          ChatTurn(role: ChatMessageRole.ASSISTANT, content: result.reply),
+        );
       });
     } catch (e) {
       setState(() {
-        _turns.add(ChatTurn(
-          role: ChatMessageRole.ASSISTANT,
-          content: e is AppException ? e.message : 'Something went wrong. Please try again.',
-        ));
+        _turns.add(
+          ChatTurn(
+            role: ChatMessageRole.ASSISTANT,
+            content: e is AppException
+                ? e.message
+                : 'Something went wrong. Please try again.',
+          ),
+        );
       });
     } finally {
       setState(() => _sending = false);
@@ -108,11 +117,16 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
             try {
               final response = await ref
                   .read(assistantRepositoryProvider)
-                  .checkAffordability(amount, descriptionController.text.trim());
+                  .checkAffordability(
+                    amount,
+                    descriptionController.text.trim(),
+                  );
               setSheetState(() => result = response);
             } catch (e) {
               setSheetState(
-                () => error = e is AppException ? e.message : 'Something went wrong.',
+                () => error = e is AppException
+                    ? e.message
+                    : 'Something went wrong.',
               );
             } finally {
               setSheetState(() => checking = false);
@@ -121,8 +135,8 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
 
           return Padding(
             padding: EdgeInsets.only(
-              left: AppSpacing.lg,
-              right: AppSpacing.lg,
+              left: AppSpacing.pageMargin,
+              right: AppSpacing.pageMargin,
               top: AppSpacing.lg,
               bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
             ),
@@ -130,7 +144,10 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Can I afford this?', style: Theme.of(context).textTheme.titleLarge),
+                Text(
+                  'Can I afford this?',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
                 const SizedBox(height: AppSpacing.md),
                 AppTextField(
                   label: 'Amount (RM)',
@@ -138,22 +155,37 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                AppTextField(label: 'What is it? (optional)', controller: descriptionController),
+                AppTextField(
+                  label: 'What is it? (optional)',
+                  controller: descriptionController,
+                ),
                 const SizedBox(height: AppSpacing.lg),
-                PrimaryButton(label: 'Check', onPressed: check, loading: checking),
+                PrimaryButton(
+                  label: 'Check',
+                  onPressed: check,
+                  loading: checking,
+                ),
                 if (error != null) ...[
                   const SizedBox(height: AppSpacing.md),
-                  Text(error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                  Text(
+                    error!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
                 ],
                 if (result != null) ...[
                   const SizedBox(height: AppSpacing.lg),
                   Builder(
                     builder: (context) {
                       final scheme = Theme.of(context).colorScheme;
-                      final onColor =
-                          result!.canAfford ? scheme.onPrimaryContainer : scheme.onErrorContainer;
+                      final onColor = result!.canAfford
+                          ? scheme.onPrimaryContainer
+                          : scheme.onErrorContainer;
                       return Card(
-                        color: result!.canAfford ? scheme.primaryContainer : scheme.errorContainer,
+                        color: result!.canAfford
+                            ? scheme.primaryContainer
+                            : scheme.errorContainer,
                         child: Padding(
                           padding: const EdgeInsets.all(AppSpacing.md),
                           child: Column(
@@ -163,21 +195,23 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
                                 result!.canAfford
                                     ? 'You can afford it'
                                     : "You can't afford it right now",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
+                                style: Theme.of(context).textTheme.titleMedium
                                     ?.copyWith(color: onColor),
                               ),
                               const SizedBox(height: 8),
-                              Text(result!.narrative, style: TextStyle(color: onColor)),
+                              Text(
+                                result!.narrative,
+                                style: TextStyle(color: onColor),
+                              ),
                               const SizedBox(height: AppSpacing.md),
-                              Divider(color: onColor.withValues(alpha: 0.25), height: 1),
+                              Divider(
+                                color: onColor.withValues(alpha: 0.25),
+                                height: 1,
+                              ),
                               const SizedBox(height: AppSpacing.sm),
                               Text(
                                 'What this is checked against',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium
+                                style: Theme.of(context).textTheme.labelMedium
                                     ?.copyWith(color: onColor),
                               ),
                               const SizedBox(height: AppSpacing.xs),
@@ -204,13 +238,14 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
                                 emphasize: true,
                               ),
                               const SizedBox(height: AppSpacing.sm),
-                              Divider(color: onColor.withValues(alpha: 0.25), height: 1),
+                              Divider(
+                                color: onColor.withValues(alpha: 0.25),
+                                height: 1,
+                              ),
                               const SizedBox(height: AppSpacing.sm),
                               Text(
                                 'Also worth knowing',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium
+                                style: Theme.of(context).textTheme.labelMedium
                                     ?.copyWith(color: onColor),
                               ),
                               const SizedBox(height: AppSpacing.xs),
@@ -234,9 +269,7 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
                               const SizedBox(height: AppSpacing.sm),
                               Text(
                                 result!.disclaimer,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
+                                style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(color: onColor),
                               ),
                             ],
@@ -257,7 +290,9 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: const Text('Assistant'),
         actions: [
           IconButton(
@@ -275,15 +310,22 @@ class _AssistantScreenState extends ConsumerState<AssistantScreen> {
                 ? const EmptyView(
                     icon: Icons.smart_toy_outlined,
                     title: 'Ask about your money',
-                    message: '"Where did most of my money go this month?"\n'
+                    message:
+                        '"Where did most of my money go this month?"\n'
                         '"Can I afford something for RM200?"\n'
                         '"How much can I save this month?"',
                   )
                 : ListView.builder(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     controller: _scrollController,
-                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    padding: AppSpacing.scrollInsets(
+                      context,
+                      floatingAction: false,
+                    ),
                     itemCount: _turns.length,
-                    itemBuilder: (context, index) => _ChatBubble(turn: _turns[index]),
+                    itemBuilder: (context, index) =>
+                        _ChatBubble(turn: _turns[index]),
                   ),
           ),
           if (_sending)
@@ -329,8 +371,11 @@ class _SpaceContextBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final spaces = ref.watch(spaceListProvider).valueOrNull ?? const <FinancialSpace>[];
-    final businesses = spaces.where((s) => s.type == SpaceType.BUSINESS).toList();
+    final spaces =
+        ref.watch(spaceListProvider).valueOrNull ?? const <FinancialSpace>[];
+    final businesses = spaces
+        .where((s) => s.type == SpaceType.BUSINESS)
+        .toList();
     if (businesses.isEmpty) return const SizedBox.shrink();
 
     final selectedId = ref.watch(assistantActiveSpaceIdProvider);
@@ -344,15 +389,27 @@ class _SpaceContextBar extends ConsumerWidget {
 
     final theme = Theme.of(context);
     return Container(
-      margin: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, 0),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        0,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Row(
         children: [
-          DuitlahIcon(Icons.workspaces_outlined, size: 18, color: theme.colorScheme.onSurfaceVariant),
+          DuitlahIcon(
+            Icons.workspaces_outlined,
+            size: 18,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Text('Asking about:', style: theme.textTheme.bodySmall),
           const SizedBox(width: AppSpacing.xs),
@@ -362,16 +419,23 @@ class _SpaceContextBar extends ConsumerWidget {
                 value: selected?.id,
                 isDense: true,
                 isExpanded: true,
-                style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
                 items: [
-                  DropdownMenuItem<String?>(value: null, child: const Text('Personal')),
+                  DropdownMenuItem<String?>(
+                    value: null,
+                    child: const Text('Personal'),
+                  ),
                   for (final b in businesses)
                     DropdownMenuItem<String?>(
                       value: b.id,
                       child: Text(b.name, overflow: TextOverflow.ellipsis),
                     ),
                 ],
-                onChanged: (value) => ref.read(assistantActiveSpaceIdProvider.notifier).state = value,
+                onChanged: (value) =>
+                    ref.read(assistantActiveSpaceIdProvider.notifier).state =
+                        value,
               ),
             ),
           ),
@@ -396,14 +460,22 @@ class _ChatBubble extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.8,
+        ),
         decoration: BoxDecoration(
-          color: isUser ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
+          color: isUser
+              ? theme.colorScheme.primary
+              : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: Text(
           turn.content,
-          style: TextStyle(color: isUser ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface),
+          style: TextStyle(
+            color: isUser
+                ? theme.colorScheme.onPrimary
+                : theme.colorScheme.onSurface,
+          ),
         ),
       ),
     );
@@ -431,12 +503,16 @@ class _ObligationRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textStyle = (emphasize ? theme.textTheme.bodyMedium : theme.textTheme.bodySmall)
-        ?.copyWith(color: color, fontWeight: emphasize ? FontWeight.w700 : FontWeight.w400);
+    final textStyle =
+        (emphasize ? theme.textTheme.bodyMedium : theme.textTheme.bodySmall)
+            ?.copyWith(
+              color: color,
+              fontWeight: emphasize ? FontWeight.w700 : FontWeight.w400,
+            );
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
+      child: AppAdaptiveRow(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: textStyle),

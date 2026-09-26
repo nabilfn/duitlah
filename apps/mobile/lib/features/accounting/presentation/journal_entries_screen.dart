@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +48,8 @@ class JournalEntriesScreen extends ConsumerStatefulWidget {
   final String spaceId;
 
   @override
-  ConsumerState<JournalEntriesScreen> createState() => _JournalEntriesScreenState();
+  ConsumerState<JournalEntriesScreen> createState() =>
+      _JournalEntriesScreenState();
 }
 
 class _JournalEntriesScreenState extends ConsumerState<JournalEntriesScreen> {
@@ -60,7 +64,8 @@ class _JournalEntriesScreenState extends ConsumerState<JournalEntriesScreen> {
     _to = DateTime(now.year, now.month + 1, 0);
   }
 
-  JournalEntriesFilter get _filter => (spaceId: widget.spaceId, from: _fmtDate(_from), to: _fmtDate(_to));
+  JournalEntriesFilter get _filter =>
+      (spaceId: widget.spaceId, from: _fmtDate(_from), to: _fmtDate(_to));
 
   Future<void> _pickRange(BuildContext context) async {
     final range = await showDateRangePicker(
@@ -83,15 +88,25 @@ class _JournalEntriesScreenState extends ConsumerState<JournalEntriesScreen> {
       builder: (context) => Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(entry.description, style: Theme.of(context).textTheme.titleLarge),
-              Text(entry.entryDate, style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                entry.description,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Text(
+                entry.entryDate,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               if (entry.sourceType != JournalSourceType.MANUAL) ...[
                 const SizedBox(height: AppSpacing.xs),
-                Chip(label: Text(sourceLabel(entry.sourceType)), visualDensity: VisualDensity.compact),
+                Chip(
+                  label: Text(sourceLabel(entry.sourceType)),
+                  visualDensity: VisualDensity.compact,
+                ),
               ],
               const Divider(height: AppSpacing.lg),
               for (final line in entry.lines)
@@ -107,9 +122,11 @@ class _JournalEntriesScreenState extends ConsumerState<JournalEntriesScreen> {
                         ),
                       ),
                       Text(
-                        '${line.direction == LedgerDirection.DEBIT ? 'Dr' : 'Cr'} RM ${line.amount}',
+                        '${line.direction == LedgerDirection.DEBIT ? 'Dr' : 'Cr'} ${Money.format(line.amount)}',
                         style: TextStyle(
-                          color: line.direction == LedgerDirection.DEBIT ? context.duitlahColors.information : context.duitlahColors.warning,
+                          color: line.direction == LedgerDirection.DEBIT
+                              ? context.duitlahColors.information
+                              : context.duitlahColors.warning,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -124,7 +141,9 @@ class _JournalEntriesScreenState extends ConsumerState<JournalEntriesScreen> {
   }
 
   Future<void> _newEntry(BuildContext context) async {
-    final accounts = await ref.read(chartOfAccountsRepositoryProvider).listAccounts(widget.spaceId);
+    final accounts = await ref
+        .read(chartOfAccountsRepositoryProvider)
+        .listAccounts(widget.spaceId);
     final active = accounts.where((a) => !a.archived).toList();
     if (!context.mounted) return;
     if (active.isEmpty) {
@@ -133,7 +152,8 @@ class _JournalEntriesScreenState extends ConsumerState<JournalEntriesScreen> {
     }
     final saved = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => _JournalEntryFormSheet(spaceId: widget.spaceId, accounts: active),
+      builder: (context) =>
+          _JournalEntryFormSheet(spaceId: widget.spaceId, accounts: active),
     );
     if (saved == true) ref.invalidate(journalEntryListProvider(_filter));
   }
@@ -145,62 +165,101 @@ class _JournalEntriesScreenState extends ConsumerState<JournalEntriesScreen> {
       appBar: AppBar(
         title: const Text('Journal Entries'),
         actions: [
-          IconButton(icon: const DuitlahIcon(Icons.date_range_outlined), onPressed: () => _pickRange(context)),
+          IconButton(
+            icon: const DuitlahIcon(Icons.date_range_outlined),
+            onPressed: () => _pickRange(context),
+          ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text('${_fmtDate(_from)} to ${_fmtDate(_to)}', style: Theme.of(context).textTheme.bodySmall),
-            ),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async => ref.invalidate(journalEntryListProvider(_filter)),
-              child: entries.when(
-                data: (items) => items.isEmpty
-                    ? ListView(
-                        children: const [
-                          SizedBox(height: 80),
-                          EmptyView(icon: Icons.book_outlined, title: 'No journal entries in this range'),
-                        ],
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
-                        itemCount: items.length,
-                        itemBuilder: (context, index) {
-                          final e = items[index];
-                          final debit = _sum(e, LedgerDirection.DEBIT);
-                          final credit = _sum(e, LedgerDirection.CREDIT);
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                            child: ListTile(
-                              title: Text(e.description),
-                              subtitle: Text('${e.entryDate} · ${sourceLabel(e.sourceType)}'),
-                              trailing: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text('Dr ${debit.toStringAsFixed(2)}', style: const TextStyle(fontSize: 12)),
-                                  Text('Cr ${credit.toStringAsFixed(2)}', style: const TextStyle(fontSize: 12)),
-                                ],
-                              ),
-                              onTap: () => _viewEntry(context, e),
-                            ),
-                          );
-                        },
-                      ),
-                loading: () => const LoadingView(),
-                error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(journalEntryListProvider(_filter))),
+      body: AppPageBody(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.sm,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '${_fmtDate(_from)} to ${_fmtDate(_to)}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async =>
+                    ref.invalidate(journalEntryListProvider(_filter)),
+                child: entries.when(
+                  data: (items) => items.isEmpty
+                      ? ListView(
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          children: const [
+                            SizedBox(height: 80),
+                            EmptyView(
+                              icon: Icons.book_outlined,
+                              title: 'No journal entries in this range',
+                            ),
+                          ],
+                        )
+                      : ListView.builder(
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          padding: AppSpacing.scrollInsets(
+                            context,
+                            floatingAction: true,
+                          ),
+                          itemCount: items.length,
+                          itemBuilder: (context, index) {
+                            final e = items[index];
+                            final debit = _sum(e, LedgerDirection.DEBIT);
+                            final credit = _sum(e, LedgerDirection.CREDIT);
+                            return Card(
+                              margin: const EdgeInsets.only(
+                                bottom: AppSpacing.sm,
+                              ),
+                              child: AppRecordTile(
+                                title: Text(e.description),
+                                subtitle: Text(
+                                  '${e.entryDate} · ${sourceLabel(e.sourceType)}',
+                                ),
+                                trailing: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      'Dr ${debit.toStringAsFixed(2)}',
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                    Text(
+                                      'Cr ${credit.toStringAsFixed(2)}',
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                                onTap: () => _viewEntry(context, e),
+                              ),
+                            );
+                          },
+                        ),
+                  loading: () => const LoadingView(),
+                  error: (e, _) => ErrorView(
+                    error: e,
+                    onRetry: () =>
+                        ref.invalidate(journalEntryListProvider(_filter)),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _newEntry(context), child: const DuitlahIcon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _newEntry(context),
+        child: const DuitlahIcon(Icons.add),
+      ),
     );
   }
 }
@@ -212,10 +271,12 @@ class _JournalEntryFormSheet extends ConsumerStatefulWidget {
   final List<LedgerAccount> accounts;
 
   @override
-  ConsumerState<_JournalEntryFormSheet> createState() => _JournalEntryFormSheetState();
+  ConsumerState<_JournalEntryFormSheet> createState() =>
+      _JournalEntryFormSheetState();
 }
 
-class _JournalEntryFormSheetState extends ConsumerState<_JournalEntryFormSheet> {
+class _JournalEntryFormSheetState
+    extends ConsumerState<_JournalEntryFormSheet> {
   final _descriptionController = TextEditingController();
   DateTime _entryDate = DateTime.now();
   List<JournalLineDraft> _lines = [JournalLineDraft(), JournalLineDraft()];
@@ -231,10 +292,12 @@ class _JournalEntryFormSheetState extends ConsumerState<_JournalEntryFormSheet> 
     super.dispose();
   }
 
-  double get _totalDebit =>
-      _lines.where((l) => l.direction == LedgerDirection.DEBIT).fold(0.0, (s, l) => s + l.amountValue);
-  double get _totalCredit =>
-      _lines.where((l) => l.direction == LedgerDirection.CREDIT).fold(0.0, (s, l) => s + l.amountValue);
+  double get _totalDebit => _lines
+      .where((l) => l.direction == LedgerDirection.DEBIT)
+      .fold(0.0, (s, l) => s + l.amountValue);
+  double get _totalCredit => _lines
+      .where((l) => l.direction == LedgerDirection.CREDIT)
+      .fold(0.0, (s, l) => s + l.amountValue);
   double get _difference => _totalDebit - _totalCredit;
 
   bool get _canSubmit =>
@@ -246,10 +309,15 @@ class _JournalEntryFormSheetState extends ConsumerState<_JournalEntryFormSheet> 
       _lines.every((l) => l.account != null && l.amountValue > 0);
 
   Future<void> _submit() async {
-    final inputs = _lines.map((l) => l.toInput()).whereType<JournalEntryLineInput>().toList();
+    final inputs = _lines
+        .map((l) => l.toInput())
+        .whereType<JournalEntryLineInput>()
+        .toList();
     setState(() => _submitting = true);
     try {
-      await ref.read(journalEntriesRepositoryProvider).create(
+      await ref
+          .read(journalEntriesRepositoryProvider)
+          .create(
             widget.spaceId,
             entryDate: _fmtDate(_entryDate),
             description: _descriptionController.text.trim(),
@@ -259,7 +327,10 @@ class _JournalEntryFormSheetState extends ConsumerState<_JournalEntryFormSheet> 
     } catch (e) {
       if (mounted) {
         setState(() => _submitting = false);
-        showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
       }
     }
   }
@@ -267,20 +338,27 @@ class _JournalEntryFormSheetState extends ConsumerState<_JournalEntryFormSheet> 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: Listenable.merge([..._lines.map((l) => l.amountController), _descriptionController]),
+      animation: Listenable.merge([
+        ..._lines.map((l) => l.amountController),
+        _descriptionController,
+      ]),
       builder: (context, _) => Padding(
         padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
+          left: AppSpacing.pageMargin,
+          right: AppSpacing.pageMargin,
           top: AppSpacing.lg,
           bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
         ),
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('New manual entry', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'New manual entry',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: AppSpacing.md),
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -297,7 +375,10 @@ class _JournalEntryFormSheetState extends ConsumerState<_JournalEntryFormSheet> 
                   if (picked != null) setState(() => _entryDate = picked);
                 },
               ),
-              AppTextField(label: 'Description', controller: _descriptionController),
+              AppTextField(
+                label: 'Description',
+                controller: _descriptionController,
+              ),
               const SizedBox(height: AppSpacing.md),
               JournalLineEditor(
                 lines: _lines,
@@ -308,12 +389,16 @@ class _JournalEntryFormSheetState extends ConsumerState<_JournalEntryFormSheet> 
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: (_difference.abs() < 0.005 ? context.duitlahColors.positive : context.duitlahColors.negative).withValues(alpha: 0.08),
+                  color:
+                      (_difference.abs() < 0.005
+                              ? context.duitlahColors.positive
+                              : context.duitlahColors.negative)
+                          .withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Column(
                   children: [
-                    Row(
+                    AppAdaptiveRow(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Debits: ${_totalDebit.toStringAsFixed(2)}'),
@@ -325,14 +410,20 @@ class _JournalEntryFormSheetState extends ConsumerState<_JournalEntryFormSheet> 
                       'Difference: ${_difference.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: _difference.abs() < 0.005 ? context.duitlahColors.positive : context.duitlahColors.negative,
+                        color: _difference.abs() < 0.005
+                            ? context.duitlahColors.positive
+                            : context.duitlahColors.negative,
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(label: 'Submit', loading: _submitting, onPressed: _canSubmit ? _submit : null),
+              PrimaryButton(
+                label: 'Submit',
+                loading: _submitting,
+                onPressed: _canSubmit ? _submit : null,
+              ),
             ],
           ),
         ),

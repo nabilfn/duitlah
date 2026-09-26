@@ -1,6 +1,10 @@
-import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
+import 'package:duitlah_mobile/core/widgets/app_search_field.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
 import 'package:flutter/material.dart';
+
+import '../../../core/widgets/dialogs.dart';
+import '../../../core/widgets/dock_insets.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/app_state_views.dart';
@@ -30,6 +34,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(transactionsProvider.future),
         child: CustomScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverPadding(
@@ -40,28 +45,23 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: TextField(
+                          child: AppSearchField(
+                            hint: 'Search this page…',
                             onChanged: (v) =>
                                 setState(() => _query = v.toLowerCase().trim()),
-                            decoration: InputDecoration(
-                              hintText: 'Search this page…',
-                              prefixIcon: const Padding(
-                                padding: EdgeInsets.all(14),
-                                child: DuitlahIcon(Icons.search, size: 20),
-                              ),
-                              fillColor: context.duitlahColors.surfaceSecondary,
-                            ),
                           ),
                         ),
                         const SizedBox(width: 8),
                         IconButton.filledTonal(
                           tooltip: 'Filter by account',
-                          onPressed: () => showModalBottomSheet<void>(
+                          onPressed: () => showDuitlahGlassSheet<void>(
                             context: context,
                             useSafeArea: true,
                             isScrollControlled: true,
                             builder: (ctx) => SafeArea(
                               child: SingleChildScrollView(
+                                keyboardDismissBehavior:
+                                    ScrollViewKeyboardDismissBehavior.onDrag,
                                 child: Padding(
                                   padding: const EdgeInsets.all(20),
                                   child: Column(
@@ -227,7 +227,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                                 ? "RM"
                                 : account?.currency ?? "RM",
                           ),
-                          const Divider(indent: 58),
+                          const Divider(),
                         ],
                       );
                     },
@@ -237,7 +237,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 104),
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  12,
+                  20,
+                  104 + DuitlahDockInsets.of(context),
+                ),
                 child: transactions.maybeWhen(
                   data: (page) => Row(
                     children: [

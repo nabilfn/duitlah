@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -23,10 +25,12 @@ class RecurringTransactionsScreen extends ConsumerStatefulWidget {
   const RecurringTransactionsScreen({super.key});
 
   @override
-  ConsumerState<RecurringTransactionsScreen> createState() => _RecurringTransactionsScreenState();
+  ConsumerState<RecurringTransactionsScreen> createState() =>
+      _RecurringTransactionsScreenState();
 }
 
-class _RecurringTransactionsScreenState extends ConsumerState<RecurringTransactionsScreen> {
+class _RecurringTransactionsScreenState
+    extends ConsumerState<RecurringTransactionsScreen> {
   bool _subscriptionsOnly = false;
 
   void _invalidateAll() {
@@ -44,7 +48,8 @@ class _RecurringTransactionsScreenState extends ConsumerState<RecurringTransacti
       body: RefreshIndicator(
         onRefresh: () async => _invalidateAll(),
         child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: AppSpacing.scrollInsets(context, floatingAction: true),
           children: [
             summary.maybeWhen(
               data: (s) => s.subscriptions.isEmpty
@@ -52,18 +57,29 @@ class _RecurringTransactionsScreenState extends ConsumerState<RecurringTransacti
                   : Card(
                       child: Padding(
                         padding: const EdgeInsets.all(AppSpacing.lg),
-                        child: Row(
+                        child: AppAdaptiveRow(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Monthly subscriptions', style: Theme.of(context).textTheme.bodySmall),
+                                Text(
+                                  'Monthly subscriptions',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
                                 const SizedBox(height: 4),
-                                AmountText(s.estimatedMonthlyTotal, style: Theme.of(context).textTheme.headlineSmall),
+                                AmountText(
+                                  s.estimatedMonthlyTotal,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall,
+                                ),
                               ],
                             ),
-                            Text('${s.subscriptions.length} active', style: Theme.of(context).textTheme.bodySmall),
+                            Text(
+                              '${s.subscriptions.length} active',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
                           ],
                         ),
                       ),
@@ -71,14 +87,17 @@ class _RecurringTransactionsScreenState extends ConsumerState<RecurringTransacti
               orElse: () => const SizedBox.shrink(),
             ),
             const SizedBox(height: AppSpacing.md),
-            Row(
+            // Filter chips wrap onto a second line at large text sizes
+            // instead of running off the edge of a narrow phone.
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.xs,
               children: [
                 ChoiceChip(
                   label: const Text('All'),
                   selected: !_subscriptionsOnly,
                   onSelected: (_) => setState(() => _subscriptionsOnly = false),
                 ),
-                const SizedBox(width: AppSpacing.sm),
                 ChoiceChip(
                   label: const Text('Subscriptions'),
                   selected: _subscriptionsOnly,
@@ -89,7 +108,9 @@ class _RecurringTransactionsScreenState extends ConsumerState<RecurringTransacti
             const SizedBox(height: AppSpacing.md),
             rules.when(
               data: (list) {
-                final filtered = _subscriptionsOnly ? list.where((r) => r.isSubscription).toList() : list;
+                final filtered = _subscriptionsOnly
+                    ? list.where((r) => r.isSubscription).toList()
+                    : list;
                 if (filtered.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
@@ -101,7 +122,12 @@ class _RecurringTransactionsScreenState extends ConsumerState<RecurringTransacti
                   );
                 }
                 return Column(
-                  children: filtered.map((rule) => _RuleCard(rule: rule, onChanged: _invalidateAll)).toList(),
+                  children: filtered
+                      .map(
+                        (rule) =>
+                            _RuleCard(rule: rule, onChanged: _invalidateAll),
+                      )
+                      .toList(),
                 );
               },
               loading: () => const LoadingView(),
@@ -119,7 +145,11 @@ class _RecurringTransactionsScreenState extends ConsumerState<RecurringTransacti
   }
 
   Future<void> _showCreateSheet(BuildContext context) async {
-    final accounts = ref.read(accountListProvider).valueOrNull ?? const [];
+    // Nothing on this screen watches the account list, so on a cold open a
+    // cached read is still loading and every user would be told to add an
+    // account they already have. Await the value instead.
+    final accounts = await ref.read(accountListProvider.future);
+    if (!context.mounted) return;
     if (accounts.isEmpty) {
       showErrorSnackBar(context, 'Add an account first.');
       return;
@@ -151,7 +181,12 @@ class _RuleCard extends ConsumerWidget {
       await ref.read(recurringTransactionsRepositoryProvider).delete(rule.id);
       onChanged();
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
@@ -160,20 +195,30 @@ class _RuleCard extends ConsumerWidget {
     final theme = Theme.of(context);
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: ListTile(
+      child: AppRecordTile(
         title: Text(rule.merchant ?? rule.description ?? rule.type.name),
-        subtitle: Text('${rule.frequency.name.toLowerCase()} · next ${rule.nextOccurrenceDate}'),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+        subtitle: Text(
+          '${rule.frequency.name.toLowerCase()} · next ${rule.nextOccurrenceDate}',
+        ),
+        // Wraps rather than overflows once the tile stacks its trailing
+        // content on a narrow or scaled screen.
+        trailing: Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.xs,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             AmountText(
               rule.amount,
-              tone: rule.direction == TransactionDirection.IN ? AmountTone.positive : AmountTone.negative,
+              tone: rule.direction == TransactionDirection.IN
+                  ? AmountTone.positive
+                  : AmountTone.negative,
               style: theme.textTheme.titleSmall,
             ),
-            const SizedBox(width: AppSpacing.sm),
             if (!rule.active)
-              StatusChip(label: 'Ended', color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+              StatusChip(
+                label: 'Ended',
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             IconButton(
               icon: const DuitlahIcon(Icons.delete_outline, size: 18),
               onPressed: () => _confirmDelete(context, ref),
@@ -191,10 +236,12 @@ class _RecurringTransactionForm extends ConsumerStatefulWidget {
   final List<Account> accounts;
 
   @override
-  ConsumerState<_RecurringTransactionForm> createState() => _RecurringTransactionFormState();
+  ConsumerState<_RecurringTransactionForm> createState() =>
+      _RecurringTransactionFormState();
 }
 
-class _RecurringTransactionFormState extends ConsumerState<_RecurringTransactionForm> {
+class _RecurringTransactionFormState
+    extends ConsumerState<_RecurringTransactionForm> {
   final _amountController = TextEditingController();
   final _merchantController = TextEditingController();
   late String _accountId = widget.accounts.first.id;
@@ -214,18 +261,27 @@ class _RecurringTransactionFormState extends ConsumerState<_RecurringTransaction
   Future<void> _submit() async {
     setState(() => _submitting = true);
     try {
-      await ref.read(recurringTransactionsRepositoryProvider).create(
+      await ref
+          .read(recurringTransactionsRepositoryProvider)
+          .create(
             accountId: _accountId,
             type: _type,
             amount: _amountController.text.trim(),
-            merchant: _merchantController.text.trim().isEmpty ? null : _merchantController.text.trim(),
+            merchant: _merchantController.text.trim().isEmpty
+                ? null
+                : _merchantController.text.trim(),
             frequency: _frequency,
             startDate: _startDate.toIso8601String().split('T').first,
             isSubscription: _isSubscription,
           );
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -235,52 +291,90 @@ class _RecurringTransactionFormState extends ConsumerState<_RecurringTransaction
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        left: AppSpacing.lg,
-        right: AppSpacing.lg,
+        left: AppSpacing.pageMargin,
+        right: AppSpacing.pageMargin,
         top: AppSpacing.lg,
         bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
       child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('New recurring transaction', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'New recurring transaction',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: AppSpacing.md),
             DuitlahSegmentedControl<TransactionType>(
               segments: const [
-                ButtonSegment(value: TransactionType.EXPENSE, label: Text('Expense')),
-                ButtonSegment(value: TransactionType.INCOME, label: Text('Income')),
+                ButtonSegment(
+                  value: TransactionType.EXPENSE,
+                  label: Text('Expense'),
+                ),
+                ButtonSegment(
+                  value: TransactionType.INCOME,
+                  label: Text('Income'),
+                ),
               ],
               selected: {_type},
               onSelectionChanged: (s) => setState(() => _type = s.first),
             ),
             const SizedBox(height: AppSpacing.md),
-            DropdownButtonFormField<String>(
-              icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _accountId,
-              decoration: const InputDecoration(labelText: 'Account'),
-              items: widget.accounts.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
-              onChanged: (v) => setState(() => _accountId = v ?? _accountId),
+            AppFieldGroup(
+              label: 'Account',
+              child: DropdownButtonFormField<String>(
+                itemHeight: null,
+                isExpanded: true,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                initialValue: _accountId,
+                decoration: const InputDecoration(),
+                items: widget.accounts
+                    .map(
+                      (a) => DropdownMenuItem(value: a.id, child: Text(a.name)),
+                    )
+                    .toList(),
+                onChanged: (v) => setState(() => _accountId = v ?? _accountId),
+              ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'Amount (RM)', controller: _amountController, keyboardType: TextInputType.number),
+            AppTextField(
+              label: 'Amount (RM)',
+              controller: _amountController,
+              keyboardType: TextInputType.number,
+            ),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'Merchant / description', controller: _merchantController),
+            AppTextField(
+              label: 'Merchant / description',
+              controller: _merchantController,
+            ),
             const SizedBox(height: AppSpacing.md),
-            DropdownButtonFormField<RecurrenceFrequency>(
-              icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _frequency,
-              decoration: const InputDecoration(labelText: 'Repeats'),
-              items: RecurrenceFrequency.values
-                  .map((f) => DropdownMenuItem(value: f, child: Text(f.name.toLowerCase())))
-                  .toList(),
-              onChanged: (v) => setState(() => _frequency = v ?? _frequency),
+            AppFieldGroup(
+              label: 'Repeats',
+              child: DropdownButtonFormField<RecurrenceFrequency>(
+                itemHeight: null,
+                isExpanded: true,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                initialValue: _frequency,
+                decoration: const InputDecoration(),
+                items: RecurrenceFrequency.values
+                    .map(
+                      (f) => DropdownMenuItem(
+                        value: f,
+                        child: Text(f.name.toLowerCase()),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (v) => setState(() => _frequency = v ?? _frequency),
+              ),
             ),
             const SizedBox(height: AppSpacing.sm),
             OutlinedButton.icon(
               icon: const DuitlahIcon(Icons.calendar_today_outlined),
-              label: Text('Starts ${_startDate.toIso8601String().split('T').first}'),
+              label: Text(
+                'Starts ${_startDate.toIso8601String().split('T').first}',
+              ),
               onPressed: () async {
                 final picked = await showDatePicker(
                   context: context,
@@ -299,7 +393,11 @@ initialValue: _frequency,
               onChanged: (v) => setState(() => _isSubscription = v),
             ),
             const SizedBox(height: AppSpacing.lg),
-            PrimaryButton(label: 'Add', onPressed: _submit, loading: _submitting),
+            PrimaryButton(
+              label: 'Add',
+              onPressed: _submit,
+              loading: _submitting,
+            ),
           ],
         ),
       ),

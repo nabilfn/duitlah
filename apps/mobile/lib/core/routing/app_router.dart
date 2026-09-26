@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../widgets/editorial_surfaces.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -112,8 +115,11 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authProvider);
       final atSplash = state.matchedLocation == AppRoutes.splash;
-      final loggingIn = state.matchedLocation == AppRoutes.login || state.matchedLocation == AppRoutes.register;
-      final isGuestOrJoinRoute = state.matchedLocation.startsWith('/bagilah/guest') ||
+      final loggingIn =
+          state.matchedLocation == AppRoutes.login ||
+          state.matchedLocation == AppRoutes.register;
+      final isGuestOrJoinRoute =
+          state.matchedLocation.startsWith('/bagilah/guest') ||
           state.matchedLocation.startsWith(AppRoutes.bagilahJoin);
 
       // While auth is still bootstrapping (trading the persisted refresh
@@ -125,47 +131,105 @@ final routerProvider = Provider<GoRouter>((ref) {
       // redirecting to login.
       return authState.when(
         loading: () => atSplash ? null : AppRoutes.splash,
-        unauthenticated: () => (loggingIn || isGuestOrJoinRoute) ? null : AppRoutes.login,
+        unauthenticated: () =>
+            (loggingIn || isGuestOrJoinRoute) ? null : AppRoutes.login,
         authenticated: (_) => (loggingIn || atSplash) ? AppRoutes.home : null,
       );
     },
     routes: [
-      GoRoute(path: AppRoutes.splash, builder: (context, state) => const SplashScreen()),
-      GoRoute(path: AppRoutes.login, builder: (context, state) => const LoginScreen()),
-      GoRoute(path: AppRoutes.register, builder: (context, state) => const RegisterScreen()),
+      GoRoute(
+        path: AppRoutes.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.login,
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.register,
+        builder: (context, state) => const RegisterScreen(),
+      ),
       GoRoute(
         path: AppRoutes.bagilahJoin,
-        builder: (context, state) => BagilahJoinScreen(token: state.uri.queryParameters['token'] ?? ''),
+        builder: (context, state) =>
+            BagilahJoinScreen(token: state.uri.queryParameters['token'] ?? ''),
       ),
       GoRoute(
         path: '/bagilah/guest/:billId',
-        builder: (context, state) => GuestBillScreen(billId: state.pathParameters['billId']!),
+        builder: (context, state) =>
+            GuestBillScreen(billId: state.pathParameters['billId']!),
       ),
-      GoRoute(path: AppRoutes.bagilahQrScan, builder: (context, state) => const QrScanScreen()),
-      GoRoute(path: AppRoutes.bagilahCreate, builder: (context, state) => const CreateBillScreen()),
-      GoRoute(path: AppRoutes.bagilahScan, builder: (context, state) => const ReceiptCaptureScreen()),
+      GoRoute(
+        path: AppRoutes.bagilahQrScan,
+        builder: (context, state) => const QrScanScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.bagilahCreate,
+        builder: (context, state) => const CreateBillScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.bagilahScan,
+        builder: (context, state) => const ReceiptCaptureScreen(),
+      ),
       GoRoute(
         path: '/bagilah/review/:scanId',
-        builder: (context, state) => ReceiptReviewScreen(scanId: state.pathParameters['scanId']!),
+        builder: (context, state) =>
+            ReceiptReviewScreen(scanId: state.pathParameters['scanId']!),
       ),
       GoRoute(
         path: '/bagilah/:id',
-        builder: (context, state) => BillDetailScreen(billId: state.pathParameters['id']!),
+        builder: (context, state) =>
+            BillDetailScreen(billId: state.pathParameters['id']!),
       ),
-      GoRoute(path: AppRoutes.groupCreate, builder: (context, state) => const CreateGroupScreen()),
-      GoRoute(path: AppRoutes.groupJoin, builder: (context, state) => const JoinGroupScreen()),
+      GoRoute(
+        path: AppRoutes.groupCreate,
+        builder: (context, state) => const CreateGroupScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.groupJoin,
+        builder: (context, state) => const JoinGroupScreen(),
+      ),
       GoRoute(
         path: '/groups/:id',
-        builder: (context, state) => GroupDetailScreen(groupId: state.pathParameters['id']!),
+        builder: (context, state) =>
+            GroupDetailScreen(groupId: state.pathParameters['id']!),
       ),
-      GoRoute(path: AppRoutes.settlements, builder: (context, state) => const SettlementsScreen()),
-      GoRoute(path: AppRoutes.categories, builder: (context, state) => const CategoriesScreen()),
-      GoRoute(path: AppRoutes.accounts, builder: (context, state) => const AccountsScreen()),
-      GoRoute(path: AppRoutes.budgets, builder: (context, state) => const BudgetsScreen()),
-      GoRoute(path: AppRoutes.goals, builder: (context, state) => GoalsScreen(wrappedAmount: state.uri.queryParameters['wrappedAmount'], wrappedMonth: state.uri.queryParameters['wrappedMonth'])),
-      GoRoute(path: AppRoutes.notifications, builder: (context, state) => const NotificationsScreen()),
-      GoRoute(path: AppRoutes.recurring, builder: (context, state) => const RecurringTransactionsScreen()),
-      GoRoute(path: AppRoutes.calendar, builder: (context, state) => const CalendarScreen()),
+      GoRoute(
+        path: AppRoutes.settlements,
+        builder: (context, state) =>
+            SettlementsScreen(personId: state.uri.queryParameters['person']),
+      ),
+      GoRoute(
+        path: AppRoutes.categories,
+        builder: (context, state) => const CategoriesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.accounts,
+        builder: (context, state) => const AccountsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.budgets,
+        builder: (context, state) => const BudgetsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.goals,
+        builder: (context, state) => GoalsScreen(
+          wrappedAmount: state.uri.queryParameters['wrappedAmount'],
+          wrappedMonth: state.uri.queryParameters['wrappedMonth'],
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.recurring,
+        builder: (context, state) => const RecurringTransactionsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.calendar,
+        builder: (context, state) => const CalendarScreen(),
+      ),
       GoRoute(
         path: '/wrapped/:year/:month',
         builder: (context, state) => MonthlyWrappedScreen(
@@ -173,11 +237,59 @@ final routerProvider = Provider<GoRouter>((ref) {
           month: int.parse(state.pathParameters['month']!),
         ),
       ),
-      GoRoute(path: AppRoutes.assistant, builder: (context, state) => const AssistantScreen()),
-      GoRoute(path: AppRoutes.duitlahPlus, builder: (context, state) => const DuitlahPlusScreen()),
-      GoRoute(path: AppRoutes.helpSupport, builder: (context, state) => const HelpSupportScreen()),
-      GoRoute(path: AppRoutes.feedback, builder: (context, state) => const FeedbackScreen()),
-      GoRoute(path: AppRoutes.spaces, builder: (context, state) => const SpacesScreen()),
+      GoRoute(
+        path: AppRoutes.assistant,
+        pageBuilder: (context, state) => CustomTransitionPage<void>(
+          key: state.pageKey,
+          opaque: false,
+          barrierDismissible: true,
+          barrierLabel: 'Close assistant',
+          barrierColor: Colors.black26,
+          transitionDuration: EditorialMotion.of(context),
+          reverseTransitionDuration: EditorialMotion.of(context),
+          child: const Align(
+            alignment: Alignment.bottomCenter,
+            child: FractionallySizedBox(
+              heightFactor: .94,
+              widthFactor: 1,
+              child: DuitlahGlassSheet(
+                showDragHandle: false,
+                child: Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                    child: AssistantScreen(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              DuitlahAssistantExpansion(
+                animation: animation,
+                origin: state.extra is Rect ? state.extra as Rect : null,
+                child: child,
+              ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.duitlahPlus,
+        builder: (context, state) => const DuitlahPlusScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.helpSupport,
+        builder: (context, state) => const HelpSupportScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.feedback,
+        builder: (context, state) => const FeedbackScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.spaces,
+        builder: (context, state) => const SpacesScreen(),
+      ),
       GoRoute(
         path: AppRoutes.createBusinessSpace,
         builder: (context, state) => const CreateBusinessSpaceScreen(),
@@ -189,29 +301,35 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/spaces/:spaceId/team',
-        builder: (context, state) => TeamScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            TeamScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       // Phase 5 — Business Core. Every route below is scoped by :spaceId (a
       // business space's FinancialSpace.id).
       GoRoute(
         path: '/spaces/:spaceId/business',
-        builder: (context, state) => BusinessDashboardScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            BusinessDashboardScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/business/customers',
-        builder: (context, state) => CustomersScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            CustomersScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/business/suppliers',
-        builder: (context, state) => SuppliersScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            SuppliersScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/business/products',
-        builder: (context, state) => ProductsScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            ProductsScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/business/accounts',
-        builder: (context, state) => BusinessAccountsScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            BusinessAccountsScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/business/accounts/:accountId',
@@ -222,7 +340,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/spaces/:spaceId/business/expenses',
-        builder: (context, state) => ExpensesScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            ExpensesScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/business/expenses/:expenseId',
@@ -233,7 +352,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/spaces/:spaceId/business/quotations',
-        builder: (context, state) => QuotationsScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            QuotationsScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/business/quotations/:quotationId',
@@ -244,7 +364,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/spaces/:spaceId/business/invoices',
-        builder: (context, state) => InvoicesScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            InvoicesScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/business/invoices/:invoiceId',
@@ -255,7 +376,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/spaces/:spaceId/business/recurring-invoices',
-        builder: (context, state) => RecurringInvoicesScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            RecurringInvoicesScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/business/credit-notes',
@@ -276,49 +398,60 @@ final routerProvider = Provider<GoRouter>((ref) {
       // by :spaceId (the same business space id as Phase 5's routes above).
       GoRoute(
         path: '/spaces/:spaceId/accounting',
-        builder: (context, state) => AccountingHubScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            AccountingHubScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/accounting/chart-of-accounts',
-        builder: (context, state) => ChartOfAccountsScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            ChartOfAccountsScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/accounting/periods',
-        builder: (context, state) => AccountingPeriodsScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            AccountingPeriodsScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/accounting/journal-entries',
-        builder: (context, state) => JournalEntriesScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            JournalEntriesScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/accounting/reports',
-        builder: (context, state) => ReportsHubScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            ReportsHubScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/accounting/reports/general-ledger',
-        builder: (context, state) => GeneralLedgerScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            GeneralLedgerScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/accounting/reports/trial-balance',
-        builder: (context, state) => TrialBalanceScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            TrialBalanceScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/accounting/reports/income-statement',
-        builder: (context, state) => IncomeStatementScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            IncomeStatementScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/accounting/reports/balance-sheet',
-        builder: (context, state) => BalanceSheetScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            BalanceSheetScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/accounting/reports/cash-flow',
-        builder: (context, state) => CashFlowScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            CashFlowScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       // Phase 7 — Reconciliation. Scoped by the same business space id as
       // Phase 5/6's routes above.
       GoRoute(
         path: '/spaces/:spaceId/reconciliation',
-        builder: (context, state) => ReconciliationHubScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            ReconciliationHubScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/reconciliation/sessions/:sessionId',
@@ -331,7 +464,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // as Phase 5/6/7's routes above.
       GoRoute(
         path: '/spaces/:spaceId/inventory',
-        builder: (context, state) => InventoryHubScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            InventoryHubScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/inventory/products/:productId',
@@ -344,7 +478,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Phase 5/6/7/8's routes above.
       GoRoute(
         path: '/spaces/:spaceId/assets',
-        builder: (context, state) => AssetsHubScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            AssetsHubScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: '/spaces/:spaceId/assets/:assetId',
@@ -357,13 +492,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       // business space id as Phase 5/6/7/8/9's routes above.
       GoRoute(
         path: '/spaces/:spaceId/business-tax',
-        builder: (context, state) => BusinessTaxHubScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            BusinessTaxHubScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       // Phase 11 — Cross-Space Accounting. Scoped by the same business
       // space id as Phase 5/6/7/8/9/10's routes above.
       GoRoute(
         path: '/spaces/:spaceId/crossspace',
-        builder: (context, state) => CrossSpaceHubScreen(spaceId: state.pathParameters['spaceId']!),
+        builder: (context, state) =>
+            CrossSpaceHubScreen(spaceId: state.pathParameters['spaceId']!),
       ),
       GoRoute(
         path: AppRoutes.autoTrackReview,
@@ -373,46 +510,124 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.statementImport,
         builder: (context, state) => const StatementImportScreen(),
       ),
-      GoRoute(path: AppRoutes.receiptVault, builder: (context, state) => const ReceiptVaultScreen()),
-      GoRoute(path: AppRoutes.transactionRules, builder: (context, state) => const TransactionRulesScreen()),
-      GoRoute(path: AppRoutes.notificationRules, builder: (context, state) => const NotificationRulesScreen()),
-      GoRoute(path: AppRoutes.bills, builder: (context, state) => const BillsScreen()),
-      GoRoute(path: AppRoutes.liabilities, builder: (context, state) => const LiabilitiesScreen()),
-      GoRoute(path: AppRoutes.netWorth, builder: (context, state) => const NetWorthScreen()),
-      GoRoute(path: AppRoutes.combinedNetWorth, builder: (context, state) => const CombinedNetWorthScreen()),
-      GoRoute(path: AppRoutes.financialHealth, builder: (context, state) => const FinancialHealthScreen()),
-      GoRoute(path: AppRoutes.exports, builder: (context, state) => const ExportsScreen()),
-      GoRoute(path: AppRoutes.personalTax, builder: (context, state) => const PersonalTaxScreen()),
-      GoRoute(path: AppRoutes.personalTaxIncome, builder: (context, state) => const PersonalIncomeScreen()),
-      GoRoute(path: AppRoutes.personalTaxPcb, builder: (context, state) => const PcbScreen()),
-      GoRoute(path: AppRoutes.personalTaxZakat, builder: (context, state) => const ZakatScreen()),
-      GoRoute(path: AppRoutes.personalTaxReliefs, builder: (context, state) => const TaxReliefsScreen()),
-      GoRoute(path: AppRoutes.personalTaxDocuments, builder: (context, state) => const TaxDocumentsScreen()),
+      GoRoute(
+        path: AppRoutes.receiptVault,
+        builder: (context, state) => const ReceiptVaultScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.transactionRules,
+        builder: (context, state) => const TransactionRulesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notificationRules,
+        builder: (context, state) => const NotificationRulesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.bills,
+        builder: (context, state) => const BillsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.liabilities,
+        builder: (context, state) => const LiabilitiesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.netWorth,
+        builder: (context, state) => const NetWorthScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.combinedNetWorth,
+        builder: (context, state) => const CombinedNetWorthScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.financialHealth,
+        builder: (context, state) => const FinancialHealthScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.exports,
+        builder: (context, state) => const ExportsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.personalTax,
+        builder: (context, state) => const PersonalTaxScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.personalTaxIncome,
+        builder: (context, state) => const PersonalIncomeScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.personalTaxPcb,
+        builder: (context, state) => const PcbScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.personalTaxZakat,
+        builder: (context, state) => const ZakatScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.personalTaxReliefs,
+        builder: (context, state) => const TaxReliefsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.personalTaxDocuments,
+        builder: (context, state) => const TaxDocumentsScreen(),
+      ),
       GoRoute(
         path: '/receipts/vault/:receiptId',
-        builder: (context, state) =>
-            VaultReceiptDetailScreen(receiptId: state.pathParameters['receiptId']!),
+        builder: (context, state) => VaultReceiptDetailScreen(
+          receiptId: state.pathParameters['receiptId']!,
+        ),
       ),
-      GoRoute(path: AppRoutes.groups, builder: (context, state) => const GroupsListScreen()),
-      GoRoute(path: AppRoutes.more, builder: (context, state) => const MoreMenuScreen()),
+      GoRoute(
+        path: AppRoutes.groups,
+        builder: (context, state) => const GroupsListScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.more,
+        builder: (context, state) => const MoreMenuScreen(),
+      ),
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) => MainShell(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) =>
+            MainShell(navigationShell: navigationShell),
         branches: [
-          StatefulShellBranch(routes: [
-            GoRoute(path: AppRoutes.home, builder: (context, state) => const HomeScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: AppRoutes.transactions, builder: (context, state) => const TransactionsScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: AppRoutes.insights, builder: (context, state) => const InsightsScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: AppRoutes.bagilah, builder: (context, state) => const BillsListScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: AppRoutes.profile, builder: (context, state) => const ProfileScreen()),
-          ]),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.home,
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.transactions,
+                builder: (context, state) => const TransactionsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.insights,
+                builder: (context, state) => const InsightsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.bagilah,
+                builder: (context, state) => const BillsListScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.profile,
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
         ],
       ),
     ],

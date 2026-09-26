@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +48,8 @@ class BusinessTaxHubScreen extends ConsumerStatefulWidget {
   final String spaceId;
 
   @override
-  ConsumerState<BusinessTaxHubScreen> createState() => _BusinessTaxHubScreenState();
+  ConsumerState<BusinessTaxHubScreen> createState() =>
+      _BusinessTaxHubScreenState();
 }
 
 class _BusinessTaxHubScreenState extends ConsumerState<BusinessTaxHubScreen> {
@@ -61,7 +64,8 @@ class _BusinessTaxHubScreenState extends ConsumerState<BusinessTaxHubScreen> {
     _to = DateTime(now.year, now.month + 1, 0);
   }
 
-  SstReportFilter get _reportFilter => (spaceId: widget.spaceId, from: _fmtDate(_from), to: _fmtDate(_to));
+  SstReportFilter get _reportFilter =>
+      (spaceId: widget.spaceId, from: _fmtDate(_from), to: _fmtDate(_to));
 
   @override
   Widget build(BuildContext context) {
@@ -71,79 +75,113 @@ class _BusinessTaxHubScreenState extends ConsumerState<BusinessTaxHubScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Business Tax')),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(einvoiceReadinessProvider(widget.spaceId));
-          ref.invalidate(sstReportProvider(_reportFilter));
-          ref.invalidate(sstRateListProvider(widget.spaceId));
-        },
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          children: [
-            Text('e-Invoice readiness', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            readiness.when(
-              data: (r) => _ReadinessCard(spaceId: widget.spaceId, readiness: r),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(einvoiceReadinessProvider(widget.spaceId))),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Text('SST report', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            OutlinedButton(
-              onPressed: () async {
-                final picked = await showDateRangePicker(
-                  context: context,
-                  firstDate: DateTime(_from.year - 5),
-                  lastDate: DateTime(_to.year + 5),
-                  initialDateRange: DateTimeRange(start: _from, end: _to),
-                );
-                if (picked != null) {
-                  setState(() {
-                    _from = picked.start;
-                    _to = picked.end;
-                  });
-                }
-              },
-              child: Text('${_fmtDate(_from)} to ${_fmtDate(_to)}'),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            report.when(
-              data: (r) => Card(
-                child: Column(
-                  children: [
-                    ListTile(
-                      title: const Text('Collected tax'),
-                      subtitle: Text('${r.from} to ${r.to}'),
-                      trailing: Text(Money.format(r.collectedTax), style: Theme.of(context).textTheme.titleMedium),
-                    ),
-                    const Divider(height: 1),
-                    ListTile(
-                      title: const Text('Payable tax'),
-                      trailing: Text(Money.format(r.payableTax), style: Theme.of(context).textTheme.titleMedium),
-                    ),
-                  ],
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(einvoiceReadinessProvider(widget.spaceId));
+            ref.invalidate(sstReportProvider(_reportFilter));
+            ref.invalidate(sstRateListProvider(widget.spaceId));
+          },
+          child: ListView(
+            padding: AppSpacing.scrollInsets(context, floatingAction: false),
+            children: [
+              Text(
+                'e-Invoice readiness',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              readiness.when(
+                data: (r) =>
+                    _ReadinessCard(spaceId: widget.spaceId, readiness: r),
+                loading: () => const LoadingView(),
+                error: (e, _) => ErrorView(
+                  error: e,
+                  onRetry: () =>
+                      ref.invalidate(einvoiceReadinessProvider(widget.spaceId)),
                 ),
               ),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(sstReportProvider(_reportFilter))),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Text('SST rates', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Reference rates set by LHDN — not editable here.',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            rates.when(
-              data: (items) => items.isEmpty
-                  ? const EmptyView(icon: Icons.percent_outlined, title: 'No SST rates published yet')
-                  : Column(children: items.map((r) => _SstRateTile(rate: r)).toList()),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(sstRateListProvider(widget.spaceId))),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.xl),
+              Text(
+                'SST report',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              OutlinedButton(
+                onPressed: () async {
+                  final picked = await showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(_from.year - 5),
+                    lastDate: DateTime(_to.year + 5),
+                    initialDateRange: DateTimeRange(start: _from, end: _to),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _from = picked.start;
+                      _to = picked.end;
+                    });
+                  }
+                },
+                child: Text('${_fmtDate(_from)} to ${_fmtDate(_to)}'),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              report.when(
+                data: (r) => Card(
+                  child: Column(
+                    children: [
+                      AppRecordTile(
+                        title: const Text('Collected tax'),
+                        subtitle: Text('${r.from} to ${r.to}'),
+                        trailing: Text(
+                          Money.format(r.collectedTax),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                      const Divider(height: 1),
+                      AppRecordTile(
+                        title: const Text('Payable tax'),
+                        trailing: Text(
+                          Money.format(r.payableTax),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                loading: () => const LoadingView(),
+                error: (e, _) => ErrorView(
+                  error: e,
+                  onRetry: () =>
+                      ref.invalidate(sstReportProvider(_reportFilter)),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Text('SST rates', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Reference rates set by LHDN — not editable here.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              rates.when(
+                data: (items) => items.isEmpty
+                    ? const EmptyView(
+                        icon: Icons.percent_outlined,
+                        title: 'No SST rates published yet',
+                      )
+                    : Column(
+                        children: items
+                            .map((r) => _SstRateTile(rate: r))
+                            .toList(),
+                      ),
+                loading: () => const LoadingView(),
+                error: (e, _) => ErrorView(
+                  error: e,
+                  onRetry: () =>
+                      ref.invalidate(sstRateListProvider(widget.spaceId)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -162,7 +200,9 @@ class _ReadinessCard extends StatelessWidget {
     final ready = readiness.ready;
     return Card(
       color: readiness.mandated
-          ? (ready ? theme.colorScheme.primaryContainer : theme.colorScheme.errorContainer)
+          ? (ready
+                ? theme.colorScheme.primaryContainer
+                : theme.colorScheme.errorContainer)
           : null,
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -172,8 +212,12 @@ class _ReadinessCard extends StatelessWidget {
             Row(
               children: [
                 DuitlahIcon(
-                  ready ? Icons.check_circle_outline : Icons.warning_amber_outlined,
-                  color: ready ? theme.colorScheme.primary : theme.colorScheme.error,
+                  ready
+                      ? Icons.check_circle_outline
+                      : Icons.warning_amber_outlined,
+                  color: ready
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.error,
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
@@ -186,12 +230,13 @@ class _ReadinessCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (readiness.currentRuleEffectiveDate != null || readiness.currentRuleThreshold != null) ...[
+            if (readiness.currentRuleEffectiveDate != null ||
+                readiness.currentRuleThreshold != null) ...[
               const SizedBox(height: AppSpacing.sm),
               Text(
                 [
                   if (readiness.currentRuleThreshold != null)
-                    'Threshold: RM ${readiness.currentRuleThreshold}',
+                    'Threshold: ${readiness.currentRuleThreshold == null ? 'Not configured' : Money.format(readiness.currentRuleThreshold!)}',
                   if (readiness.currentRuleEffectiveDate != null)
                     'Effective ${readiness.currentRuleEffectiveDate}',
                 ].join(' · '),
@@ -200,9 +245,15 @@ class _ReadinessCard extends StatelessWidget {
             ],
             const SizedBox(height: AppSpacing.md),
             if (ready)
-              Text('Your business profile has everything needed to submit e-Invoices.', style: theme.textTheme.bodyMedium)
+              Text(
+                'Your business profile has everything needed to submit e-Invoices.',
+                style: theme.textTheme.bodyMedium,
+              )
             else ...[
-              Text('Missing before you can submit e-Invoices:', style: theme.textTheme.bodyMedium),
+              Text(
+                'Missing before you can submit e-Invoices:',
+                style: theme.textTheme.bodyMedium,
+              ),
               const SizedBox(height: AppSpacing.xs),
               ...readiness.missingFields.map(
                 (f) => Padding(
@@ -212,7 +263,12 @@ class _ReadinessCard extends StatelessWidget {
                     children: [
                       const DuitlahIcon(Icons.circle, size: 6),
                       const SizedBox(width: AppSpacing.sm),
-                      Expanded(child: Text(_missingFieldLabel(f), style: theme.textTheme.bodySmall)),
+                      Expanded(
+                        child: Text(
+                          _missingFieldLabel(f),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -220,7 +276,8 @@ class _ReadinessCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               SecondaryButton(
                 label: 'Update business profile',
-                onPressed: () => context.push(AppRoutes.businessProfile(spaceId)),
+                onPressed: () =>
+                    context.push(AppRoutes.businessProfile(spaceId)),
               ),
             ],
           ],
@@ -241,7 +298,9 @@ class _SstRateTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
-        title: Text('${rate.taxType == TaxType.SALES ? 'Sales' : 'Service'} tax — ${rate.ratePercent}%'),
+        title: Text(
+          '${rate.taxType == TaxType.SALES ? 'Sales' : 'Service'} tax — ${rate.ratePercent}%',
+        ),
         subtitle: Text(
           isCurrent
               ? 'Effective from ${rate.effectiveFrom}${rate.description != null ? '\n${rate.description}' : ''}'

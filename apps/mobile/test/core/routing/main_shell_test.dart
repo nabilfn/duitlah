@@ -167,7 +167,7 @@ void main() {
                   routes: [
                     GoRoute(
                       path: path,
-                      builder: (context, state) => Scaffold(body: Text(path)),
+                      builder: (context, state) => Scaffold(body: Text(path), floatingActionButton: path == AppRoutes.transactions ? FloatingActionButton(onPressed: () {}, child: const Text('+')) : null),
                     ),
                   ],
                 ),
@@ -228,9 +228,12 @@ void main() {
       await tester.pumpAndSettle();
       final onTransactions = tester.getRect(find.byType(AssistantFab));
 
-      // Transactions owns an "Add transaction" button in the same corner, so
-      // the assistant sits above it instead of on top of it.
-      expect(onTransactions.bottom, lessThan(onHome.bottom));
+      // The assistant now lives in the dock, outside the feature viewport.
+      // Its position stays stable and cannot collide with a screen FAB.
+      expect(onTransactions.bottom, onHome.bottom);
+      final screenFab = tester.getRect(find.byType(FloatingActionButton));
+      expect(screenFab.overlaps(onTransactions), false);
+      expect(screenFab.bottom, lessThanOrEqualTo(onTransactions.top));
     });
   });
 }

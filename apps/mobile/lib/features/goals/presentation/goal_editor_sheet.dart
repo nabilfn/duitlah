@@ -64,6 +64,7 @@ class _GoalEditorSheetState extends ConsumerState<GoalEditorSheet> {
 
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
+    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
     child: Padding(
       padding: EdgeInsets.fromLTRB(
         16,

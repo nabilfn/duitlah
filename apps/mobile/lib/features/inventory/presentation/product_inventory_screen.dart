@@ -1,3 +1,7 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +28,11 @@ String _fmtDate(DateTime d) => d.toIso8601String().substring(0, 10);
 /// instead): current valuation + "Record Movement", the movement history,
 /// and the optional recipe/ingredients list with its cost/margin summary.
 class ProductInventoryScreen extends ConsumerWidget {
-  const ProductInventoryScreen({super.key, required this.spaceId, required this.productId});
+  const ProductInventoryScreen({
+    super.key,
+    required this.spaceId,
+    required this.productId,
+  });
 
   final String spaceId;
   final String productId;
@@ -44,20 +52,29 @@ class ProductInventoryScreen extends ConsumerWidget {
   Future<void> _openMovementForm(BuildContext context, WidgetRef ref) async {
     final saved = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => _MovementFormSheet(spaceId: spaceId, productId: productId),
+      builder: (context) =>
+          _MovementFormSheet(spaceId: spaceId, productId: productId),
     );
     if (saved == true) _invalidateMovements(ref);
   }
 
-  Future<void> _openAddIngredientSheet(BuildContext context, WidgetRef ref) async {
+  Future<void> _openAddIngredientSheet(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final added = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => _AddIngredientSheet(spaceId: spaceId, productId: productId),
+      builder: (context) =>
+          _AddIngredientSheet(spaceId: spaceId, productId: productId),
     );
     if (added == true) _invalidateRecipe(ref);
   }
 
-  Future<void> _removeIngredient(BuildContext context, WidgetRef ref, RecipeItemResponse item) async {
+  Future<void> _removeIngredient(
+    BuildContext context,
+    WidgetRef ref,
+    RecipeItemResponse item,
+  ) async {
     final confirmed = await showConfirmDialog(
       context,
       title: 'Remove ingredient?',
@@ -67,10 +84,17 @@ class ProductInventoryScreen extends ConsumerWidget {
     );
     if (!confirmed) return;
     try {
-      await ref.read(inventoryRepositoryProvider).removeRecipeItem(spaceId, productId, item.id);
+      await ref
+          .read(inventoryRepositoryProvider)
+          .removeRecipeItem(spaceId, productId, item.id);
       _invalidateRecipe(ref);
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
@@ -86,85 +110,128 @@ class ProductInventoryScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(product.valueOrNull?.name ?? 'Product')),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(productDetailProvider(productKey));
-          _invalidateMovements(ref);
-          _invalidateRecipe(ref);
-        },
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          children: [
-            valuation.when(
-              data: (v) => _ValuationCard(valuation: v),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(productValuationProvider(_key))),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            PrimaryButton(label: 'Record movement', onPressed: () => _openMovementForm(context, ref)),
-            const SizedBox(height: AppSpacing.xl),
-            Text('Movement history', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            movements.when(
-              data: (items) => items.isEmpty
-                  ? const EmptyView(icon: Icons.receipt_long_outlined, title: 'No movements recorded yet')
-                  : Column(children: items.map((m) => _MovementTile(movement: m)).toList()),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(movementListProvider(_key))),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Recipe / ingredients', style: Theme.of(context).textTheme.titleMedium),
-                TextButton.icon(
-                  onPressed: () => _openAddIngredientSheet(context, ref),
-                  icon: const DuitlahIcon(Icons.add),
-                  label: const Text('Add'),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(productDetailProvider(productKey));
+            _invalidateMovements(ref);
+            _invalidateRecipe(ref);
+          },
+          child: ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: AppSpacing.scrollInsets(context, floatingAction: false),
+            children: [
+              valuation.when(
+                data: (v) => _ValuationCard(valuation: v),
+                loading: () => const LoadingView(),
+                error: (e, _) => ErrorView(
+                  error: e,
+                  onRetry: () => ref.invalidate(productValuationProvider(_key)),
                 ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            recipeItems.when(
-              data: (items) => items.isEmpty
-                  ? const EmptyView(
-                      icon: Icons.restaurant_menu_outlined,
-                      title: 'No recipe set',
-                      message: 'Add ingredients to compute this product\'s cost and margin. Entirely optional.',
-                    )
-                  : Column(
-                      children: items
-                          .map((item) => Card(
-                                margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                                child: ListTile(
+              ),
+              const SizedBox(height: AppSpacing.md),
+              PrimaryButton(
+                label: 'Record movement',
+                onPressed: () => _openMovementForm(context, ref),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Text(
+                'Movement history',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              movements.when(
+                data: (items) => items.isEmpty
+                    ? const EmptyView(
+                        icon: Icons.receipt_long_outlined,
+                        title: 'No movements recorded yet',
+                      )
+                    : Column(
+                        children: items
+                            .map((m) => _MovementTile(movement: m))
+                            .toList(),
+                      ),
+                loading: () => const LoadingView(),
+                error: (e, _) => ErrorView(
+                  error: e,
+                  onRetry: () => ref.invalidate(movementListProvider(_key)),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              AppAdaptiveRow(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Recipe / ingredients',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _openAddIngredientSheet(context, ref),
+                    icon: const DuitlahIcon(Icons.add),
+                    label: const Text('Add'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              recipeItems.when(
+                data: (items) => items.isEmpty
+                    ? const EmptyView(
+                        icon: Icons.restaurant_menu_outlined,
+                        title: 'No recipe set',
+                        message: 'Add ingredients to compute this product\'s cost and margin. Entirely optional.',
+                      )
+                    : Column(
+                        children: items
+                            .map(
+                              (item) => Card(
+                                margin: const EdgeInsets.only(
+                                  bottom: AppSpacing.sm,
+                                ),
+                                child: AppRecordTile(
                                   title: Text(item.ingredientName),
-                                  subtitle: Text('${item.quantityPerUnit} × ${item.ingredientUnitCost}'),
+                                  subtitle: Text(
+                                    '${item.quantityPerUnit} × ${item.ingredientUnitCost}',
+                                  ),
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(item.lineCost),
                                       IconButton(
-                                        icon: const DuitlahIcon(Icons.delete_outline),
-                                        onPressed: () => _removeIngredient(context, ref, item),
+                                        icon: const DuitlahIcon(
+                                          Icons.delete_outline,
+                                        ),
+                                        onPressed: () => _removeIngredient(
+                                          context,
+                                          ref,
+                                          item,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ))
-                          .toList(),
-                    ),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(recipeItemsProvider(_key))),
-            ),
-            if (hasRecipeItems) ...[
-              const SizedBox(height: AppSpacing.sm),
-              recipeCost.when(
-                data: (c) => _RecipeCostCard(cost: c),
+                              ),
+                            )
+                            .toList(),
+                      ),
                 loading: () => const LoadingView(),
-                error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(recipeCostProvider(_key))),
+                error: (e, _) => ErrorView(
+                  error: e,
+                  onRetry: () => ref.invalidate(recipeItemsProvider(_key)),
+                ),
               ),
+              if (hasRecipeItems) ...[
+                const SizedBox(height: AppSpacing.sm),
+                recipeCost.when(
+                  data: (c) => _RecipeCostCard(cost: c),
+                  loading: () => const LoadingView(),
+                  error: (e, _) => ErrorView(
+                    error: e,
+                    onRetry: () => ref.invalidate(recipeCostProvider(_key)),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -181,11 +248,23 @@ class _ValuationCard extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Row(
+        child: AppMetricRow(
           children: [
-            Expanded(child: _Stat(label: 'On hand', value: valuation.quantityOnHand)),
-            Expanded(child: _Stat(label: 'WAC', value: 'RM ${valuation.weightedAverageCost}')),
-            Expanded(child: _Stat(label: 'Total value', value: 'RM ${valuation.totalValue}')),
+            Expanded(
+              child: _Stat(label: 'On hand', value: valuation.quantityOnHand),
+            ),
+            Expanded(
+              child: _Stat(
+                label: 'WAC',
+                value: Money.format(valuation.weightedAverageCost),
+              ),
+            ),
+            Expanded(
+              child: _Stat(
+                label: 'Total value',
+                value: Money.format(valuation.totalValue),
+              ),
+            ),
           ],
         ),
       ),
@@ -221,18 +300,27 @@ class _MovementTile extends StatelessWidget {
     final isInbound = (double.tryParse(movement.quantity) ?? 0) >= 0;
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: ListTile(
+      child: AppRecordTile(
         leading: DuitlahIcon(
           isInbound ? Icons.arrow_downward : Icons.arrow_upward,
-          color: isInbound ? context.duitlahColors.positive : context.duitlahColors.negative,
+          color: isInbound
+              ? context.duitlahColors.positive
+              : context.duitlahColors.negative,
         ),
         title: Text(movement.type.name),
-        subtitle: Text(movement.notes != null ? '${movement.occurredOn} · ${movement.notes}' : movement.occurredOn),
+        subtitle: Text(
+          movement.notes != null
+              ? '${movement.occurredOn} · ${movement.notes}'
+              : movement.occurredOn,
+        ),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text('${movement.quantity} @ ${movement.unitCost}', style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              '${movement.quantity} @ ${movement.unitCost}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             Text(movement.value, style: Theme.of(context).textTheme.titleSmall),
           ],
         ),
@@ -256,23 +344,28 @@ class _RecipeCostCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            AppAdaptiveRow(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [const Text('Unit cost'), Text(cost.unitCost)],
             ),
             const SizedBox(height: 4),
-            Row(
+            AppAdaptiveRow(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [const Text('Selling price'), Text(cost.sellingPrice)],
             ),
             const Divider(),
-            Row(
+            AppAdaptiveRow(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Gross margin'),
                 Text(
                   '${cost.grossMargin} (${cost.grossMarginPercent}%)',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: marginPositive ? context.duitlahColors.positive : context.duitlahColors.negative),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: marginPositive
+                        ? context.duitlahColors.positive
+                        : context.duitlahColors.negative,
+                  ),
                 ),
               ],
             ),
@@ -306,7 +399,8 @@ class _MovementFormSheetState extends ConsumerState<_MovementFormSheet> {
   String? _businessAccountId;
   bool _submitting = false;
 
-  bool get _isNegative => (double.tryParse(_quantityController.text.trim()) ?? 0) < 0;
+  bool get _isNegative =>
+      (double.tryParse(_quantityController.text.trim()) ?? 0) < 0;
 
   @override
   void dispose() {
@@ -321,62 +415,93 @@ class _MovementFormSheetState extends ConsumerState<_MovementFormSheet> {
     if (quantity.isEmpty) return;
     setState(() => _submitting = true);
     try {
-      await ref.read(inventoryRepositoryProvider).recordMovement(
+      await ref
+          .read(inventoryRepositoryProvider)
+          .recordMovement(
             widget.spaceId,
             widget.productId,
             type: _type,
             quantity: quantity,
-            unitCost: _isNegative || _unitCostController.text.trim().isEmpty ? null : _unitCostController.text.trim(),
+            unitCost: _isNegative || _unitCostController.text.trim().isEmpty
+                ? null
+                : _unitCostController.text.trim(),
             occurredOn: _fmtDate(_occurredOn),
-            notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-            businessAccountId: _type == MovementType.PURCHASE ? _businessAccountId : null,
+            notes: _notesController.text.trim().isEmpty
+                ? null
+                : _notesController.text.trim(),
+            businessAccountId: _type == MovementType.PURCHASE
+                ? _businessAccountId
+                : null,
           );
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) {
         setState(() => _submitting = false);
-        showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final accounts = ref.watch(businessAccountListProvider(widget.spaceId)).valueOrNull ?? const [];
+    final accounts =
+        ref.watch(businessAccountListProvider(widget.spaceId)).valueOrNull ??
+        const [];
     final activeAccounts = accounts.where((a) => !a.archived).toList();
 
     return AnimatedBuilder(
       animation: _quantityController,
       builder: (context, _) => Padding(
         padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
+          left: AppSpacing.pageMargin,
+          right: AppSpacing.pageMargin,
           top: AppSpacing.lg,
           bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
         ),
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Record movement', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Record movement',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: AppSpacing.md),
-              DropdownButtonFormField<MovementType>(
-                icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _type,
-                decoration: const InputDecoration(labelText: 'Type'),
-                items: MovementType.values.map((t) => DropdownMenuItem(value: t, child: Text(t.name))).toList(),
-                onChanged: (v) => setState(() => _type = v ?? _type),
+              AppFieldGroup(
+                label: 'Type',
+                child: DropdownButtonFormField<MovementType>(
+                  itemHeight: null,
+                  isExpanded: true,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                  initialValue: _type,
+                  decoration: const InputDecoration(),
+                  items: MovementType.values
+                      .map(
+                        (t) => DropdownMenuItem(value: t, child: Text(t.name)),
+                      )
+                      .toList(),
+                  onChanged: (v) => setState(() => _type = v ?? _type),
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
               AppTextField(
                 label: 'Quantity (negative for outbound)',
                 controller: _quantityController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                  signed: true,
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
               AppTextField(
-                label: _isNegative ? 'Unit cost (computed by server)' : 'Unit cost (RM)',
+                label: _isNegative
+                    ? 'Unit cost (computed by server)'
+                    : 'Unit cost (RM)',
                 controller: _unitCostController,
                 enabled: !_isNegative,
                 keyboardType: TextInputType.number,
@@ -395,22 +520,42 @@ initialValue: _type,
                 child: Text('Occurred on ${_fmtDate(_occurredOn)}'),
               ),
               const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Notes (optional)', controller: _notesController),
+              AppTextField(
+                label: 'Notes (optional)',
+                controller: _notesController,
+              ),
               if (_type == MovementType.PURCHASE) ...[
                 const SizedBox(height: AppSpacing.sm),
-                DropdownButtonFormField<String?>(
-                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _businessAccountId,
-                  decoration: const InputDecoration(labelText: 'Paid from (optional — omit if bought on credit)'),
-                  items: [
-                    const DropdownMenuItem<String?>(value: null, child: Text('On credit / not set')),
-                    ...activeAccounts.map((a) => DropdownMenuItem<String?>(value: a.id, child: Text(a.name))),
-                  ],
-                  onChanged: (v) => setState(() => _businessAccountId = v),
+                AppFieldGroup(
+                  label: 'Paid from (optional — omit if bought on credit)',
+                  child: DropdownButtonFormField<String?>(
+                    itemHeight: null,
+                    isExpanded: true,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                    initialValue: _businessAccountId,
+                    decoration: const InputDecoration(),
+                    items: [
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('On credit / not set'),
+                      ),
+                      ...activeAccounts.map(
+                        (a) => DropdownMenuItem<String?>(
+                          value: a.id,
+                          child: Text(a.name),
+                        ),
+                      ),
+                    ],
+                    onChanged: (v) => setState(() => _businessAccountId = v),
+                  ),
                 ),
               ],
               const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(label: 'Save', loading: _submitting, onPressed: _submit),
+              PrimaryButton(
+                label: 'Save',
+                loading: _submitting,
+                onPressed: _submit,
+              ),
             ],
           ),
         ),
@@ -430,7 +575,8 @@ class _AddIngredientSheet extends ConsumerStatefulWidget {
   final String productId;
 
   @override
-  ConsumerState<_AddIngredientSheet> createState() => _AddIngredientSheetState();
+  ConsumerState<_AddIngredientSheet> createState() =>
+      _AddIngredientSheetState();
 }
 
 class _AddIngredientSheetState extends ConsumerState<_AddIngredientSheet> {
@@ -450,7 +596,9 @@ class _AddIngredientSheetState extends ConsumerState<_AddIngredientSheet> {
     if (ingredientId == null || quantity.isEmpty) return;
     setState(() => _submitting = true);
     try {
-      await ref.read(inventoryRepositoryProvider).addRecipeItem(
+      await ref
+          .read(inventoryRepositoryProvider)
+          .addRecipeItem(
             widget.spaceId,
             widget.productId,
             ingredientProductId: ingredientId,
@@ -460,20 +608,26 @@ class _AddIngredientSheetState extends ConsumerState<_AddIngredientSheet> {
     } catch (e) {
       if (mounted) {
         setState(() => _submitting = false);
-        showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final products = ref.watch(productListProvider(widget.spaceId)).valueOrNull ?? const [];
-    final candidates = products.where((p) => p.id != widget.productId && p.active).toList();
+    final products =
+        ref.watch(productListProvider(widget.spaceId)).valueOrNull ?? const [];
+    final candidates = products
+        .where((p) => p.id != widget.productId && p.active)
+        .toList();
 
     return Padding(
       padding: EdgeInsets.only(
-        left: AppSpacing.lg,
-        right: AppSpacing.lg,
+        left: AppSpacing.pageMargin,
+        right: AppSpacing.pageMargin,
         top: AppSpacing.lg,
         bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
@@ -486,12 +640,21 @@ class _AddIngredientSheetState extends ConsumerState<_AddIngredientSheet> {
           if (candidates.isEmpty)
             const Text('No other products available to use as an ingredient.')
           else
-            DropdownButtonFormField<String>(
-              icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _ingredientProductId,
-              decoration: const InputDecoration(labelText: 'Ingredient product'),
-              items: candidates.map((p) => DropdownMenuItem(value: p.id, child: Text(p.name))).toList(),
-              onChanged: (v) => setState(() => _ingredientProductId = v),
+            AppFieldGroup(
+              label: 'Ingredient product',
+              child: DropdownButtonFormField<String>(
+                itemHeight: null,
+                isExpanded: true,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                initialValue: _ingredientProductId,
+                decoration: const InputDecoration(),
+                items: candidates
+                    .map(
+                      (p) => DropdownMenuItem(value: p.id, child: Text(p.name)),
+                    )
+                    .toList(),
+                onChanged: (v) => setState(() => _ingredientProductId = v),
+              ),
             ),
           const SizedBox(height: AppSpacing.sm),
           AppTextField(

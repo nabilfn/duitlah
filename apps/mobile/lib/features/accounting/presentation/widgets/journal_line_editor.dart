@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -15,9 +16,13 @@ import '../../domain/journal_entries.dart';
 /// total by listening to it directly rather than needing an explicit
 /// `onChanged` callback on every keystroke.
 class JournalLineDraft {
-  JournalLineDraft({this.account, this.direction = LedgerDirection.DEBIT, String amount = '', String description = ''})
-      : amountController = TextEditingController(text: amount),
-        descriptionController = TextEditingController(text: description);
+  JournalLineDraft({
+    this.account,
+    this.direction = LedgerDirection.DEBIT,
+    String amount = '',
+    String description = '',
+  }) : amountController = TextEditingController(text: amount),
+       descriptionController = TextEditingController(text: description);
 
   LedgerAccount? account;
   LedgerDirection direction;
@@ -34,7 +39,9 @@ class JournalLineDraft {
       accountId: account!.id,
       direction: direction,
       amount: amount,
-      description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
+      description: descriptionController.text.trim().isEmpty
+          ? null
+          : descriptionController.text.trim(),
     );
   }
 }
@@ -88,23 +95,34 @@ class JournalLineEditor extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: DropdownButtonFormField<LedgerAccount>(
-                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: line.account,
-                  isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Account'),
-                  items: accounts
-                      .map((a) => DropdownMenuItem(value: a, child: Text('${a.code} · ${a.name}')))
-                      .toList(),
-                  onChanged: (a) {
-                    line.account = a;
-                    onChanged(lines);
-                  },
+                child: AppFieldGroup(
+                  label: 'Account',
+                  child: DropdownButtonFormField<LedgerAccount>(
+                    itemHeight: null,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                    initialValue: line.account,
+                    isExpanded: true,
+                    decoration: const InputDecoration(),
+                    items: accounts
+                        .map(
+                          (a) => DropdownMenuItem(
+                            value: a,
+                            child: Text('${a.code} · ${a.name}'),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (a) {
+                      line.account = a;
+                      onChanged(lines);
+                    },
+                  ),
                 ),
               ),
               IconButton(
                 icon: const DuitlahIcon(Icons.close),
-                onPressed: lines.length <= 1 ? null : () => onChanged([...lines]..removeAt(index)),
+                onPressed: lines.length <= 1
+                    ? null
+                    : () => onChanged([...lines]..removeAt(index)),
               ),
             ],
           ),
@@ -112,7 +130,10 @@ initialValue: line.account,
           DuitlahSegmentedControl<LedgerDirection>(
             segments: const [
               ButtonSegment(value: LedgerDirection.DEBIT, label: Text('Debit')),
-              ButtonSegment(value: LedgerDirection.CREDIT, label: Text('Credit')),
+              ButtonSegment(
+                value: LedgerDirection.CREDIT,
+                label: Text('Credit'),
+              ),
             ],
             selected: {line.direction},
             onSelectionChanged: (s) {
@@ -127,7 +148,10 @@ initialValue: line.account,
             keyboardType: TextInputType.number,
           ),
           const SizedBox(height: AppSpacing.sm),
-          AppTextField(label: 'Description (optional)', controller: line.descriptionController),
+          AppTextField(
+            label: 'Description (optional)',
+            controller: line.descriptionController,
+          ),
         ],
       ),
     );

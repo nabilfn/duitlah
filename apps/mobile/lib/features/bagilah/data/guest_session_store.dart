@@ -22,18 +22,18 @@ class GuestSession {
   final String displayName;
 
   Map<String, dynamic> toJson() => {
-        'billId': billId,
-        'participantId': participantId,
-        'guestToken': guestToken,
-        'displayName': displayName,
-      };
+    'billId': billId,
+    'participantId': participantId,
+    'guestToken': guestToken,
+    'displayName': displayName,
+  };
 
   factory GuestSession.fromJson(Map<String, dynamic> json) => GuestSession(
-        billId: json['billId'] as String,
-        participantId: json['participantId'] as String,
-        guestToken: json['guestToken'] as String,
-        displayName: json['displayName'] as String,
-      );
+    billId: json['billId'] as String,
+    participantId: json['participantId'] as String,
+    guestToken: json['guestToken'] as String,
+    displayName: json['displayName'] as String,
+  );
 }
 
 class GuestSessionStore {

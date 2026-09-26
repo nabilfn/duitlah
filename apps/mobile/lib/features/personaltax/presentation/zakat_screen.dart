@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -20,41 +22,59 @@ class ZakatScreen extends ConsumerWidget {
 
     final saved = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => SingleChildScrollView(child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Record zakat — YA $ya', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(label: 'Amount (RM)', controller: amountController, keyboardType: TextInputType.number),
-            const SizedBox(height: AppSpacing.lg),
-            PrimaryButton(
-              label: 'Save',
-              onPressed: () async {
-                try {
-                  await ref.read(personalTaxRepositoryProvider).recordZakat(
-                        yearOfAssessment: ya,
-                        amount: amountController.text.trim(),
-                        paidOn: DateTime.now().toIso8601String().split('T').first,
+      builder: (context) => SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.pageMargin,
+            right: AppSpacing.pageMargin,
+            top: AppSpacing.lg,
+            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Record zakat — YA $ya',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              AppTextField(
+                label: 'Amount (RM)',
+                controller: amountController,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              PrimaryButton(
+                label: 'Save',
+                onPressed: () async {
+                  try {
+                    await ref
+                        .read(personalTaxRepositoryProvider)
+                        .recordZakat(
+                          yearOfAssessment: ya,
+                          amount: amountController.text.trim(),
+                          paidOn: DateTime.now()
+                              .toIso8601String()
+                              .split('T')
+                              .first,
+                        );
+                    if (context.mounted) Navigator.of(context).pop(true);
+                  } catch (e) {
+                    if (context.mounted) {
+                      showErrorSnackBar(
+                        context,
+                        e is AppException ? e.message : 'Something went wrong.',
                       );
-                  if (context.mounted) Navigator.of(context).pop(true);
-                } catch (e) {
-                  if (context.mounted) {
-                    showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+                    }
                   }
-                }
-              },
-            ),
-          ],
+                },
+              ),
+            ],
+          ),
         ),
-      )),
+      ),
     );
     if (saved == true) {
       ref.invalidate(zakatListProvider);
@@ -67,27 +87,52 @@ class ZakatScreen extends ConsumerWidget {
     final zakat = ref.watch(zakatListProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Zakat')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(zakatListProvider),
-        child: zakat.when(
-          data: (items) => items.isEmpty
-              ? ListView(
-                  children: const [SizedBox(height: 80), EmptyView(icon: Icons.volunteer_activism_outlined, title: 'No zakat recorded yet')])
-              : ListView.builder(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final payment = items[index];
-                    return Card(
-                      child: ListTile(title: Text(payment.paidOn), trailing: Text(Money.format(payment.amount))),
-                    );
-                  },
-                ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(zakatListProvider)),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(zakatListProvider),
+          child: zakat.when(
+            data: (items) => items.isEmpty
+                ? ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: const [
+                      SizedBox(height: 80),
+                      EmptyView(
+                        icon: Icons.volunteer_activism_outlined,
+                        title: 'No zakat recorded yet',
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: AppSpacing.scrollInsets(
+                      context,
+                      floatingAction: true,
+                    ),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final payment = items[index];
+                      return Card(
+                        child: AppRecordTile(
+                          title: Text(payment.paidOn),
+                          trailing: Text(Money.format(payment.amount)),
+                        ),
+                      );
+                    },
+                  ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(zakatListProvider),
+            ),
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _recordZakat(context, ref), child: const DuitlahIcon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _recordZakat(context, ref),
+        child: const DuitlahIcon(Icons.add),
+      ),
     );
   }
 }

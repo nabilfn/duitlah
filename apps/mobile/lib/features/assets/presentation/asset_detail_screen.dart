@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +29,11 @@ String _fmtDate(DateTime d) => d.toIso8601String().substring(0, 10);
 /// [FixedAssetStatus.DISPOSED], since the server would reject them anyway
 /// with a 409 and there's no reason to invite that in normal use.
 class AssetDetailScreen extends ConsumerWidget {
-  const AssetDetailScreen({super.key, required this.spaceId, required this.assetId});
+  const AssetDetailScreen({
+    super.key,
+    required this.spaceId,
+    required this.assetId,
+  });
 
   final String spaceId;
   final String assetId;
@@ -39,7 +46,11 @@ class AssetDetailScreen extends ConsumerWidget {
     ref.invalidate(assetListProvider(spaceId));
   }
 
-  Future<void> _openEditForm(BuildContext context, WidgetRef ref, FixedAssetResponse asset) async {
+  Future<void> _openEditForm(
+    BuildContext context,
+    WidgetRef ref,
+    FixedAssetResponse asset,
+  ) async {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => AssetFormSheet(spaceId: spaceId, existing: asset),
@@ -74,28 +85,47 @@ class AssetDetailScreen extends ConsumerWidget {
                   );
                   if (picked != null) setDialogState(() => period = picked);
                 },
-                child: Text('Month: ${period.year}-${period.month.toString().padLeft(2, '0')}'),
+                child: Text(
+                  'Month: ${period.year}-${period.month.toString().padLeft(2, '0')}',
+                ),
               ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Run')),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Run'),
+            ),
           ],
         ),
       ),
     );
     if (confirmed != true) return;
     try {
-      await ref.read(fixedAssetsRepositoryProvider).runDepreciation(spaceId, assetId, period: _fmtDate(period));
+      await ref
+          .read(fixedAssetsRepositoryProvider)
+          .runDepreciation(spaceId, assetId, period: _fmtDate(period));
       _invalidateAll(ref);
       if (context.mounted) showSuccessSnackBar(context, 'Depreciation posted.');
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
-  Future<void> _openDisposeSheet(BuildContext context, WidgetRef ref, FixedAssetResponse asset) async {
+  Future<void> _openDisposeSheet(
+    BuildContext context,
+    WidgetRef ref,
+    FixedAssetResponse asset,
+  ) async {
     final disposed = await showAppBottomSheet<bool>(
       context,
       builder: (context) => _DisposeSheet(spaceId: spaceId, asset: asset),
@@ -112,66 +142,88 @@ class AssetDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(asset.valueOrNull?.name ?? 'Asset'),
         actions: [
-          if (asset.valueOrNull != null && asset.valueOrNull!.status == FixedAssetStatus.ACTIVE)
+          if (asset.valueOrNull != null &&
+              asset.valueOrNull!.status == FixedAssetStatus.ACTIVE)
             IconButton(
               icon: const DuitlahIcon(Icons.edit_outlined),
               onPressed: () => _openEditForm(context, ref, asset.valueOrNull!),
             ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async => _invalidateAll(ref),
-        child: asset.when(
-          data: (a) => ListView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            children: [
-              _AssetHeaderCard(asset: a),
-              const SizedBox(height: AppSpacing.md),
-              if (a.status == FixedAssetStatus.ACTIVE) ...[
-                Row(
-                  children: [
-                    Expanded(
-                      child: SecondaryButton(
-                        label: 'Run depreciation',
-                        onPressed: () => _runDepreciation(context, ref),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => _invalidateAll(ref),
+          child: asset.when(
+            data: (a) => ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: AppSpacing.scrollInsets(context, floatingAction: false),
+              children: [
+                _AssetHeaderCard(asset: a),
+                const SizedBox(height: AppSpacing.md),
+                if (a.status == FixedAssetStatus.ACTIVE) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SecondaryButton(
+                          label: 'Run depreciation',
+                          onPressed: () => _runDepreciation(context, ref),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: SecondaryButton(
-                        label: 'Dispose',
-                        onPressed: () => _openDisposeSheet(context, ref, a),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: SecondaryButton(
+                          label: 'Dispose',
+                          onPressed: () => _openDisposeSheet(context, ref, a),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ] else
-                Card(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: ListTile(
-                    leading: const DuitlahIcon(Icons.inventory_2_outlined),
-                    title: const Text('This asset has been disposed'),
-                    subtitle: Text(
-                      'Disposed on ${a.disposedOn ?? '-'}'
-                      '${a.disposalProceeds != null ? ' · Proceeds RM ${a.disposalProceeds}' : ''}',
+                    ],
+                  ),
+                ] else
+                  Card(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest,
+                    child: ListTile(
+                      leading: const DuitlahIcon(Icons.inventory_2_outlined),
+                      title: const Text('This asset has been disposed'),
+                      subtitle: Text(
+                        'Disposed on ${a.disposedOn ?? '-'}'
+                        '${a.disposalProceeds != null ? ' · Proceeds ${Money.format(a.disposalProceeds!)}' : ''}',
+                      ),
                     ),
                   ),
+                const SizedBox(height: AppSpacing.xl),
+                Text(
+                  'Depreciation history',
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-              const SizedBox(height: AppSpacing.xl),
-              Text('Depreciation history', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: AppSpacing.sm),
-              entries.when(
-                data: (items) => items.isEmpty
-                    ? const EmptyView(icon: Icons.timeline_outlined, title: 'No depreciation posted yet')
-                    : Column(children: items.map((e) => _DepreciationTile(entry: e)).toList()),
-                loading: () => const LoadingView(),
-                error: (e, _) =>
-                    ErrorView(error: e, onRetry: () => ref.invalidate(depreciationEntryListProvider(_key))),
-              ),
-            ],
+                const SizedBox(height: AppSpacing.sm),
+                entries.when(
+                  data: (items) => items.isEmpty
+                      ? const EmptyView(
+                          icon: Icons.timeline_outlined,
+                          title: 'No depreciation posted yet',
+                        )
+                      : Column(
+                          children: items
+                              .map((e) => _DepreciationTile(entry: e))
+                              .toList(),
+                        ),
+                  loading: () => const LoadingView(),
+                  error: (e, _) => ErrorView(
+                    error: e,
+                    onRetry: () =>
+                        ref.invalidate(depreciationEntryListProvider(_key)),
+                  ),
+                ),
+              ],
+            ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(assetDetailProvider(_key)),
+            ),
           ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(assetDetailProvider(_key))),
         ),
       ),
     );
@@ -195,33 +247,67 @@ class _AssetHeaderCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(asset.category ?? 'Uncategorized', style: Theme.of(context).textTheme.bodyMedium),
+                  child: Text(
+                    asset.category ?? 'Uncategorized',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                 ),
                 Chip(
-                  label: Text(asset.status == FixedAssetStatus.DISPOSED ? 'Disposed' : 'Active'),
+                  label: Text(
+                    asset.status == FixedAssetStatus.DISPOSED
+                        ? 'Disposed'
+                        : 'Active',
+                  ),
                   visualDensity: VisualDensity.compact,
                 ),
               ],
             ),
             const Divider(height: AppSpacing.lg),
-            Row(
+            AppMetricRow(
               children: [
-                Expanded(child: _Stat(label: 'Accumulated depreciation', value: 'RM ${asset.accumulatedDepreciation}')),
-                Expanded(child: _Stat(label: 'Net book value', value: 'RM ${asset.netBookValue}')),
+                Expanded(
+                  child: _Stat(
+                    label: 'Accumulated depreciation',
+                    value: Money.format(asset.accumulatedDepreciation),
+                  ),
+                ),
+                Expanded(
+                  child: _Stat(
+                    label: 'Net book value',
+                    value: Money.format(asset.netBookValue),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            Row(
+            AppMetricRow(
               children: [
-                Expanded(child: _Stat(label: 'Cost', value: 'RM ${asset.cost}')),
-                Expanded(child: _Stat(label: 'Salvage value', value: 'RM ${asset.salvageValue}')),
+                Expanded(
+                  child: _Stat(label: 'Cost', value: Money.format(asset.cost)),
+                ),
+                Expanded(
+                  child: _Stat(
+                    label: 'Salvage value',
+                    value: Money.format(asset.salvageValue),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-            Row(
+            AppMetricRow(
               children: [
-                Expanded(child: _Stat(label: 'Useful life', value: '${asset.usefulLifeMonths} months')),
-                Expanded(child: _Stat(label: 'Method', value: depreciationMethodLabel(asset.depreciationMethod))),
+                Expanded(
+                  child: _Stat(
+                    label: 'Useful life',
+                    value: '${asset.usefulLifeMonths} months',
+                  ),
+                ),
+                Expanded(
+                  child: _Stat(
+                    label: 'Method',
+                    value: depreciationMethodLabel(asset.depreciationMethod),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
@@ -260,10 +346,13 @@ class _DepreciationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: ListTile(
+      child: AppRecordTile(
         leading: const DuitlahIcon(Icons.calendar_month_outlined),
         title: Text(entry.period),
-        trailing: Text(Money.format(entry.amount), style: Theme.of(context).textTheme.titleSmall),
+        trailing: Text(
+          Money.format(entry.amount),
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
       ),
     );
   }
@@ -292,9 +381,11 @@ class _DisposeSheetState extends ConsumerState<_DisposeSheet> {
   String? _businessAccountId;
   bool _submitting = false;
 
-  double get _proceedsValue => double.tryParse(_proceedsController.text.trim()) ?? 0;
+  double get _proceedsValue =>
+      double.tryParse(_proceedsController.text.trim()) ?? 0;
   bool get _needsAccount => _proceedsValue > 0;
-  bool get _canSubmit => !_submitting && (!_needsAccount || _businessAccountId != null);
+  bool get _canSubmit =>
+      !_submitting && (!_needsAccount || _businessAccountId != null);
 
   @override
   void dispose() {
@@ -314,8 +405,12 @@ class _DisposeSheetState extends ConsumerState<_DisposeSheet> {
 
     setState(() => _submitting = true);
     try {
-      final proceeds = _proceedsController.text.trim().isEmpty ? '0' : _proceedsController.text.trim();
-      await ref.read(fixedAssetsRepositoryProvider).disposeAsset(
+      final proceeds = _proceedsController.text.trim().isEmpty
+          ? '0'
+          : _proceedsController.text.trim();
+      await ref
+          .read(fixedAssetsRepositoryProvider)
+          .disposeAsset(
             widget.spaceId,
             widget.asset.id,
             disposedOn: _fmtDate(_disposedOn),
@@ -326,31 +421,40 @@ class _DisposeSheetState extends ConsumerState<_DisposeSheet> {
     } catch (e) {
       if (mounted) {
         setState(() => _submitting = false);
-        showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final accounts = ref.watch(businessAccountListProvider(widget.spaceId)).valueOrNull ?? const [];
+    final accounts =
+        ref.watch(businessAccountListProvider(widget.spaceId)).valueOrNull ??
+        const [];
     final activeAccounts = accounts.where((a) => !a.archived).toList();
 
     return AnimatedBuilder(
       animation: _proceedsController,
       builder: (context, _) => Padding(
         padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
+          left: AppSpacing.pageMargin,
+          right: AppSpacing.pageMargin,
           top: AppSpacing.lg,
           bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
         ),
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Dispose asset', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Dispose asset',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 'Recording a disposal is permanent — the asset can no longer be depreciated afterwards.',
@@ -379,23 +483,40 @@ class _DisposeSheetState extends ConsumerState<_DisposeSheet> {
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: AppSpacing.sm),
-              DropdownButtonFormField<String?>(
-                icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _businessAccountId,
-                decoration: InputDecoration(
-                  labelText: _needsAccount ? 'Received into (required)' : 'Received into (optional)',
+              AppFieldGroup(
+                label: _needsAccount
+                    ? 'Received into (required)'
+                    : 'Received into (optional)',
+                child: DropdownButtonFormField<String?>(
+                  itemHeight: null,
+                  isExpanded: true,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                  initialValue: _businessAccountId,
+                  decoration: InputDecoration(),
+                  items: [
+                    if (!_needsAccount)
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('Not applicable'),
+                      ),
+                    ...activeAccounts.map(
+                      (a) => DropdownMenuItem<String?>(
+                        value: a.id,
+                        child: Text(a.name),
+                      ),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() => _businessAccountId = v),
                 ),
-                items: [
-                  if (!_needsAccount) const DropdownMenuItem<String?>(value: null, child: Text('Not applicable')),
-                  ...activeAccounts.map((a) => DropdownMenuItem<String?>(value: a.id, child: Text(a.name))),
-                ],
-                onChanged: (v) => setState(() => _businessAccountId = v),
               ),
               if (_needsAccount && _businessAccountId == null) ...[
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   'Required because proceeds are greater than zero.',
-                  style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontSize: 12,
+                  ),
                 ),
               ],
               const SizedBox(height: AppSpacing.lg),

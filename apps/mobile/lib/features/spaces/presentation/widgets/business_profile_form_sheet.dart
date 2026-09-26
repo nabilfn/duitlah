@@ -18,31 +18,63 @@ String _fmtDate(DateTime d) => d.toIso8601String().substring(0, 10);
 /// alongside it) — there's no create path here, unlike
 /// `asset_form_sheet.dart`'s create-or-edit shape.
 class BusinessProfileFormSheet extends ConsumerStatefulWidget {
-  const BusinessProfileFormSheet({super.key, required this.spaceId, required this.existing});
+  const BusinessProfileFormSheet({
+    super.key,
+    required this.spaceId,
+    required this.existing,
+  });
 
   final String spaceId;
   final BusinessProfile existing;
 
   @override
-  ConsumerState<BusinessProfileFormSheet> createState() => _BusinessProfileFormSheetState();
+  ConsumerState<BusinessProfileFormSheet> createState() =>
+      _BusinessProfileFormSheetState();
 }
 
-class _BusinessProfileFormSheetState extends ConsumerState<BusinessProfileFormSheet> {
-  late final _legalNameController = TextEditingController(text: widget.existing.legalName);
-  late final _tradeNameController = TextEditingController(text: widget.existing.tradeName);
-  late final _registrationNumberController = TextEditingController(text: widget.existing.registrationNumber);
+class _BusinessProfileFormSheetState
+    extends ConsumerState<BusinessProfileFormSheet> {
+  late final _legalNameController = TextEditingController(
+    text: widget.existing.legalName,
+  );
+  late final _tradeNameController = TextEditingController(
+    text: widget.existing.tradeName,
+  );
+  late final _registrationNumberController = TextEditingController(
+    text: widget.existing.registrationNumber,
+  );
   late final _tinController = TextEditingController(text: widget.existing.tin);
-  late final _businessTypeController = TextEditingController(text: widget.existing.businessType);
-  late final _industryController = TextEditingController(text: widget.existing.industry);
-  late final _sstNumberController = TextEditingController(text: widget.existing.sstNumber);
-  late final _addressController = TextEditingController(text: widget.existing.address);
-  late final _phoneController = TextEditingController(text: widget.existing.phone);
-  late final _emailController = TextEditingController(text: widget.existing.email);
-  late final _currencyController = TextEditingController(text: widget.existing.currency);
-  late final _annualRevenueController = TextEditingController(text: widget.existing.annualRevenue);
+  late final _businessTypeController = TextEditingController(
+    text: widget.existing.businessType,
+  );
+  late final _industryController = TextEditingController(
+    text: widget.existing.industry,
+  );
+  late final _sstNumberController = TextEditingController(
+    text: widget.existing.sstNumber,
+  );
+  late final _addressController = TextEditingController(
+    text: widget.existing.address,
+  );
+  late final _phoneController = TextEditingController(
+    text: widget.existing.phone,
+  );
+  late final _emailController = TextEditingController(
+    text: widget.existing.email,
+  );
+  late final _currencyController = TextEditingController(
+    text: widget.existing.currency,
+  );
+  late final _annualRevenueController = TextEditingController(
+    text: widget.existing.annualRevenue,
+  );
 
-  late DateTime? _financialYearStart = DateTime.tryParse(widget.existing.financialYearStart ?? '');
-  late DateTime? _financialYearEnd = DateTime.tryParse(widget.existing.financialYearEnd ?? '');
+  late DateTime? _financialYearStart = DateTime.tryParse(
+    widget.existing.financialYearStart ?? '',
+  );
+  late DateTime? _financialYearEnd = DateTime.tryParse(
+    widget.existing.financialYearEnd ?? '',
+  );
 
   bool _submitting = false;
 
@@ -63,10 +95,12 @@ class _BusinessProfileFormSheetState extends ConsumerState<BusinessProfileFormSh
     super.dispose();
   }
 
-  String? _textOrNull(TextEditingController c) => c.text.trim().isEmpty ? null : c.text.trim();
+  String? _textOrNull(TextEditingController c) =>
+      c.text.trim().isEmpty ? null : c.text.trim();
 
   Future<void> _pickDate(bool isStart) async {
-    final initial = (isStart ? _financialYearStart : _financialYearEnd) ?? DateTime.now();
+    final initial =
+        (isStart ? _financialYearStart : _financialYearEnd) ?? DateTime.now();
     final picked = await showDatePicker(
       context: context,
       initialDate: initial,
@@ -92,7 +126,9 @@ class _BusinessProfileFormSheetState extends ConsumerState<BusinessProfileFormSh
 
     setState(() => _submitting = true);
     try {
-      await ref.read(spacesRepositoryProvider).updateBusinessProfile(
+      await ref
+          .read(spacesRepositoryProvider)
+          .updateBusinessProfile(
             widget.spaceId,
             legalName: legalName,
             tradeName: _textOrNull(_tradeNameController),
@@ -101,8 +137,12 @@ class _BusinessProfileFormSheetState extends ConsumerState<BusinessProfileFormSh
             businessType: _textOrNull(_businessTypeController),
             industry: _textOrNull(_industryController),
             sstNumber: _textOrNull(_sstNumberController),
-            financialYearStart: _financialYearStart != null ? _fmtDate(_financialYearStart!) : null,
-            financialYearEnd: _financialYearEnd != null ? _fmtDate(_financialYearEnd!) : null,
+            financialYearStart: _financialYearStart != null
+                ? _fmtDate(_financialYearStart!)
+                : null,
+            financialYearEnd: _financialYearEnd != null
+                ? _fmtDate(_financialYearEnd!)
+                : null,
             address: _textOrNull(_addressController),
             phone: _textOrNull(_phoneController),
             email: _textOrNull(_emailController),
@@ -125,31 +165,50 @@ class _BusinessProfileFormSheetState extends ConsumerState<BusinessProfileFormSh
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        left: AppSpacing.lg,
-        right: AppSpacing.lg,
+        left: AppSpacing.pageMargin,
+        right: AppSpacing.pageMargin,
         top: AppSpacing.lg,
         bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
       child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Edit business profile', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Edit business profile',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: AppSpacing.md),
             AppTextField(label: 'Legal name', controller: _legalNameController),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'Trade name (optional)', controller: _tradeNameController),
+            AppTextField(
+              label: 'Trade name (optional)',
+              controller: _tradeNameController,
+            ),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'Registration number (optional)', controller: _registrationNumberController),
+            AppTextField(
+              label: 'Registration number (optional)',
+              controller: _registrationNumberController,
+            ),
             const SizedBox(height: AppSpacing.sm),
             AppTextField(label: 'TIN (optional)', controller: _tinController),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'Business type (optional)', controller: _businessTypeController),
+            AppTextField(
+              label: 'Business type (optional)',
+              controller: _businessTypeController,
+            ),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'Industry (optional)', controller: _industryController),
+            AppTextField(
+              label: 'Industry (optional)',
+              controller: _industryController,
+            ),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'SST number (optional)', controller: _sstNumberController),
+            AppTextField(
+              label: 'SST number (optional)',
+              controller: _sstNumberController,
+            ),
             const SizedBox(height: AppSpacing.sm),
             AppTextField(
               label: 'Annual revenue (RM, optional)',
@@ -160,19 +219,30 @@ class _BusinessProfileFormSheetState extends ConsumerState<BusinessProfileFormSh
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Financial year start'),
-              subtitle: Text(_financialYearStart != null ? _fmtDate(_financialYearStart!) : 'Not set'),
+              subtitle: Text(
+                _financialYearStart != null
+                    ? _fmtDate(_financialYearStart!)
+                    : 'Not set',
+              ),
               trailing: const DuitlahIcon(Icons.calendar_month_outlined),
               onTap: () => _pickDate(true),
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Financial year end'),
-              subtitle: Text(_financialYearEnd != null ? _fmtDate(_financialYearEnd!) : 'Not set'),
+              subtitle: Text(
+                _financialYearEnd != null
+                    ? _fmtDate(_financialYearEnd!)
+                    : 'Not set',
+              ),
               trailing: const DuitlahIcon(Icons.calendar_month_outlined),
               onTap: () => _pickDate(false),
             ),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'Address (optional)', controller: _addressController),
+            AppTextField(
+              label: 'Address (optional)',
+              controller: _addressController,
+            ),
             const SizedBox(height: AppSpacing.sm),
             AppTextField(
               label: 'Phone (optional)',
@@ -188,7 +258,11 @@ class _BusinessProfileFormSheetState extends ConsumerState<BusinessProfileFormSh
             const SizedBox(height: AppSpacing.sm),
             AppTextField(label: 'Currency', controller: _currencyController),
             const SizedBox(height: AppSpacing.lg),
-            PrimaryButton(label: 'Save', loading: _submitting, onPressed: _submit),
+            PrimaryButton(
+              label: 'Save',
+              loading: _submitting,
+              onPressed: _submit,
+            ),
           ],
         ),
       ),

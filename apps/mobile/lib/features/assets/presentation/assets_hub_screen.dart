@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -37,27 +39,36 @@ class AssetsHubScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Fixed Assets')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(assetListProvider(spaceId)),
-        child: assets.when(
-          data: (items) => items.isEmpty
-              ? ListView(
-                  children: const [
-                    SizedBox(height: 80),
-                    EmptyView(
-                      icon: Icons.chair_outlined,
-                      title: 'No assets registered yet',
-                      message: 'Add equipment, vehicles, or other long-term assets to track their depreciation.',
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(assetListProvider(spaceId)),
+          child: assets.when(
+            data: (items) => items.isEmpty
+                ? ListView(
+                    children: const [
+                      SizedBox(height: 80),
+                      EmptyView(
+                        icon: Icons.chair_outlined,
+                        title: 'No assets registered yet',
+                        message: 'Add equipment, vehicles, or other long-term assets to track their depreciation.',
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    padding: AppSpacing.scrollInsets(
+                      context,
+                      floatingAction: true,
                     ),
-                  ],
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) => _AssetTile(spaceId: spaceId, asset: items[index]),
-                ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(assetListProvider(spaceId))),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) =>
+                        _AssetTile(spaceId: spaceId, asset: items[index]),
+                  ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(assetListProvider(spaceId)),
+            ),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -80,17 +91,22 @@ class _AssetTile extends StatelessWidget {
     final isDisposed = asset.status == FixedAssetStatus.DISPOSED;
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: ListTile(
+      child: AppRecordTile(
         title: Text(asset.name),
         subtitle: Text(asset.category ?? 'Uncategorized'),
         trailing: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(Money.format(asset.netBookValue), style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              Money.format(asset.netBookValue),
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             Chip(
               label: Text(isDisposed ? 'Disposed' : 'Active'),
-              backgroundColor: isDisposed ? null : Theme.of(context).colorScheme.primaryContainer,
+              backgroundColor: isDisposed
+                  ? null
+                  : Theme.of(context).colorScheme.primaryContainer,
               visualDensity: VisualDensity.compact,
               padding: EdgeInsets.zero,
             ),

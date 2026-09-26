@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/widgets/dialogs.dart';
+
 import 'package:flutter/rendering.dart';
 
 import '../../services/wrapped_share_service.dart';
@@ -10,7 +13,7 @@ import 'wrapped_share_card.dart';
 Future<void> showWrappedShareSheet(
   BuildContext context,
   WrappedResult result,
-) => showModalBottomSheet<void>(
+) => showDuitlahGlassSheet<void>(
   context: context,
   isScrollControlled: true,
   useSafeArea: true,

@@ -19,7 +19,11 @@ class AuthRepository {
     return User.fromJson(data['user'] as Map<String, dynamic>);
   }
 
-  Future<User> register(String email, String password, String displayName) async {
+  Future<User> register(
+    String email,
+    String password,
+    String displayName,
+  ) async {
     final data = await _client.post(
       '/api/v1/auth/register',
       data: {'email': email, 'password': password, 'displayName': displayName},
@@ -48,10 +52,13 @@ class AuthRepository {
   /// on the web side.
   Future<User?> bootstrapSession() async {
     try {
-      final refreshData =
-          await _client.post('/api/v1/auth/refresh', skipAuth: true) as Map<String, dynamic>;
+      final refreshData = await _client.post(
+        '/api/v1/auth/refresh',
+        skipAuth: true,
+      ) as Map<String, dynamic>;
       _client.setAccessToken(refreshData['accessToken'] as String);
-      final userData = await _client.get('/api/v1/users/me') as Map<String, dynamic>;
+      final userData =
+          await _client.get('/api/v1/users/me') as Map<String, dynamic>;
       return User.fromJson(userData);
     } catch (_) {
       return null;
@@ -59,20 +66,23 @@ class AuthRepository {
   }
 
   Future<void> requestPasswordReset(String email) => _client.post(
-        '/api/v1/auth/password-reset/request',
-        data: {'email': email},
-        skipAuth: true,
-      );
+    '/api/v1/auth/password-reset/request',
+    data: {'email': email},
+    skipAuth: true,
+  );
 
-  Future<void> confirmPasswordReset(String token, String newPassword) => _client.post(
+  Future<void> confirmPasswordReset(String token, String newPassword) =>
+      _client.post(
         '/api/v1/auth/password-reset/confirm',
         data: {'token': token, 'newPassword': newPassword},
         skipAuth: true,
       );
 
-  Future<void> resendVerificationEmail() => _client.post('/api/v1/auth/verify-email/resend');
+  Future<void> resendVerificationEmail() =>
+      _client.post('/api/v1/auth/verify-email/resend');
 
-  Future<void> changePassword(String currentPassword, String newPassword) => _client.post(
+  Future<void> changePassword(String currentPassword, String newPassword) =>
+      _client.post(
         '/api/v1/users/me/change-password',
         data: {'currentPassword': currentPassword, 'newPassword': newPassword},
       );

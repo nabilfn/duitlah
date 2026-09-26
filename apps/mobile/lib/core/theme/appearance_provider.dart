@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../api/providers.dart';
 import '../storage/secure_storage.dart';
 
@@ -18,13 +19,21 @@ Future<ThemeMode> loadAppearance(SecureStorage storage) async {
   }
 }
 
-final initialAppearanceProvider = Provider<ThemeMode>((ref) => ThemeMode.system);
-final appearanceProvider = StateNotifierProvider<AppearanceController, ThemeMode>(
-  (ref) => AppearanceController(ref.watch(secureStorageProvider), ref.watch(initialAppearanceProvider)),
+final initialAppearanceProvider = Provider<ThemeMode>(
+  (ref) => ThemeMode.system,
 );
+final appearanceProvider =
+    StateNotifierProvider<AppearanceController, ThemeMode>(
+      (ref) => AppearanceController(
+        ref.watch(secureStorageProvider),
+        ref.watch(initialAppearanceProvider),
+      ),
+    );
 
 class AppearanceController extends StateNotifier<ThemeMode> {
-  AppearanceController(this._storage, ThemeMode initial) : _saved = initial, super(initial);
+  AppearanceController(this._storage, ThemeMode initial)
+    : _saved = initial,
+      super(initial);
   final SecureStorage _storage;
   ThemeMode _saved;
   Future<void> _pending = Future<void>.value();

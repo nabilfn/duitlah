@@ -23,13 +23,14 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   static final light = _fromPalette(DuitlahColors.light);
   static final dark = _fromPalette(DuitlahColors.dark);
 
-  static AppSemanticColors _fromPalette(DuitlahColors palette) => AppSemanticColors(
-    success: palette.positive,
-    warning: palette.warning,
-    info: palette.information,
-    bagilah: palette.primarySoft,
-    bagilahForeground: palette.textPrimary,
-  );
+  static AppSemanticColors _fromPalette(DuitlahColors palette) =>
+      AppSemanticColors(
+        success: palette.positive,
+        warning: palette.warning,
+        info: palette.information,
+        bagilah: palette.primarySoft,
+        bagilahForeground: palette.textPrimary,
+      );
 
   @override
   AppSemanticColors copyWith({

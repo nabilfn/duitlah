@@ -9,8 +9,9 @@ import 'api_client.dart';
 
 final secureStorageProvider = Provider<SecureStorage>((ref) => SecureStorage());
 
-final biometricLockServiceProvider =
-    Provider((ref) => BiometricLockService(ref.watch(secureStorageProvider)));
+final biometricLockServiceProvider = Provider(
+  (ref) => BiometricLockService(ref.watch(secureStorageProvider)),
+);
 
 final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(ref.watch(secureStorageProvider));

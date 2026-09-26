@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
@@ -41,7 +43,12 @@ class _BalanceSheetScreenState extends ConsumerState<BalanceSheetScreen> {
           .balanceSheet(widget.spaceId, asOf: _fmtDate(_asOf), format: format);
       await Share.shareXFiles([XFile(file.path)]);
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Export failed.');
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Export failed.',
+        );
+      }
     } finally {
       if (mounted) setState(() => _exporting = false);
     }
@@ -49,7 +56,12 @@ class _BalanceSheetScreenState extends ConsumerState<BalanceSheetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final report = ref.watch(balanceSheetReportProvider((spaceId: widget.spaceId, asOf: _fmtDate(_asOf))));
+    final report = ref.watch(
+      balanceSheetReportProvider((
+        spaceId: widget.spaceId,
+        asOf: _fmtDate(_asOf),
+      )),
+    );
     return Scaffold(
       appBar: AppBar(
         title: const Text('Balance Sheet'),
@@ -58,33 +70,41 @@ class _BalanceSheetScreenState extends ConsumerState<BalanceSheetScreen> {
             enabled: !_exporting,
             icon: const DuitlahIcon(Icons.ios_share),
             onSelected: _export,
-            itemBuilder: (context) =>
-                ExportFormat.values.map((f) => PopupMenuItem(value: f, child: Text('Share as ${f.name}'))).toList(),
+            itemBuilder: (context) => ExportFormat.values
+                .map(
+                  (f) => PopupMenuItem(
+                    value: f,
+                    child: Text('Share as ${f.name}'),
+                  ),
+                )
+                .toList(),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          OutlinedButton(
-            onPressed: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: _asOf,
-                firstDate: DateTime(_asOf.year - 5),
-                lastDate: DateTime(_asOf.year + 5),
-              );
-              if (picked != null) setState(() => _asOf = picked);
-            },
-            child: Text('As of ${_fmtDate(_asOf)}'),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          report.when(
-            data: (r) => _Body(report: r),
-            loading: () => const LoadingView(),
-            error: (e, _) => ErrorView(error: e),
-          ),
-        ],
+      body: AppPageBody(
+        child: ListView(
+          padding: AppSpacing.scrollInsets(context, floatingAction: false),
+          children: [
+            OutlinedButton(
+              onPressed: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _asOf,
+                  firstDate: DateTime(_asOf.year - 5),
+                  lastDate: DateTime(_asOf.year + 5),
+                );
+                if (picked != null) setState(() => _asOf = picked);
+              },
+              child: Text('As of ${_fmtDate(_asOf)}'),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            report.when(
+              data: (r) => _Body(report: r),
+              loading: () => const LoadingView(),
+              error: (e, _) => ErrorView(error: e),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -98,7 +118,8 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final totalAssets = double.tryParse(report.totalAssets) ?? 0;
-    final totalLiabilitiesAndEquity = double.tryParse(report.totalLiabilitiesAndEquity) ?? 0;
+    final totalLiabilitiesAndEquity =
+        double.tryParse(report.totalLiabilitiesAndEquity) ?? 0;
     final balanced = (totalAssets - totalLiabilitiesAndEquity).abs() < 0.005;
 
     return Column(
@@ -126,16 +147,23 @@ class _Body extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: (balanced ? context.duitlahColors.positive : context.duitlahColors.negative).withValues(alpha: 0.1),
+            color:
+                (balanced
+                        ? context.duitlahColors.positive
+                        : context.duitlahColors.negative)
+                    .withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
           child: Column(
             children: [
-              Row(
+              AppAdaptiveRow(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Total Liabilities + Equity'),
-                  Text(Money.format(report.totalLiabilitiesAndEquity), style: Theme.of(context).textTheme.titleSmall),
+                  Text(
+                    Money.format(report.totalLiabilitiesAndEquity),
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
@@ -144,13 +172,24 @@ class _Body extends StatelessWidget {
                 children: [
                   DuitlahIcon(
                     balanced ? Icons.check_circle_outline : Icons.error_outline,
-                    color: balanced ? context.duitlahColors.positive : context.duitlahColors.negative,
+                    color: balanced
+                        ? context.duitlahColors.positive
+                        : context.duitlahColors.negative,
                     size: 18,
                   ),
                   const SizedBox(width: AppSpacing.xs),
-                  Text(
-                    balanced ? 'Total Assets = Total Liabilities + Equity' : 'Assets do not match Liabilities + Equity',
-                    style: TextStyle(color: balanced ? context.duitlahColors.positive : context.duitlahColors.negative, fontWeight: FontWeight.w600),
+                  Flexible(
+                    child: Text(
+                      balanced
+                          ? 'Total Assets = Total Liabilities + Equity'
+                          : 'Assets do not match Liabilities + Equity',
+                      style: TextStyle(
+                        color: balanced
+                            ? context.duitlahColors.positive
+                            : context.duitlahColors.negative,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -162,26 +201,34 @@ class _Body extends StatelessWidget {
   }
 
   Widget _lineRow(BuildContext context, AccountAmountLine l) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text('${l.accountCode} ${l.accountName}'), Text(Money.format(l.amount))],
-        ),
-      );
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: AppAdaptiveRow(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text('${l.accountCode} ${l.accountName}'),
+        Text(Money.format(l.amount)),
+      ],
+    ),
+  );
 
-  Widget _lineRowRaw(BuildContext context, String label, String amount) => Padding(
+  Widget _lineRowRaw(BuildContext context, String label, String amount) =>
+      Padding(
         padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Row(
+        child: AppAdaptiveRow(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [Text(label), Text(Money.format(amount))],
         ),
       );
 
-  Widget _totalRow(BuildContext context, String label, String amount) => Row(
+  Widget _totalRow(BuildContext context, String label, String amount) =>
+      AppAdaptiveRow(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: Theme.of(context).textTheme.titleSmall),
-          Text(Money.format(amount), style: Theme.of(context).textTheme.titleSmall),
+          Text(
+            Money.format(amount),
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
         ],
       );
 }

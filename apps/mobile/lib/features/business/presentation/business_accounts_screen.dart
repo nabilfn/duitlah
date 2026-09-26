@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -28,57 +31,89 @@ class BusinessAccountsScreen extends ConsumerWidget {
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            top: AppSpacing.lg,
-            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Add business account', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: AppSpacing.md),
-              AppTextField(label: 'Name', controller: nameController),
-              const SizedBox(height: AppSpacing.sm),
-              DropdownButtonFormField<BusinessAccountType>(
-                icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: type,
-                decoration: const InputDecoration(labelText: 'Type'),
-                items: BusinessAccountType.values.map((t) => DropdownMenuItem(value: t, child: Text(t.name))).toList(),
-                onChanged: (v) => setSheetState(() => type = v ?? type),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Currency', controller: currencyController),
-              const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Opening balance', controller: openingBalanceController, keyboardType: TextInputType.number),
-              const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(
-                label: 'Add',
-                onPressed: () async {
-                  final name = nameController.text.trim();
-                  if (name.isEmpty) return;
-                  try {
-                    await ref.read(bankingRepositoryProvider).createAccount(
-                          spaceId,
-                          name: name,
-                          type: type,
-                          currency: currencyController.text.trim().isEmpty ? null : currencyController.text.trim(),
-                          openingBalance: openingBalanceController.text.trim().isEmpty ? null : openingBalanceController.text.trim(),
+        builder: (context, setSheetState) => SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: AppSpacing.pageMargin,
+              right: AppSpacing.pageMargin,
+              top: AppSpacing.lg,
+              bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Add business account',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                AppTextField(label: 'Name', controller: nameController),
+                const SizedBox(height: AppSpacing.sm),
+                AppFieldGroup(
+                  label: 'Type',
+                  child: DropdownButtonFormField<BusinessAccountType>(
+                    itemHeight: null,
+                    isExpanded: true,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                    initialValue: type,
+                    decoration: const InputDecoration(),
+                    items: BusinessAccountType.values
+                        .map(
+                          (t) =>
+                              DropdownMenuItem(value: t, child: Text(t.name)),
+                        )
+                        .toList(),
+                    onChanged: (v) => setSheetState(() => type = v ?? type),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppTextField(label: 'Currency', controller: currencyController),
+                const SizedBox(height: AppSpacing.sm),
+                AppTextField(
+                  label: 'Opening balance',
+                  controller: openingBalanceController,
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                PrimaryButton(
+                  label: 'Add',
+                  onPressed: () async {
+                    final name = nameController.text.trim();
+                    if (name.isEmpty) return;
+                    try {
+                      await ref
+                          .read(bankingRepositoryProvider)
+                          .createAccount(
+                            spaceId,
+                            name: name,
+                            type: type,
+                            currency: currencyController.text.trim().isEmpty
+                                ? null
+                                : currencyController.text.trim(),
+                            openingBalance:
+                                openingBalanceController.text.trim().isEmpty
+                                ? null
+                                : openingBalanceController.text.trim(),
+                          );
+                      if (context.mounted) Navigator.of(context).pop(true);
+                    } catch (e) {
+                      if (context.mounted) {
+                        showErrorSnackBar(
+                          context,
+                          e is AppException
+                              ? e.message
+                              : 'Something went wrong.',
                         );
-                    if (context.mounted) Navigator.of(context).pop(true);
-                  } catch (e) {
-                    if (context.mounted) {
-                      showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+                      }
                     }
-                  }
-                },
-              ),
-            ],
+                  },
+                ),
+              ],
+            ),
           ),
-        )),
+        ),
       ),
     );
     if (saved == true) ref.invalidate(businessAccountListProvider(spaceId));
@@ -89,32 +124,64 @@ initialValue: type,
     final accounts = ref.watch(businessAccountListProvider(spaceId));
     return Scaffold(
       appBar: AppBar(title: const Text('Business Accounts')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(businessAccountListProvider(spaceId)),
-        child: accounts.when(
-          data: (items) => items.isEmpty
-              ? ListView(children: const [SizedBox(height: 80), EmptyView(icon: Icons.account_balance_outlined, title: 'No business accounts yet')])
-              : ListView.builder(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final a = items[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: ListTile(
-                        title: Text(a.name),
-                        subtitle: Text('${a.type.name} · ${a.currency}${a.archived ? ' · Archived' : ''}'),
-                        trailing: Text(Money.format(a.balance), style: Theme.of(context).textTheme.titleMedium),
-                        onTap: () => context.push(AppRoutes.businessAccountDetail(spaceId, a.id)),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async =>
+              ref.invalidate(businessAccountListProvider(spaceId)),
+          child: accounts.when(
+            data: (items) => items.isEmpty
+                ? ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: const [
+                      SizedBox(height: 80),
+                      EmptyView(
+                        icon: Icons.account_balance_outlined,
+                        title: 'No business accounts yet',
                       ),
-                    );
-                  },
-                ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(businessAccountListProvider(spaceId))),
+                    ],
+                  )
+                : ListView.builder(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: AppSpacing.scrollInsets(
+                      context,
+                      floatingAction: true,
+                    ),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final a = items[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: AppRecordTile(
+                          title: Text(a.name),
+                          subtitle: Text(
+                            '${a.type.name} · ${a.currency}${a.archived ? ' · Archived' : ''}',
+                          ),
+                          trailing: Text(
+                            Money.format(a.balance),
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          onTap: () => context.push(
+                            AppRoutes.businessAccountDetail(spaceId, a.id),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () =>
+                  ref.invalidate(businessAccountListProvider(spaceId)),
+            ),
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addAccount(context, ref), child: const DuitlahIcon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _addAccount(context, ref),
+        child: const DuitlahIcon(Icons.add),
+      ),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,7 +39,9 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
 
     setState(() => _submitting = true);
     try {
-      await ref.read(feedbackRepositoryProvider).submit(
+      await ref
+          .read(feedbackRepositoryProvider)
+          .submit(
             category: _category,
             message: message,
             idempotencyKey: const Uuid().v4(),
@@ -48,7 +52,10 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       }
     } catch (e) {
       if (mounted) {
-        showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -59,46 +66,69 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Send feedback')),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Found a bug, or have an idea for Duitlah? Let us know.',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            DropdownButtonFormField<FeedbackCategory>(
-              icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _category,
-              decoration: const InputDecoration(labelText: 'Category'),
-              items: const [
-                DropdownMenuItem(value: FeedbackCategory.BUG, child: Text('Bug report')),
-                DropdownMenuItem(
-                  value: FeedbackCategory.FEATURE_REQUEST,
-                  child: Text('Feature request'),
-                ),
-                DropdownMenuItem(value: FeedbackCategory.GENERAL, child: Text('General feedback')),
-                DropdownMenuItem(value: FeedbackCategory.COMPLAINT, child: Text('Complaint')),
-              ],
-              onChanged: (v) => setState(() => _category = v ?? FeedbackCategory.GENERAL),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: _messageController,
-              minLines: 5,
-              maxLines: 10,
-              maxLength: 2000,
-              decoration: const InputDecoration(
-                labelText: 'Your message',
-                alignLabelWithHint: true,
-                border: OutlineInputBorder(),
+      body: AppPageBody(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Found a bug, or have an idea for Duitlah? Let us know.',
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            PrimaryButton(label: 'Send feedback', onPressed: _submit, loading: _submitting),
-          ],
+              const SizedBox(height: AppSpacing.lg),
+              AppFieldGroup(
+                label: 'Category',
+                child: DropdownButtonFormField<FeedbackCategory>(
+                  itemHeight: null,
+                  isExpanded: true,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                  initialValue: _category,
+                  decoration: const InputDecoration(),
+                  items: const [
+                    DropdownMenuItem(
+                      value: FeedbackCategory.BUG,
+                      child: Text('Bug report'),
+                    ),
+                    DropdownMenuItem(
+                      value: FeedbackCategory.FEATURE_REQUEST,
+                      child: Text('Feature request'),
+                    ),
+                    DropdownMenuItem(
+                      value: FeedbackCategory.GENERAL,
+                      child: Text('General feedback'),
+                    ),
+                    DropdownMenuItem(
+                      value: FeedbackCategory.COMPLAINT,
+                      child: Text('Complaint'),
+                    ),
+                  ],
+                  onChanged: (v) =>
+                      setState(() => _category = v ?? FeedbackCategory.GENERAL),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              AppFieldGroup(
+                label: 'Your message',
+                child: TextField(
+                  controller: _messageController,
+                  minLines: 5,
+                  maxLines: 10,
+                  maxLength: 2000,
+                  decoration: const InputDecoration(
+                    alignLabelWithHint: true,
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              PrimaryButton(
+                label: 'Send feedback',
+                onPressed: _submit,
+                loading: _submitting,
+              ),
+            ],
+          ),
         ),
       ),
     );

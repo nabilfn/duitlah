@@ -9,6 +9,7 @@ import 'package:duitlah_mobile/core/api/providers.dart';
 import 'package:duitlah_mobile/core/auth/biometric_lock_service.dart';
 import 'package:duitlah_mobile/core/storage/secure_storage.dart';
 import 'package:duitlah_mobile/core/routing/main_shell.dart';
+import 'package:duitlah_mobile/core/widgets/dock_insets.dart';
 import 'package:duitlah_mobile/core/routing/app_router.dart';
 import 'package:duitlah_mobile/core/routing/app_routes.dart';
 import 'package:duitlah_mobile/features/accounts/data/finance_repository.dart';
@@ -20,6 +21,9 @@ import 'package:duitlah_mobile/features/auth/application/auth_state.dart';
 import 'package:duitlah_mobile/features/auth/data/auth_repository.dart';
 import 'package:duitlah_mobile/features/auth/domain/user.dart';
 import 'package:duitlah_mobile/features/home/presentation/home_screen.dart';
+import 'package:duitlah_mobile/features/auth/presentation/login_screen.dart';
+import 'package:duitlah_mobile/features/budgets/application/budgets_providers.dart';
+import 'package:duitlah_mobile/features/budgets/domain/budget.dart';
 import 'package:duitlah_mobile/features/transactions/presentation/transactions_screen.dart';
 import 'package:duitlah_mobile/features/transactions/presentation/transaction_form_sheet.dart';
 import 'package:duitlah_mobile/features/bagilah/presentation/bills_list_screen.dart';
@@ -137,6 +141,8 @@ List<Override> _overrides() => [
       recentTransactions: _transactions,
     ),
   ),
+  homeSpendingProvider.overrideWith((ref) async => const [CategorySpending(categoryId: 'food', categoryName: 'Food', amount: '430')]),
+  budgetListProvider.overrideWith((ref) async => [Budget(id: 'b', categoryName: 'Food', periodYear: DateTime.now().year, periodMonth: DateTime.now().month, cycleType: BudgetCycleType.CALENDAR_MONTH, limit: '3000', spent: '1840', remaining: '1160', status: BudgetStatus.OK)]),
   accountListProvider.overrideWith((ref) async => _accounts),
   categoryListProvider.overrideWith(
     (ref) async => [
@@ -161,8 +167,14 @@ List<Override> _overrides() => [
     (ref) async => const SettlementSummary(
       totalOwedToMe: '320',
       totalIOwe: '86.50',
-      owedToMe: [],
-      iOwe: [],
+      owedToMe: [
+        CounterpartySummary(userId: 'a', displayName: 'Aisyah', netAmount: '200', oldestUnpaidDays: 1),
+        CounterpartySummary(userId: 'c', displayName: 'Daniel', netAmount: '120', oldestUnpaidDays: 2),
+      ],
+      iOwe: [
+        CounterpartySummary(userId: 'b', displayName: 'Hana', netAmount: '-60', oldestUnpaidDays: 1),
+        CounterpartySummary(userId: 'd', displayName: 'Farid', netAmount: '-26.50', oldestUnpaidDays: 3),
+      ],
     ),
   ),
   billListProvider.overrideWith(
@@ -331,6 +343,21 @@ void main() {
       expect(find.byType(DuitlahBottomNavigation), findsOneWidget);
     }
   });
+  testWidgets('balance visibility hides the canvas amounts and restores them', (tester) async {
+    await tester.pumpWidget(ProviderScope(overrides: _overrides(), child: MaterialApp(theme: AppTheme.light(), home: const HomeScreen())));
+    await tester.pumpAndSettle();
+    final toggle = find.byTooltip('Hide balance');
+    await tester.ensureVisible(toggle);
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(find.text('RM •••••'), findsOneWidget);
+    expect(find.text('RM 4,850.75'), findsNothing);
+    expect(find.text('RM 6,200.00 income this month'), findsNothing);
+    await tester.tap(find.byTooltip('Show balance'));
+    await tester.pumpAndSettle();
+    expect(find.text('RM 4,850.75'), findsOneWidget);
+  });
+
   for (final type in [TransactionType.EXPENSE, TransactionType.TRANSFER]) {
     testWidgets('$type validates and calls the existing repository', (
       tester,
@@ -398,6 +425,7 @@ void main() {
     'analytics': const InsightsScreen(),
     'profile': const ProfileScreen(),
     'add_transaction': const TransactionFormSheet(),
+    'login': const LoginScreen(),
   };
   for (final scenario in [
     (const Size(390, 844), false),
@@ -437,10 +465,11 @@ void main() {
                   textScaler: TextScaler.linear(size.width == 320 ? 1.3 : 1),
                 ),
                 child: Scaffold(
-                  body: entry.value,
-                  bottomNavigationBar: entry.key == 'add_transaction'
+                  extendBody: entry.key != 'login' && entry.key != 'add_transaction',
+                  body: DuitlahDockBody(child: entry.value),
+                  bottomNavigationBar: (entry.key == 'add_transaction' || entry.key == 'login')
                       ? null
-                      : DuitlahBottomNavigation(
+                      : DuitlahNavigationDock(
                           currentBranch: {
                             'home': 0,
                             'transactions': 1,

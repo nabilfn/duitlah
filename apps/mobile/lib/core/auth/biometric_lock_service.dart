@@ -23,15 +23,20 @@ class BiometricLockService {
     }
   }
 
-  Future<bool> isEnabled() async => (await _storage.read(_enabledKey)) == 'true';
+  Future<bool> isEnabled() async =>
+      (await _storage.read(_enabledKey)) == 'true';
 
-  Future<void> setEnabled(bool enabled) => _storage.write(_enabledKey, enabled.toString());
+  Future<void> setEnabled(bool enabled) =>
+      _storage.write(_enabledKey, enabled.toString());
 
   Future<bool> authenticate() async {
     try {
       return await _auth.authenticate(
         localizedReason: 'Unlock Duitlah',
-        options: const AuthenticationOptions(biometricOnly: false, stickyAuth: true),
+        options: const AuthenticationOptions(
+          biometricOnly: false,
+          stickyAuth: true,
+        ),
       );
     } catch (_) {
       return false;

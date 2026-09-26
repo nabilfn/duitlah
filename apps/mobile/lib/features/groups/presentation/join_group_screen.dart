@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -33,7 +34,11 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
       ref.invalidate(groupListProvider);
       if (mounted) context.pushReplacement(AppRoutes.groupDetail(group.id));
     } catch (e) {
-      setState(() => _error = e is AppException ? e.message : 'Could not join this group.');
+      setState(
+        () => _error = e is AppException
+            ? e.message
+            : 'Could not join this group.',
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -49,19 +54,31 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Join a group')),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AppTextField(label: 'Invite link or code', controller: _tokenController),
-            if (_error != null) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+      body: AppPageBody(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppTextField(
+                label: 'Invite link or code',
+                controller: _tokenController,
+              ),
+              if (_error != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  _error!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.lg),
+              PrimaryButton(
+                label: 'Join',
+                onPressed: _submit,
+                loading: _loading,
+              ),
             ],
-            const SizedBox(height: AppSpacing.lg),
-            PrimaryButton(label: 'Join', onPressed: _submit, loading: _loading),
-          ],
+          ),
         ),
       ),
     );

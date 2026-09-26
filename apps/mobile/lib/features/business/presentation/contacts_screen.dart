@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,49 +42,82 @@ class _ContactsBody extends ConsumerWidget {
     final contactPersonController = TextEditingController(text: contactPerson);
     final phoneController = TextEditingController(text: phone);
     final emailController = TextEditingController(text: email);
-    final billingAddressController = TextEditingController(text: billingAddress);
-    final registrationNumberController = TextEditingController(text: registrationNumber);
+    final billingAddressController = TextEditingController(
+      text: billingAddress,
+    );
+    final registrationNumberController = TextEditingController(
+      text: registrationNumber,
+    );
     final tinController = TextEditingController(text: tin);
     final sstNumberController = TextEditingController(text: sstNumber);
-    final paymentTermsController = TextEditingController(text: paymentTermsDays?.toString());
+    final paymentTermsController = TextEditingController(
+      text: paymentTermsDays?.toString(),
+    );
     final notesController = TextEditingController(text: notes);
 
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => Padding(
         padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
+          left: AppSpacing.pageMargin,
+          right: AppSpacing.pageMargin,
           top: AppSpacing.lg,
           bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
         ),
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                existingId == null ? (isSupplier ? 'Add supplier' : 'Add customer') : 'Edit ${isSupplier ? 'supplier' : 'customer'}',
+                existingId == null
+                    ? (isSupplier ? 'Add supplier' : 'Add customer')
+                    : 'Edit ${isSupplier ? 'supplier' : 'customer'}',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: AppSpacing.md),
               AppTextField(label: 'Name', controller: nameController),
               const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Contact person', controller: contactPersonController),
+              AppTextField(
+                label: 'Contact person',
+                controller: contactPersonController,
+              ),
               const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Phone', controller: phoneController, keyboardType: TextInputType.phone),
+              AppTextField(
+                label: 'Phone',
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+              ),
               const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Email', controller: emailController, keyboardType: TextInputType.emailAddress),
+              AppTextField(
+                label: 'Email',
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+              ),
               const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Billing address', controller: billingAddressController),
+              AppTextField(
+                label: 'Billing address',
+                controller: billingAddressController,
+              ),
               const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Registration number', controller: registrationNumberController),
+              AppTextField(
+                label: 'Registration number',
+                controller: registrationNumberController,
+              ),
               const SizedBox(height: AppSpacing.sm),
               AppTextField(label: 'TIN', controller: tinController),
               const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'SST number', controller: sstNumberController),
+              AppTextField(
+                label: 'SST number',
+                controller: sstNumberController,
+              ),
               const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Payment terms (days)', controller: paymentTermsController, keyboardType: TextInputType.number),
+              AppTextField(
+                label: 'Payment terms (days)',
+                controller: paymentTermsController,
+                keyboardType: TextInputType.number,
+              ),
               const SizedBox(height: AppSpacing.sm),
               AppTextField(label: 'Notes', controller: notesController),
               const SizedBox(height: AppSpacing.lg),
@@ -91,8 +126,11 @@ class _ContactsBody extends ConsumerWidget {
                 onPressed: () async {
                   final name = nameController.text.trim();
                   if (name.isEmpty) return;
-                  String? orNull(TextEditingController c) => c.text.trim().isEmpty ? null : c.text.trim();
-                  final paymentTerms = int.tryParse(paymentTermsController.text.trim());
+                  String? orNull(TextEditingController c) =>
+                      c.text.trim().isEmpty ? null : c.text.trim();
+                  final paymentTerms = int.tryParse(
+                    paymentTermsController.text.trim(),
+                  );
                   try {
                     final repo = ref.read(contactsRepositoryProvider);
                     if (isSupplier) {
@@ -104,7 +142,9 @@ class _ContactsBody extends ConsumerWidget {
                           phone: orNull(phoneController),
                           email: orNull(emailController),
                           billingAddress: orNull(billingAddressController),
-                          registrationNumber: orNull(registrationNumberController),
+                          registrationNumber: orNull(
+                            registrationNumberController,
+                          ),
                           tin: orNull(tinController),
                           sstNumber: orNull(sstNumberController),
                           paymentTermsDays: paymentTerms,
@@ -119,7 +159,9 @@ class _ContactsBody extends ConsumerWidget {
                           phone: orNull(phoneController),
                           email: orNull(emailController),
                           billingAddress: orNull(billingAddressController),
-                          registrationNumber: orNull(registrationNumberController),
+                          registrationNumber: orNull(
+                            registrationNumberController,
+                          ),
                           tin: orNull(tinController),
                           sstNumber: orNull(sstNumberController),
                           paymentTermsDays: paymentTerms,
@@ -135,7 +177,9 @@ class _ContactsBody extends ConsumerWidget {
                           phone: orNull(phoneController),
                           email: orNull(emailController),
                           billingAddress: orNull(billingAddressController),
-                          registrationNumber: orNull(registrationNumberController),
+                          registrationNumber: orNull(
+                            registrationNumberController,
+                          ),
                           tin: orNull(tinController),
                           sstNumber: orNull(sstNumberController),
                           paymentTermsDays: paymentTerms,
@@ -150,7 +194,9 @@ class _ContactsBody extends ConsumerWidget {
                           phone: orNull(phoneController),
                           email: orNull(emailController),
                           billingAddress: orNull(billingAddressController),
-                          registrationNumber: orNull(registrationNumberController),
+                          registrationNumber: orNull(
+                            registrationNumberController,
+                          ),
                           tin: orNull(tinController),
                           sstNumber: orNull(sstNumberController),
                           paymentTermsDays: paymentTerms,
@@ -161,7 +207,10 @@ class _ContactsBody extends ConsumerWidget {
                     if (context.mounted) Navigator.of(context).pop(true);
                   } catch (e) {
                     if (context.mounted) {
-                      showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+                      showErrorSnackBar(
+                        context,
+                        e is AppException ? e.message : 'Something went wrong.',
+                      );
                     }
                   }
                 },
@@ -184,7 +233,8 @@ class _ContactsBody extends ConsumerWidget {
     final confirmed = await showConfirmDialog(
       context,
       title: 'Archive ${isSupplier ? 'supplier' : 'customer'}?',
-      message: 'This hides it from active lists — it is not permanently deleted.',
+      message:
+          'This hides it from active lists — it is not permanently deleted.',
       confirmLabel: 'Archive',
       destructive: true,
     );
@@ -198,19 +248,27 @@ class _ContactsBody extends ConsumerWidget {
         ref.invalidate(customerListProvider(spaceId));
       }
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
   Widget _emptyView() => ListView(
-        children: [
-          const SizedBox(height: 80),
-          EmptyView(
-            icon: isSupplier ? Icons.local_shipping_outlined : Icons.people_alt_outlined,
-            title: isSupplier ? 'No suppliers yet' : 'No customers yet',
-          ),
-        ],
-      );
+    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+    children: [
+      const SizedBox(height: 80),
+      EmptyView(
+        icon: isSupplier
+            ? Icons.local_shipping_outlined
+            : Icons.people_alt_outlined,
+        title: isSupplier ? 'No suppliers yet' : 'No customers yet',
+      ),
+    ],
+  );
 
   Widget _row(
     BuildContext context,
@@ -224,13 +282,16 @@ class _ContactsBody extends ConsumerWidget {
   }) {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: ListTile(
+      child: AppRecordTile(
         title: Text(name),
-        subtitle: Text([if (email != null) email, if (phone != null) phone].join(' · ')),
+        subtitle: Text(
+          [if (email != null) email, if (phone != null) phone].join(' · '),
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (status == ContactStatus.ARCHIVED) const Chip(label: Text('Archived')),
+            if (status == ContactStatus.ARCHIVED)
+              const Chip(label: Text('Archived')),
             IconButton(
               icon: const DuitlahIcon(Icons.archive_outlined),
               onPressed: () => _archive(context, ref, id),
@@ -246,91 +307,118 @@ class _ContactsBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: Text(isSupplier ? 'Suppliers' : 'Customers')),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          if (isSupplier) {
-            ref.invalidate(supplierListProvider(spaceId));
-          } else {
-            ref.invalidate(customerListProvider(spaceId));
-          }
-        },
-        child: isSupplier
-            ? ref.watch(supplierListProvider(spaceId)).when(
-                  data: (items) => items.isEmpty
-                      ? _emptyView()
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(AppSpacing.lg),
-                          itemCount: items.length,
-                          itemBuilder: (context, index) {
-                            final s = items[index];
-                            return _row(
-                              context,
-                              ref,
-                              id: s.id,
-                              name: s.name,
-                              email: s.email,
-                              phone: s.phone,
-                              status: s.status,
-                              onTap: () => _openForm(
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            if (isSupplier) {
+              ref.invalidate(supplierListProvider(spaceId));
+            } else {
+              ref.invalidate(customerListProvider(spaceId));
+            }
+          },
+          child: isSupplier
+              ? ref
+                    .watch(supplierListProvider(spaceId))
+                    .when(
+                      data: (items) => items.isEmpty
+                          ? _emptyView()
+                          : ListView.builder(
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              padding: AppSpacing.scrollInsets(
                                 context,
-                                ref,
-                                existingId: s.id,
-                                name: s.name,
-                                contactPerson: s.contactPerson,
-                                phone: s.phone,
-                                email: s.email,
-                                billingAddress: s.billingAddress,
-                                registrationNumber: s.registrationNumber,
-                                tin: s.tin,
-                                sstNumber: s.sstNumber,
-                                paymentTermsDays: s.paymentTermsDays,
-                                notes: s.notes,
+                                floatingAction: true,
                               ),
-                            );
-                          },
-                        ),
-                  loading: () => const LoadingView(),
-                  error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(supplierListProvider(spaceId))),
-                )
-            : ref.watch(customerListProvider(spaceId)).when(
-                  data: (items) => items.isEmpty
-                      ? _emptyView()
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(AppSpacing.lg),
-                          itemCount: items.length,
-                          itemBuilder: (context, index) {
-                            final c = items[index];
-                            return _row(
-                              context,
-                              ref,
-                              id: c.id,
-                              name: c.name,
-                              email: c.email,
-                              phone: c.phone,
-                              status: c.status,
-                              onTap: () => _openForm(
+                              itemCount: items.length,
+                              itemBuilder: (context, index) {
+                                final s = items[index];
+                                return _row(
+                                  context,
+                                  ref,
+                                  id: s.id,
+                                  name: s.name,
+                                  email: s.email,
+                                  phone: s.phone,
+                                  status: s.status,
+                                  onTap: () => _openForm(
+                                    context,
+                                    ref,
+                                    existingId: s.id,
+                                    name: s.name,
+                                    contactPerson: s.contactPerson,
+                                    phone: s.phone,
+                                    email: s.email,
+                                    billingAddress: s.billingAddress,
+                                    registrationNumber: s.registrationNumber,
+                                    tin: s.tin,
+                                    sstNumber: s.sstNumber,
+                                    paymentTermsDays: s.paymentTermsDays,
+                                    notes: s.notes,
+                                  ),
+                                );
+                              },
+                            ),
+                      loading: () => const LoadingView(),
+                      error: (e, _) => ErrorView(
+                        error: e,
+                        onRetry: () =>
+                            ref.invalidate(supplierListProvider(spaceId)),
+                      ),
+                    )
+              : ref
+                    .watch(customerListProvider(spaceId))
+                    .when(
+                      data: (items) => items.isEmpty
+                          ? _emptyView()
+                          : ListView.builder(
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              padding: AppSpacing.scrollInsets(
                                 context,
-                                ref,
-                                existingId: c.id,
-                                name: c.name,
-                                contactPerson: c.contactPerson,
-                                phone: c.phone,
-                                email: c.email,
-                                billingAddress: c.billingAddress,
-                                registrationNumber: c.registrationNumber,
-                                tin: c.tin,
-                                sstNumber: c.sstNumber,
-                                paymentTermsDays: c.paymentTermsDays,
-                                notes: c.notes,
+                                floatingAction: true,
                               ),
-                            );
-                          },
-                        ),
-                  loading: () => const LoadingView(),
-                  error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(customerListProvider(spaceId))),
-                ),
+                              itemCount: items.length,
+                              itemBuilder: (context, index) {
+                                final c = items[index];
+                                return _row(
+                                  context,
+                                  ref,
+                                  id: c.id,
+                                  name: c.name,
+                                  email: c.email,
+                                  phone: c.phone,
+                                  status: c.status,
+                                  onTap: () => _openForm(
+                                    context,
+                                    ref,
+                                    existingId: c.id,
+                                    name: c.name,
+                                    contactPerson: c.contactPerson,
+                                    phone: c.phone,
+                                    email: c.email,
+                                    billingAddress: c.billingAddress,
+                                    registrationNumber: c.registrationNumber,
+                                    tin: c.tin,
+                                    sstNumber: c.sstNumber,
+                                    paymentTermsDays: c.paymentTermsDays,
+                                    notes: c.notes,
+                                  ),
+                                );
+                              },
+                            ),
+                      loading: () => const LoadingView(),
+                      error: (e, _) => ErrorView(
+                        error: e,
+                        onRetry: () =>
+                            ref.invalidate(customerListProvider(spaceId)),
+                      ),
+                    ),
+        ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _openForm(context, ref), child: const DuitlahIcon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _openForm(context, ref),
+        child: const DuitlahIcon(Icons.add),
+      ),
     );
   }
 }
@@ -341,7 +429,8 @@ class CustomersScreen extends StatelessWidget {
   final String spaceId;
 
   @override
-  Widget build(BuildContext context) => _ContactsBody(spaceId: spaceId, isSupplier: false);
+  Widget build(BuildContext context) =>
+      _ContactsBody(spaceId: spaceId, isSupplier: false);
 }
 
 class SuppliersScreen extends StatelessWidget {
@@ -350,5 +439,6 @@ class SuppliersScreen extends StatelessWidget {
   final String spaceId;
 
   @override
-  Widget build(BuildContext context) => _ContactsBody(spaceId: spaceId, isSupplier: true);
+  Widget build(BuildContext context) =>
+      _ContactsBody(spaceId: spaceId, isSupplier: true);
 }

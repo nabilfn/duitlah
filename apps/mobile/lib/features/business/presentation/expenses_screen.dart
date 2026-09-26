@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
@@ -33,12 +36,16 @@ class ExpensesScreen extends ConsumerWidget {
   final String spaceId;
 
   Future<void> _addExpense(BuildContext context, WidgetRef ref) async {
-    final suppliers = await ref.read(contactsRepositoryProvider).listSuppliers(spaceId);
+    final suppliers = await ref
+        .read(contactsRepositoryProvider)
+        .listSuppliers(spaceId);
     if (!context.mounted) return;
 
     final categoryController = TextEditingController();
     final amountController = TextEditingController();
-    final dateController = TextEditingController(text: DateTime.now().toIso8601String().substring(0, 10));
+    final dateController = TextEditingController(
+      text: DateTime.now().toIso8601String().substring(0, 10),
+    );
     final notesController = TextEditingController();
     Supplier? supplier;
 
@@ -47,36 +54,66 @@ class ExpensesScreen extends ConsumerWidget {
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => Padding(
           padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
+            left: AppSpacing.pageMargin,
+            right: AppSpacing.pageMargin,
             top: AppSpacing.lg,
             bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
           ),
           child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Add expense', style: Theme.of(context).textTheme.titleLarge),
+                Text(
+                  'Add expense',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
                 const SizedBox(height: AppSpacing.md),
-                DropdownButtonFormField<Supplier?>(
-                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: supplier,
-                  decoration: const InputDecoration(labelText: 'Supplier (optional — makes this a payable)'),
-                  items: [
-                    const DropdownMenuItem<Supplier?>(value: null, child: Text('None')),
-                    ...suppliers.map((s) => DropdownMenuItem<Supplier?>(value: s, child: Text(s.name))),
-                  ],
-                  onChanged: (v) => setSheetState(() => supplier = v),
+                AppFieldGroup(
+                  label: 'Supplier (optional — makes this a payable)',
+                  child: DropdownButtonFormField<Supplier?>(
+                    itemHeight: null,
+                    isExpanded: true,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                    initialValue: supplier,
+                    decoration: const InputDecoration(),
+                    items: [
+                      const DropdownMenuItem<Supplier?>(
+                        value: null,
+                        child: Text('None'),
+                      ),
+                      ...suppliers.map(
+                        (s) => DropdownMenuItem<Supplier?>(
+                          value: s,
+                          child: Text(s.name),
+                        ),
+                      ),
+                    ],
+                    onChanged: (v) => setSheetState(() => supplier = v),
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                AppTextField(label: 'Category (optional)', controller: categoryController),
+                AppTextField(
+                  label: 'Category (optional)',
+                  controller: categoryController,
+                ),
                 const SizedBox(height: AppSpacing.sm),
-                AppTextField(label: 'Amount', controller: amountController, keyboardType: TextInputType.number),
+                AppTextField(
+                  label: 'Amount',
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                ),
                 const SizedBox(height: AppSpacing.sm),
-                AppTextField(label: 'Date (YYYY-MM-DD)', controller: dateController),
+                AppTextField(
+                  label: 'Date (YYYY-MM-DD)',
+                  controller: dateController,
+                ),
                 const SizedBox(height: AppSpacing.sm),
-                AppTextField(label: 'Notes (optional)', controller: notesController),
+                AppTextField(
+                  label: 'Notes (optional)',
+                  controller: notesController,
+                ),
                 const SizedBox(height: AppSpacing.lg),
                 PrimaryButton(
                   label: 'Add',
@@ -84,18 +121,29 @@ initialValue: supplier,
                     final amount = amountController.text.trim();
                     if (amount.isEmpty) return;
                     try {
-                      await ref.read(expensesRepositoryProvider).createExpense(
+                      await ref
+                          .read(expensesRepositoryProvider)
+                          .createExpense(
                             spaceId,
                             supplierId: supplier?.id,
-                            category: categoryController.text.trim().isEmpty ? null : categoryController.text.trim(),
+                            category: categoryController.text.trim().isEmpty
+                                ? null
+                                : categoryController.text.trim(),
                             amount: amount,
                             occurredOn: dateController.text.trim(),
-                            notes: notesController.text.trim().isEmpty ? null : notesController.text.trim(),
+                            notes: notesController.text.trim().isEmpty
+                                ? null
+                                : notesController.text.trim(),
                           );
                       if (context.mounted) Navigator.of(context).pop(true);
                     } catch (e) {
                       if (context.mounted) {
-                        showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+                        showErrorSnackBar(
+                          context,
+                          e is AppException
+                              ? e.message
+                              : 'Something went wrong.',
+                        );
                       }
                     }
                   },
@@ -114,44 +162,75 @@ initialValue: supplier,
     final expenses = ref.watch(expenseListProvider(spaceId));
     return Scaffold(
       appBar: AppBar(title: const Text('Expenses')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(expenseListProvider(spaceId)),
-        child: expenses.when(
-          data: (items) => items.isEmpty
-              ? ListView(children: const [SizedBox(height: 80), EmptyView(icon: Icons.request_quote_outlined, title: 'No expenses yet')])
-              : ListView.builder(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final e = items[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: ListTile(
-                        title: Text(e.category ?? 'Expense'),
-                        subtitle: Text(e.occurredOn),
-                        trailing: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(Money.format(e.amount)),
-                            Chip(
-                              label: Text(e.status.name, style: const TextStyle(fontSize: 11)),
-                              backgroundColor: expenseStatusColor(context, e.status).withValues(alpha: 0.15),
-                              visualDensity: VisualDensity.compact,
-                              padding: EdgeInsets.zero,
-                            ),
-                          ],
-                        ),
-                        onTap: () => context.push(AppRoutes.businessExpenseDetail(spaceId, e.id)),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(expenseListProvider(spaceId)),
+          child: expenses.when(
+            data: (items) => items.isEmpty
+                ? ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: const [
+                      SizedBox(height: 80),
+                      EmptyView(
+                        icon: Icons.request_quote_outlined,
+                        title: 'No expenses yet',
                       ),
-                    );
-                  },
-                ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(expenseListProvider(spaceId))),
+                    ],
+                  )
+                : ListView.builder(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: AppSpacing.scrollInsets(
+                      context,
+                      floatingAction: true,
+                    ),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final e = items[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: AppRecordTile(
+                          title: Text(e.category ?? 'Expense'),
+                          subtitle: Text(e.occurredOn),
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(Money.format(e.amount)),
+                              Chip(
+                                label: Text(
+                                  e.status.name,
+                                  style: const TextStyle(fontSize: 11),
+                                ),
+                                backgroundColor: expenseStatusColor(
+                                  context,
+                                  e.status,
+                                ).withValues(alpha: 0.15),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                              ),
+                            ],
+                          ),
+                          onTap: () => context.push(
+                            AppRoutes.businessExpenseDetail(spaceId, e.id),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(expenseListProvider(spaceId)),
+            ),
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addExpense(context, ref), child: const DuitlahIcon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _addExpense(context, ref),
+        child: const DuitlahIcon(Icons.add),
+      ),
     );
   }
 }

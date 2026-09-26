@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/theme/app_semantic_colors.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
@@ -50,44 +53,75 @@ class QuotationsScreen extends ConsumerWidget {
     final quotations = ref.watch(quotationListProvider(spaceId));
     return Scaffold(
       appBar: AppBar(title: const Text('Quotations')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(quotationListProvider(spaceId)),
-        child: quotations.when(
-          data: (items) => items.isEmpty
-              ? ListView(children: const [SizedBox(height: 80), EmptyView(icon: Icons.description_outlined, title: 'No quotations yet')])
-              : ListView.builder(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final q = items[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: ListTile(
-                        title: Text(q.quoteNumber),
-                        subtitle: Text(q.issueDate),
-                        trailing: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(Money.format(q.total)),
-                            Chip(
-                              label: Text(q.status.name, style: const TextStyle(fontSize: 11)),
-                              backgroundColor: quotationStatusColor(context, q.status).withValues(alpha: 0.15),
-                              visualDensity: VisualDensity.compact,
-                              padding: EdgeInsets.zero,
-                            ),
-                          ],
-                        ),
-                        onTap: () => context.push(AppRoutes.businessQuotationDetail(spaceId, q.id)),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(quotationListProvider(spaceId)),
+          child: quotations.when(
+            data: (items) => items.isEmpty
+                ? ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: const [
+                      SizedBox(height: 80),
+                      EmptyView(
+                        icon: Icons.description_outlined,
+                        title: 'No quotations yet',
                       ),
-                    );
-                  },
-                ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(quotationListProvider(spaceId))),
+                    ],
+                  )
+                : ListView.builder(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: AppSpacing.scrollInsets(
+                      context,
+                      floatingAction: true,
+                    ),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final q = items[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: AppRecordTile(
+                          title: Text(q.quoteNumber),
+                          subtitle: Text(q.issueDate),
+                          trailing: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(Money.format(q.total)),
+                              Chip(
+                                label: Text(
+                                  q.status.name,
+                                  style: const TextStyle(fontSize: 11),
+                                ),
+                                backgroundColor: quotationStatusColor(
+                                  context,
+                                  q.status,
+                                ).withValues(alpha: 0.15),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                              ),
+                            ],
+                          ),
+                          onTap: () => context.push(
+                            AppRoutes.businessQuotationDetail(spaceId, q.id),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(quotationListProvider(spaceId)),
+            ),
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _newQuotation(context, ref), child: const DuitlahIcon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _newQuotation(context, ref),
+        child: const DuitlahIcon(Icons.add),
+      ),
     );
   }
 }
@@ -98,11 +132,14 @@ class _QuotationFormSheet extends ConsumerStatefulWidget {
   final String spaceId;
 
   @override
-  ConsumerState<_QuotationFormSheet> createState() => _QuotationFormSheetState();
+  ConsumerState<_QuotationFormSheet> createState() =>
+      _QuotationFormSheetState();
 }
 
 class _QuotationFormSheetState extends ConsumerState<_QuotationFormSheet> {
-  final _issueDateController = TextEditingController(text: DateTime.now().toIso8601String().substring(0, 10));
+  final _issueDateController = TextEditingController(
+    text: DateTime.now().toIso8601String().substring(0, 10),
+  );
   final _expiryDateController = TextEditingController();
   final _taxPercentController = TextEditingController(text: '0');
   final _notesController = TextEditingController();
@@ -120,8 +157,12 @@ class _QuotationFormSheetState extends ConsumerState<_QuotationFormSheet> {
   }
 
   Future<void> _load() async {
-    final customers = await ref.read(contactsRepositoryProvider).listCustomers(widget.spaceId);
-    final products = await ref.read(catalogRepositoryProvider).listProducts(widget.spaceId);
+    final customers = await ref
+        .read(contactsRepositoryProvider)
+        .listCustomers(widget.spaceId);
+    final products = await ref
+        .read(catalogRepositoryProvider)
+        .listProducts(widget.spaceId);
     if (!mounted) return;
     setState(() {
       _customers = customers;
@@ -133,18 +174,31 @@ class _QuotationFormSheetState extends ConsumerState<_QuotationFormSheet> {
   Future<void> _submit() async {
     if (_customer == null || _lineItems.isEmpty) return;
     try {
-      await ref.read(salesRepositoryProvider).createQuotation(
+      await ref
+          .read(salesRepositoryProvider)
+          .createQuotation(
             widget.spaceId,
             customerId: _customer!.id,
             issueDate: _issueDateController.text.trim(),
-            expiryDate: _expiryDateController.text.trim().isEmpty ? null : _expiryDateController.text.trim(),
-            taxPercent: _taxPercentController.text.trim().isEmpty ? null : _taxPercentController.text.trim(),
-            notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+            expiryDate: _expiryDateController.text.trim().isEmpty
+                ? null
+                : _expiryDateController.text.trim(),
+            taxPercent: _taxPercentController.text.trim().isEmpty
+                ? null
+                : _taxPercentController.text.trim(),
+            notes: _notesController.text.trim().isEmpty
+                ? null
+                : _notesController.text.trim(),
             lineItems: _lineItems.map((e) => e.toInput()).toList(),
           );
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
@@ -152,35 +206,65 @@ class _QuotationFormSheetState extends ConsumerState<_QuotationFormSheet> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        left: AppSpacing.lg,
-        right: AppSpacing.lg,
+        left: AppSpacing.pageMargin,
+        right: AppSpacing.pageMargin,
         top: AppSpacing.lg,
         bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
       child: _loading
-          ? const Padding(padding: EdgeInsets.all(AppSpacing.xxl), child: LoadingView())
+          ? const Padding(
+              padding: EdgeInsets.all(AppSpacing.xxl),
+              child: LoadingView(),
+            )
           : SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('New quotation', style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'New quotation',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: AppSpacing.md),
-                  DropdownButtonFormField<Customer>(
-                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _customer,
-                    decoration: const InputDecoration(labelText: 'Customer'),
-                    items: _customers.map((c) => DropdownMenuItem(value: c, child: Text(c.name))).toList(),
-                    onChanged: (v) => setState(() => _customer = v),
+                  AppFieldGroup(
+                    label: 'Customer',
+                    child: DropdownButtonFormField<Customer>(
+                      itemHeight: null,
+                      isExpanded: true,
+                      icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                      initialValue: _customer,
+                      decoration: const InputDecoration(),
+                      items: _customers
+                          .map(
+                            (c) =>
+                                DropdownMenuItem(value: c, child: Text(c.name)),
+                          )
+                          .toList(),
+                      onChanged: (v) => setState(() => _customer = v),
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  AppTextField(label: 'Issue date (YYYY-MM-DD)', controller: _issueDateController),
+                  AppTextField(
+                    label: 'Issue date (YYYY-MM-DD)',
+                    controller: _issueDateController,
+                  ),
                   const SizedBox(height: AppSpacing.sm),
-                  AppTextField(label: 'Expiry date (optional)', controller: _expiryDateController),
+                  AppTextField(
+                    label: 'Expiry date (optional)',
+                    controller: _expiryDateController,
+                  ),
                   const SizedBox(height: AppSpacing.sm),
-                  AppTextField(label: 'Tax %', controller: _taxPercentController, keyboardType: TextInputType.number),
+                  AppTextField(
+                    label: 'Tax %',
+                    controller: _taxPercentController,
+                    keyboardType: TextInputType.number,
+                  ),
                   const SizedBox(height: AppSpacing.sm),
-                  AppTextField(label: 'Notes (optional)', controller: _notesController),
+                  AppTextField(
+                    label: 'Notes (optional)',
+                    controller: _notesController,
+                  ),
                   const SizedBox(height: AppSpacing.md),
                   LineItemsEditor(
                     items: _lineItems,
@@ -188,7 +272,10 @@ initialValue: _customer,
                     onChanged: (items) => setState(() => _lineItems = items),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  PrimaryButton(label: 'Create quotation', onPressed: _customer == null ? null : _submit),
+                  PrimaryButton(
+                    label: 'Create quotation',
+                    onPressed: _customer == null ? null : _submit,
+                  ),
                 ],
               ),
             ),

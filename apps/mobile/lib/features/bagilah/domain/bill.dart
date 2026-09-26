@@ -42,7 +42,8 @@ abstract class ReceiptItem with _$ReceiptItem {
     @AmountConverter() required String totalPrice,
   }) = _ReceiptItem;
 
-  factory ReceiptItem.fromJson(Map<String, dynamic> json) => _$ReceiptItemFromJson(json);
+  factory ReceiptItem.fromJson(Map<String, dynamic> json) =>
+      _$ReceiptItemFromJson(json);
 }
 
 @freezed
@@ -54,7 +55,8 @@ abstract class Participant with _$Participant {
     required bool guest,
   }) = _Participant;
 
-  factory Participant.fromJson(Map<String, dynamic> json) => _$ParticipantFromJson(json);
+  factory Participant.fromJson(Map<String, dynamic> json) =>
+      _$ParticipantFromJson(json);
 }
 
 @freezed
@@ -78,7 +80,8 @@ abstract class BillPayment with _$BillPayment {
     @AmountConverter() required String amountPaid,
   }) = _BillPayment;
 
-  factory BillPayment.fromJson(Map<String, dynamic> json) => _$BillPaymentFromJson(json);
+  factory BillPayment.fromJson(Map<String, dynamic> json) =>
+      _$BillPaymentFromJson(json);
 }
 
 @freezed
@@ -89,7 +92,8 @@ abstract class ItemIssue with _$ItemIssue {
     required IssueType type,
   }) = _ItemIssue;
 
-  factory ItemIssue.fromJson(Map<String, dynamic> json) => _$ItemIssueFromJson(json);
+  factory ItemIssue.fromJson(Map<String, dynamic> json) =>
+      _$ItemIssueFromJson(json);
 }
 
 @freezed
@@ -120,7 +124,8 @@ abstract class Breakdown with _$Breakdown {
     required List<ParticipantBreakdown> participants,
   }) = _Breakdown;
 
-  factory Breakdown.fromJson(Map<String, dynamic> json) => _$BreakdownFromJson(json);
+  factory Breakdown.fromJson(Map<String, dynamic> json) =>
+      _$BreakdownFromJson(json);
 }
 
 @freezed
@@ -133,7 +138,8 @@ abstract class BillBalance with _$BillBalance {
     @AmountConverter() required String net,
   }) = _BillBalance;
 
-  factory BillBalance.fromJson(Map<String, dynamic> json) => _$BillBalanceFromJson(json);
+  factory BillBalance.fromJson(Map<String, dynamic> json) =>
+      _$BillBalanceFromJson(json);
 }
 
 @freezed
@@ -146,5 +152,6 @@ abstract class JoinBillResponse with _$JoinBillResponse {
     String? guestToken,
   }) = _JoinBillResponse;
 
-  factory JoinBillResponse.fromJson(Map<String, dynamic> json) => _$JoinBillResponseFromJson(json);
+  factory JoinBillResponse.fromJson(Map<String, dynamic> json) =>
+      _$JoinBillResponseFromJson(json);
 }

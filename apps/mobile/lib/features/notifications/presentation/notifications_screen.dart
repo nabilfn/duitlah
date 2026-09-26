@@ -1,57 +1,141 @@
-import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_page_body.dart';
 import '../../../core/widgets/app_state_views.dart';
+import '../../../core/widgets/dialogs.dart';
 import '../application/notifications_providers.dart';
 import '../domain/app_notification.dart';
 
-/// Real, backed by the V2 Phase 3 notification architecture (spec section 24) — no longer the
-/// Phase 9.5 placeholder. Push delivery itself is still not wired up (see the backend's
-/// `PushNotificationProvider` Javadoc); this screen shows the in-app channel, which is real today.
+/// In-app notifications retain their server order and existing read behavior.
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
 
-  Future<void> _markRead(WidgetRef ref, AppNotification notification) async {
+  Future<void> _markRead(
+    BuildContext context,
+    WidgetRef ref,
+    AppNotification notification,
+  ) async {
     if (notification.read) return;
-    await ref.read(notificationRepositoryProvider).markRead(notification.id);
-    ref.invalidate(notificationListProvider);
-    ref.invalidate(unreadNotificationCountProvider);
+    try {
+      await ref.read(notificationRepositoryProvider).markRead(notification.id);
+      ref.invalidate(notificationListProvider);
+      ref.invalidate(unreadNotificationCountProvider);
+    } catch (_) {
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          'Couldn’t mark this as read. Tap to try again.',
+        );
+      }
+    }
+  }
+
+  String _day(String value) {
+    final date = DateTime.tryParse(value)?.toLocal();
+    if (date == null) return 'Updates';
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final day = DateTime(date.year, date.month, date.day);
+    if (day == today) return 'Today';
+    if (day == today.subtract(const Duration(days: 1))) return 'Yesterday';
+    return DateFormat('d MMM yyyy').format(date);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifications = ref.watch(notificationListProvider);
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Notifications')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(notificationListProvider),
-        child: notifications.when(
-          data: (items) => items.isEmpty
-              ? ListView(
-                  children: const [
-                    SizedBox(height: 80),
-                    EmptyView(icon: Icons.notifications_off_outlined, title: 'No notifications yet'),
-                  ],
-                )
-              : ListView.separated(
-                  itemCount: items.length,
-                  separatorBuilder: (_, _) => const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final n = items[index];
-                    return ListTile(
-                      leading: DuitlahIcon(
-                        n.read ? Icons.notifications_none : Icons.notifications,
-                        color: n.read ? null : Theme.of(context).colorScheme.primary,
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(notificationListProvider),
+          child: notifications.when(
+            data: (items) => items.isEmpty
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 48),
+                      EmptyView(
+                        icon: Icons.notifications_off_outlined,
+                        title: 'You’re all caught up',
+                        message: 'Bill reminders and shared-money updates will appear here.',
                       ),
-                      title: Text(n.title, style: TextStyle(fontWeight: n.read ? FontWeight.normal : FontWeight.bold)),
-                      subtitle: Text(n.body),
-                      onTap: () => _markRead(ref, n),
-                    );
-                  },
-                ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(notificationListProvider)),
+                    ],
+                  )
+                : ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: AppSpacing.scrollInsets(context),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final n = items[index];
+                      final time = DateTime.tryParse(n.createdAt)?.toLocal();
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (index == 0 ||
+                              _day(items[index - 1].createdAt) !=
+                                  _day(n.createdAt))
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                top: 16,
+                                bottom: 12,
+                              ),
+                              child: Text(
+                                _day(n.createdAt),
+                                style: theme.textTheme.titleSmall,
+                              ),
+                            ),
+                          Semantics(
+                            label: n.read ? 'Read' : 'Unread',
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 8,
+                              ),
+                              title: Text(
+                                n.title,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  fontWeight: n.read
+                                      ? FontWeight.w500
+                                      : FontWeight.w700,
+                                ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    n.body,
+                                    style: theme.textTheme.bodyMedium,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    [
+                                      if (!n.read) 'Unread',
+                                      if (time != null)
+                                        DateFormat('h:mm a').format(time),
+                                    ].join(' · '),
+                                    style: theme.textTheme.labelMedium,
+                                  ),
+                                ],
+                              ),
+                              onTap: () => _markRead(context, ref, n),
+                            ),
+                          ),
+                          const Divider(),
+                        ],
+                      );
+                    },
+                  ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(notificationListProvider),
+            ),
+          ),
         ),
       ),
     );

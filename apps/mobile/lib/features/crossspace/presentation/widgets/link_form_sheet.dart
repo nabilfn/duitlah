@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/utils/money.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,7 +32,11 @@ String _fmtDate(DateTime d) => d.toIso8601String().substring(0, 10);
 /// — plus REIMBURSEMENT alone gets an optional picker over this business's
 /// own prior BUSINESS_ADVANCE links, to name which one it settles.
 class LinkFormSheet extends ConsumerStatefulWidget {
-  const LinkFormSheet({super.key, required this.spaceId, required this.linkType});
+  const LinkFormSheet({
+    super.key,
+    required this.spaceId,
+    required this.linkType,
+  });
 
   final String spaceId;
   final CrossSpaceLinkType linkType;
@@ -49,9 +55,11 @@ class _LinkFormSheetState extends ConsumerState<LinkFormSheet> {
   DateTime _occurredOn = DateTime.now();
   bool _submitting = false;
 
-  bool get _needsExpenseAccount => widget.linkType == CrossSpaceLinkType.BUSINESS_ADVANCE;
+  bool get _needsExpenseAccount =>
+      widget.linkType == CrossSpaceLinkType.BUSINESS_ADVANCE;
   bool get _needsBusinessAccount => !_needsExpenseAccount;
-  bool get _showsRelatedLink => widget.linkType == CrossSpaceLinkType.REIMBURSEMENT;
+  bool get _showsRelatedLink =>
+      widget.linkType == CrossSpaceLinkType.REIMBURSEMENT;
 
   bool get _canSubmit =>
       !_submitting &&
@@ -88,7 +96,9 @@ class _LinkFormSheetState extends ConsumerState<LinkFormSheet> {
     setState(() => _submitting = true);
     try {
       final repo = ref.read(crossSpaceRepositoryProvider);
-      final description = _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim();
+      final description = _descriptionController.text.trim().isEmpty
+          ? null
+          : _descriptionController.text.trim();
       final occurredOn = _fmtDate(_occurredOn);
 
       if (widget.linkType == CrossSpaceLinkType.BUSINESS_ADVANCE) {
@@ -133,7 +143,10 @@ class _LinkFormSheetState extends ConsumerState<LinkFormSheet> {
     } catch (e) {
       if (mounted) {
         setState(() => _submitting = false);
-        showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
       }
     }
   }
@@ -141,36 +154,46 @@ class _LinkFormSheetState extends ConsumerState<LinkFormSheet> {
   @override
   Widget build(BuildContext context) {
     final expenseAccounts = _needsExpenseAccount
-        ? (ref.watch(chartOfAccountsListProvider(widget.spaceId)).valueOrNull ?? const <LedgerAccount>[])
-            .where((a) => a.type == LedgerAccountType.EXPENSE && !a.archived)
-            .toList()
+        ? (ref.watch(chartOfAccountsListProvider(widget.spaceId)).valueOrNull ??
+                  const <LedgerAccount>[])
+              .where((a) => a.type == LedgerAccountType.EXPENSE && !a.archived)
+              .toList()
         : const <LedgerAccount>[];
     final businessAccounts = _needsBusinessAccount
-        ? (ref.watch(businessAccountListProvider(widget.spaceId)).valueOrNull ?? const <BusinessAccount>[])
-            .where((a) => !a.archived)
-            .toList()
+        ? (ref.watch(businessAccountListProvider(widget.spaceId)).valueOrNull ??
+                  const <BusinessAccount>[])
+              .where((a) => !a.archived)
+              .toList()
         : const <BusinessAccount>[];
     final priorAdvances = _showsRelatedLink
-        ? (ref.watch(crossSpaceLinkListProvider(widget.spaceId)).valueOrNull ?? const <CrossSpaceLinkResponse>[])
-            .where((l) => l.linkType == CrossSpaceLinkType.BUSINESS_ADVANCE)
-            .toList()
+        ? (ref.watch(crossSpaceLinkListProvider(widget.spaceId)).valueOrNull ??
+                  const <CrossSpaceLinkResponse>[])
+              .where((l) => l.linkType == CrossSpaceLinkType.BUSINESS_ADVANCE)
+              .toList()
         : const <CrossSpaceLinkResponse>[];
 
     return Padding(
       padding: EdgeInsets.only(
-        left: AppSpacing.lg,
-        right: AppSpacing.lg,
+        left: AppSpacing.pageMargin,
+        right: AppSpacing.pageMargin,
         top: AppSpacing.lg,
         bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
       child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(crossSpaceLinkTypeLabel(widget.linkType), style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              crossSpaceLinkTypeLabel(widget.linkType),
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: AppSpacing.xs),
-            Text(crossSpaceLinkTypeDescription(widget.linkType), style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              crossSpaceLinkTypeDescription(widget.linkType),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               "This links a transaction you've already recorded in Personal — it never creates a new one.",
@@ -180,65 +203,101 @@ class _LinkFormSheetState extends ConsumerState<LinkFormSheet> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               tileColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.sm),
+              ),
               title: Text(
                 _transaction == null
                     ? 'Select a personal transaction'
-                    : (_transaction!.merchant ?? _transaction!.description ?? _transaction!.type.name),
+                    : (_transaction!.merchant ??
+                          _transaction!.description ??
+                          _transaction!.type.name),
               ),
-              subtitle:
-                  _transaction == null ? null : Text('RM ${_transaction!.amount} · ${_transaction!.occurredOn}'),
+              subtitle: _transaction == null
+                  ? null
+                  : Text(
+                      'RM ${_transaction!.amount} · ${_transaction!.occurredOn}',
+                    ),
               trailing: const DuitlahIcon(Icons.chevron_right),
               onTap: _pickTransaction,
             ),
             const SizedBox(height: AppSpacing.sm),
             if (_needsExpenseAccount) ...[
-              DropdownButtonFormField<String>(
-                icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _chartOfAccountsId,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Expense account'),
-                items: expenseAccounts
-                    .map((a) => DropdownMenuItem(value: a.id, child: Text('${a.code} · ${a.name}')))
-                    .toList(),
-                onChanged: (v) => setState(() => _chartOfAccountsId = v),
+              AppFieldGroup(
+                label: 'Expense account',
+                child: DropdownButtonFormField<String>(
+                  itemHeight: null,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                  initialValue: _chartOfAccountsId,
+                  isExpanded: true,
+                  decoration: const InputDecoration(),
+                  items: expenseAccounts
+                      .map(
+                        (a) => DropdownMenuItem(
+                          value: a.id,
+                          child: Text('${a.code} · ${a.name}'),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) => setState(() => _chartOfAccountsId = v),
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
             ],
             if (_needsBusinessAccount) ...[
-              DropdownButtonFormField<String>(
-                icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _businessAccountId,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Business account'),
-                items: businessAccounts.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
-                onChanged: (v) => setState(() => _businessAccountId = v),
+              AppFieldGroup(
+                label: 'Business account',
+                child: DropdownButtonFormField<String>(
+                  itemHeight: null,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                  initialValue: _businessAccountId,
+                  isExpanded: true,
+                  decoration: const InputDecoration(),
+                  items: businessAccounts
+                      .map(
+                        (a) =>
+                            DropdownMenuItem(value: a.id, child: Text(a.name)),
+                      )
+                      .toList(),
+                  onChanged: (v) => setState(() => _businessAccountId = v),
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
             ],
             if (_showsRelatedLink) ...[
-              DropdownButtonFormField<String?>(
-                icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _relatedLinkId,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Settles which advance? (optional)'),
-                items: [
-                  const DropdownMenuItem<String?>(value: null, child: Text('Not linked to a specific advance')),
-                  ...priorAdvances.map(
-                    (l) => DropdownMenuItem<String?>(
-                      value: l.id,
-                      child: Text(
-                        'RM ${l.amount}${l.description != null ? ' · ${l.description}' : ''}',
-                        overflow: TextOverflow.ellipsis,
+              AppFieldGroup(
+                label: 'Settles which advance? (optional)',
+                child: DropdownButtonFormField<String?>(
+                  itemHeight: null,
+                  icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                  initialValue: _relatedLinkId,
+                  isExpanded: true,
+                  decoration: const InputDecoration(),
+                  items: [
+                    const DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text('Not linked to a specific advance'),
+                    ),
+                    ...priorAdvances.map(
+                      (l) => DropdownMenuItem<String?>(
+                        value: l.id,
+                        child: Text(
+                          '${Money.format(l.amount)}${l.description != null ? ' · ${l.description}' : ''}',
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-                onChanged: (v) => setState(() => _relatedLinkId = v),
+                  ],
+                  onChanged: (v) => setState(() => _relatedLinkId = v),
+                ),
               ),
               const SizedBox(height: AppSpacing.sm),
             ],
-            AppTextField(label: 'Amount (RM)', controller: _amountController, keyboardType: TextInputType.number),
+            AppTextField(
+              label: 'Amount (RM)',
+              controller: _amountController,
+              keyboardType: TextInputType.number,
+            ),
             const SizedBox(height: AppSpacing.sm),
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -256,7 +315,10 @@ initialValue: _relatedLinkId,
               },
             ),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'Description (optional)', controller: _descriptionController),
+            AppTextField(
+              label: 'Description (optional)',
+              controller: _descriptionController,
+            ),
             const SizedBox(height: AppSpacing.lg),
             PrimaryButton(
               label: crossSpaceLinkTypeLabel(widget.linkType),

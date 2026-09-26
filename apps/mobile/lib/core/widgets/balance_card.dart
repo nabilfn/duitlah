@@ -2,13 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/duitlah_colors.dart';
-import 'amount_text.dart';
+import '../utils/money.dart';
 
-/// The existing balance card with the dedicated balance palette — a solid
-/// surface, not a gradient (the redesign spec explicitly calls out
-/// "excessive gradients" as something to avoid), so the primary number
-/// reads as the page's focal point through contrast and typography alone.
-/// Its background and text use separate balance tokens in both themes.
+/// A hero surface accepting display text, including privacy and loading states.
 class BalanceCard extends StatelessWidget {
   const BalanceCard({
     super.key,
@@ -17,59 +13,56 @@ class BalanceCard extends StatelessWidget {
     this.subtitle,
     this.trailing,
   });
-
   final String label;
   final String amount;
   final String? subtitle;
   final Widget? trailing;
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final palette = context.duitlahColors;
-    final onPrimary = palette.balanceText;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: palette.balanceBackground,
-        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
+          Row(
+            children: [
+              Expanded(
+                child: Text(
                   label,
                   style: TextStyle(
                     color: palette.balanceSecondary,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 8),
-                AmountText(
-                  amount,
-                  style: theme.textTheme.displaySmall?.copyWith(
-                    color: onPrimary,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    subtitle!,
-                    style: TextStyle(
-                      color: palette.balanceSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ],
+              ),
+              if (trailing != null) trailing!,
+            ],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            num.tryParse(amount) == null ? amount : Money.format(amount),
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              color: palette.balanceText,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
-          if (trailing != null) trailing!,
+          if (subtitle != null) ...[
+            const SizedBox(height: 24),
+            Text(
+              subtitle!,
+              style: TextStyle(
+                color: palette.balanceSecondary,
+                fontSize: 13,
+                height: 1.5,
+              ),
+            ),
+          ],
         ],
       ),
     );

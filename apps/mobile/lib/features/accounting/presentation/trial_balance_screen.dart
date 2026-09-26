@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,12 @@ class _TrialBalanceScreenState extends ConsumerState<TrialBalanceScreen> {
           .trialBalance(widget.spaceId, asOf: _fmtDate(_asOf), format: format);
       await Share.shareXFiles([XFile(file.path)]);
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Export failed.');
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Export failed.',
+        );
+      }
     } finally {
       if (mounted) setState(() => _exporting = false);
     }
@@ -46,7 +52,12 @@ class _TrialBalanceScreenState extends ConsumerState<TrialBalanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final report = ref.watch(trialBalanceReportProvider((spaceId: widget.spaceId, asOf: _fmtDate(_asOf))));
+    final report = ref.watch(
+      trialBalanceReportProvider((
+        spaceId: widget.spaceId,
+        asOf: _fmtDate(_asOf),
+      )),
+    );
     return Scaffold(
       appBar: AppBar(
         title: const Text('Trial Balance'),
@@ -55,33 +66,41 @@ class _TrialBalanceScreenState extends ConsumerState<TrialBalanceScreen> {
             enabled: !_exporting,
             icon: const DuitlahIcon(Icons.ios_share),
             onSelected: _export,
-            itemBuilder: (context) =>
-                ExportFormat.values.map((f) => PopupMenuItem(value: f, child: Text('Share as ${f.name}'))).toList(),
+            itemBuilder: (context) => ExportFormat.values
+                .map(
+                  (f) => PopupMenuItem(
+                    value: f,
+                    child: Text('Share as ${f.name}'),
+                  ),
+                )
+                .toList(),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          OutlinedButton(
-            onPressed: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: _asOf,
-                firstDate: DateTime(_asOf.year - 5),
-                lastDate: DateTime(_asOf.year + 5),
-              );
-              if (picked != null) setState(() => _asOf = picked);
-            },
-            child: Text('As of ${_fmtDate(_asOf)}'),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          report.when(
-            data: (r) => _Table(report: r),
-            loading: () => const LoadingView(),
-            error: (e, _) => ErrorView(error: e),
-          ),
-        ],
+      body: AppPageBody(
+        child: ListView(
+          padding: AppSpacing.scrollInsets(context, floatingAction: false),
+          children: [
+            OutlinedButton(
+              onPressed: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _asOf,
+                  firstDate: DateTime(_asOf.year - 5),
+                  lastDate: DateTime(_asOf.year + 5),
+                );
+                if (picked != null) setState(() => _asOf = picked);
+              },
+              child: Text('As of ${_fmtDate(_asOf)}'),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            report.when(
+              data: (r) => _Table(report: r),
+              loading: () => const LoadingView(),
+              error: (e, _) => ErrorView(error: e),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -110,16 +129,35 @@ class _Table extends StatelessWidget {
             ],
             rows: [
               for (final line in report.lines)
-                DataRow(cells: [
-                  DataCell(Text('${line.accountCode} ${line.accountName}')),
-                  DataCell(Text(line.debit)),
-                  DataCell(Text(line.credit)),
-                ]),
-              DataRow(cells: [
-                const DataCell(Text('Total', style: TextStyle(fontWeight: FontWeight.bold))),
-                DataCell(Text(report.totalDebit, style: const TextStyle(fontWeight: FontWeight.bold))),
-                DataCell(Text(report.totalCredit, style: const TextStyle(fontWeight: FontWeight.bold))),
-              ]),
+                DataRow(
+                  cells: [
+                    DataCell(Text('${line.accountCode} ${line.accountName}')),
+                    DataCell(Text(line.debit)),
+                    DataCell(Text(line.credit)),
+                  ],
+                ),
+              DataRow(
+                cells: [
+                  const DataCell(
+                    Text(
+                      'Total',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      report.totalDebit,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      report.totalCredit,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -127,7 +165,11 @@ class _Table extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
-            color: (balanced ? context.duitlahColors.positive : context.duitlahColors.negative).withValues(alpha: 0.1),
+            color:
+                (balanced
+                        ? context.duitlahColors.positive
+                        : context.duitlahColors.negative)
+                    .withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
           child: Row(
@@ -135,12 +177,23 @@ class _Table extends StatelessWidget {
             children: [
               DuitlahIcon(
                 balanced ? Icons.check_circle_outline : Icons.error_outline,
-                color: balanced ? context.duitlahColors.positive : context.duitlahColors.negative,
+                color: balanced
+                    ? context.duitlahColors.positive
+                    : context.duitlahColors.negative,
               ),
               const SizedBox(width: AppSpacing.sm),
-              Text(
-                balanced ? 'Debits equal credits — books balance' : 'Debits and credits do not match',
-                style: TextStyle(color: balanced ? context.duitlahColors.positive : context.duitlahColors.negative, fontWeight: FontWeight.w600),
+              Flexible(
+                child: Text(
+                  balanced
+                      ? 'Debits equal credits — books balance'
+                      : 'Debits and credits do not match',
+                  style: TextStyle(
+                    color: balanced
+                        ? context.duitlahColors.positive
+                        : context.duitlahColors.negative,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),

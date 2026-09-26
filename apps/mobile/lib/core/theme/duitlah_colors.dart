@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Exact colour roles from DUITLAH_COLOUR_THEME_UPDATE.md.
+/// Soft Editorial Glass colour roles, shared across personal and business flows.
 /// Geometry, typography and motion are deliberately outside this extension.
 class DuitlahColors extends ThemeExtension<DuitlahColors> {
   const DuitlahColors({
@@ -59,23 +59,24 @@ class DuitlahColors extends ThemeExtension<DuitlahColors> {
   final Color balanceSecondary;
   final Color balanceMuted;
   final Color balanceHighlight;
+
   /// Stronger brand emphasis (called Primary Strong in the dark palette).
   Color get primaryStrong => primaryDark;
   static const light = DuitlahColors(
-    background: Color(0xFFF7F5F1),
-    surface: Color(0xFFFEFDFC),
-    surfaceSecondary: Color(0xFFECE8E2),
+    background: Color(0xFFF5F5F2),
+    surface: Color(0xFFFCFCFA),
+    surfaceSecondary: Color(0xFFEFEFEB),
     surfaceElevated: Color(0xFFFFFFFF),
-    primary: Color(0xFF4A2438),
-    primaryDark: Color(0xFF321724),
-    primarySoft: Color(0xFFE6CFD8),
-    primarySubtle: Color(0xFFF3E8EC),
-    textPrimary: Color(0xFF1E1B1D),
-    textSecondary: Color(0xFF6E676A),
-    textTertiary: Color(0xFF90888B),
-    textOnPrimary: Color(0xFFFFF9F5),
-    border: Color(0xFFDED8D4),
-    borderSubtle: Color(0xFFE9E4E0),
+    primary: Color(0xFF0E1B30),
+    primaryDark: Color(0xFF09131F),
+    primarySoft: Color(0xFFDCE6EF),
+    primarySubtle: Color(0xFFEDF1F5),
+    textPrimary: Color(0xFF111317),
+    textSecondary: Color(0xFF6B7280),
+    textTertiary: Color(0xFF767E8A),
+    textOnPrimary: Color(0xFFF5F7FA),
+    border: Color(0xFFE3E4E3),
+    borderSubtle: Color(0xFFEBECE9),
     positive: Color(0xFF34705A),
     positiveSoft: Color(0xFFE5F0EB),
     negative: Color(0xFFB85C4B),
@@ -84,27 +85,27 @@ class DuitlahColors extends ThemeExtension<DuitlahColors> {
     warningSoft: Color(0xFFF6EEDA),
     information: Color(0xFF526C89),
     informationSoft: Color(0xFFE8EDF2),
-    balanceBackground: Color(0xFF4A2438),
-    balanceText: Color(0xFFFFF9F5),
-    balanceSecondary: Color(0xFFD8BEC9),
-    balanceMuted: Color(0xFFC7ABB7),
-    balanceHighlight: Color(0xFFE8D5DD),
+    balanceBackground: Color(0xFF0E1B30),
+    balanceText: Color(0xFFF5F7FA),
+    balanceSecondary: Color(0xFFAFCFF4),
+    balanceMuted: Color(0xFFABB4C0),
+    balanceHighlight: Color(0xFFAFCFF4),
   );
   static const dark = DuitlahColors(
-    background: Color(0xFF181416),
-    surface: Color(0xFF211C1F),
-    surfaceSecondary: Color(0xFF2B2427),
-    surfaceElevated: Color(0xFF30282C),
-    primary: Color(0xFFB97A94),
-    primaryDark: Color(0xFFD09AAF),
-    primarySoft: Color(0xFF573346),
-    primarySubtle: Color(0xFF35242C),
-    textPrimary: Color(0xFFF7F1F3),
-    textSecondary: Color(0xFFAAA0A4),
-    textTertiary: Color(0xFF81777B),
-    textOnPrimary: Color(0xFF1D1418),
-    border: Color(0xFF3B3236),
-    borderSubtle: Color(0xFF30292C),
+    background: Color(0xFF070A10),
+    surface: Color(0xFF101721),
+    surfaceSecondary: Color(0xFF0C1118),
+    surfaceElevated: Color(0xFF141D29),
+    primary: Color(0xFFAFCFF4),
+    primaryDark: Color(0xFF73B8FF),
+    primarySoft: Color(0xFF1D3553),
+    primarySubtle: Color(0xFF182C45),
+    textPrimary: Color(0xFFF5F7FA),
+    textSecondary: Color(0xFFABB4C0),
+    textTertiary: Color(0xFF8893A2),
+    textOnPrimary: Color(0xFF09131F),
+    border: Color(0xFF28313D),
+    borderSubtle: Color(0xFF1E2733),
     positive: Color(0xFF72A68F),
     positiveSoft: Color(0xFF203A30),
     negative: Color(0xFFD98272),
@@ -113,21 +114,40 @@ class DuitlahColors extends ThemeExtension<DuitlahColors> {
     warningSoft: Color(0xFF453720),
     information: Color(0xFF83A0BD),
     informationSoft: Color(0xFF263542),
-    balanceBackground: Color(0xFF6A3B50),
-    balanceText: Color(0xFFFFF8FA),
-    balanceSecondary: Color(0xFFE2C9D3),
-    balanceMuted: Color(0xFFCBAFBB),
-    balanceHighlight: Color(0xFFE2C9D3),
+    balanceBackground: Color(0xFF16263B),
+    balanceText: Color(0xFFF5F7FA),
+    balanceSecondary: Color(0xFFAFCFF4),
+    balanceMuted: Color(0xFFABB4C0),
+    balanceHighlight: Color(0xFFAFCFF4),
   );
   static const participants = <Color>[
-    Color(0xFF6D3D55),
-    Color(0xFFAD6B68),
-    Color(0xFFC7924B),
-    Color(0xFF657A63),
+    Color(0xFF223B5A),
+    Color(0xFF526C89),
+    Color(0xFF748A9D),
+    Color(0xFF627D7A),
     Color(0xFF60768A),
-    Color(0xFF8B708F),
-    Color(0xFFB88478),
+    Color(0xFF8192A6),
+    Color(0xFF9CABA9),
   ];
+
+  /// Chart marks need separation from the page in each independently tuned theme.
+  List<Color> get chartColors => surface.computeLuminance() < .1
+      ? const [
+          Color(0xFFAFCDF0),
+          Color(0xFF73B8FF),
+          Color(0xFF8EA4BC),
+          Color(0xFF6989AB),
+          Color(0xFF7896B0),
+          Color(0xFF769799),
+        ]
+      : const [
+          Color(0xFF24415F),
+          Color(0xFF526C89),
+          Color(0xFF748A9D),
+          Color(0xFF627D7A),
+          Color(0xFF60768A),
+          Color(0xFF8192A6),
+        ];
 
   Color softFor(Color tone) {
     if (tone == positive) return positiveSoft;
@@ -213,7 +233,11 @@ class DuitlahColors extends ThemeExtension<DuitlahColors> {
     return DuitlahColors(
       background: Color.lerp(background, other.background, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
-      surfaceSecondary: Color.lerp(surfaceSecondary, other.surfaceSecondary, t)!,
+      surfaceSecondary: Color.lerp(
+        surfaceSecondary,
+        other.surfaceSecondary,
+        t,
+      )!,
       surfaceElevated: Color.lerp(surfaceElevated, other.surfaceElevated, t)!,
       primary: Color.lerp(primary, other.primary, t)!,
       primaryDark: Color.lerp(primaryDark, other.primaryDark, t)!,
@@ -233,16 +257,31 @@ class DuitlahColors extends ThemeExtension<DuitlahColors> {
       warningSoft: Color.lerp(warningSoft, other.warningSoft, t)!,
       information: Color.lerp(information, other.information, t)!,
       informationSoft: Color.lerp(informationSoft, other.informationSoft, t)!,
-      balanceBackground: Color.lerp(balanceBackground, other.balanceBackground, t)!,
+      balanceBackground: Color.lerp(
+        balanceBackground,
+        other.balanceBackground,
+        t,
+      )!,
       balanceText: Color.lerp(balanceText, other.balanceText, t)!,
-      balanceSecondary: Color.lerp(balanceSecondary, other.balanceSecondary, t)!,
+      balanceSecondary: Color.lerp(
+        balanceSecondary,
+        other.balanceSecondary,
+        t,
+      )!,
       balanceMuted: Color.lerp(balanceMuted, other.balanceMuted, t)!,
-      balanceHighlight: Color.lerp(balanceHighlight, other.balanceHighlight, t)!,
+      balanceHighlight: Color.lerp(
+        balanceHighlight,
+        other.balanceHighlight,
+        t,
+      )!,
     );
   }
 }
 
 extension DuitlahColorsContext on BuildContext {
-  DuitlahColors get duitlahColors => Theme.of(this).extension<DuitlahColors>() ??
-      (Theme.of(this).brightness == Brightness.dark ? DuitlahColors.dark : DuitlahColors.light);
+  DuitlahColors get duitlahColors =>
+      Theme.of(this).extension<DuitlahColors>() ??
+      (Theme.of(this).brightness == Brightness.dark
+          ? DuitlahColors.dark
+          : DuitlahColors.light);
 }

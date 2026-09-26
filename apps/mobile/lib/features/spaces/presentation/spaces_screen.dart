@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -26,50 +28,72 @@ class SpacesScreen extends ConsumerWidget {
     final spaces = ref.watch(spaceListProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Workspaces')),
-      body: spaces.when(
-        data: (list) {
-          final personal = list.where((s) => s.type == SpaceType.PERSONAL).toList();
-          final businesses = list.where((s) => s.type == SpaceType.BUSINESS).toList();
-          return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(spaceListProvider),
-            child: ListView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              children: [
-                Text('Personal', style: Theme.of(context).textTheme.titleSmall),
-                const SizedBox(height: AppSpacing.sm),
-                for (final space in personal) _SpaceCard(space: space),
-                const SizedBox(height: AppSpacing.xl),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Businesses', style: Theme.of(context).textTheme.titleSmall),
-                    TextButton.icon(
-                      onPressed: () => context.push(AppRoutes.createBusinessSpace),
-                      icon: const DuitlahIcon(Icons.add, size: 18),
-                      label: const Text('Add Business'),
-                    ),
-                  ],
+      body: AppPageBody(
+        child: spaces.when(
+          data: (list) {
+            final personal = list
+                .where((s) => s.type == SpaceType.PERSONAL)
+                .toList();
+            final businesses = list
+                .where((s) => s.type == SpaceType.BUSINESS)
+                .toList();
+            return RefreshIndicator(
+              onRefresh: () async => ref.invalidate(spaceListProvider),
+              child: ListView(
+                padding: AppSpacing.scrollInsets(
+                  context,
+                  floatingAction: false,
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                if (businesses.isEmpty)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                    child: Text(
-                      'No business workspaces yet.',
-                      style: TextStyle(color: context.duitlahColors.textTertiary),
+                children: [
+                  Text(
+                    'Personal',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  for (final space in personal) _SpaceCard(space: space),
+                  const SizedBox(height: AppSpacing.xl),
+                  AppAdaptiveRow(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Businesses',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      TextButton.icon(
+                        onPressed: () =>
+                            context.push(AppRoutes.createBusinessSpace),
+                        icon: const DuitlahIcon(Icons.add, size: 18),
+                        label: const Text('Add Business'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  if (businesses.isEmpty)
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                      child: Text(
+                        'No business workspaces yet.',
+                        style: TextStyle(
+                          color: context.duitlahColors.textTertiary,
+                        ),
+                      ),
                     ),
-                  ),
-                for (final space in businesses)
-                  _SpaceCard(
-                    space: space,
-                    onTap: () => context.push(AppRoutes.businessDashboard(space.id)),
-                  ),
-              ],
-            ),
-          );
-        },
-        loading: () => const LoadingView(),
-        error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(spaceListProvider)),
+                  for (final space in businesses)
+                    _SpaceCard(
+                      space: space,
+                      onTap: () =>
+                          context.push(AppRoutes.businessDashboard(space.id)),
+                    ),
+                ],
+              ),
+            );
+          },
+          loading: () => const LoadingView(),
+          error: (e, _) => ErrorView(
+            error: e,
+            onRetry: () => ref.invalidate(spaceListProvider),
+          ),
+        ),
       ),
     );
   }
@@ -87,7 +111,9 @@ class _SpaceCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: ListTile(
         leading: DuitlahIcon(
-          space.type == SpaceType.PERSONAL ? Icons.person_outline : Icons.business_outlined,
+          space.type == SpaceType.PERSONAL
+              ? Icons.person_outline
+              : Icons.business_outlined,
         ),
         title: Text(space.name),
         subtitle: Text(space.yourRole.name),

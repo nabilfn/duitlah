@@ -24,15 +24,14 @@ class SseSubscription {
 
   Stream<void> get events => _controller.stream;
 
-  static SseSubscription connect(
-    String path, {
-    String? accessToken,
-  }) {
-    final dio = Dio(BaseOptions(
-      baseUrl: Env.apiBaseUrl,
-      responseType: ResponseType.stream,
-      connectTimeout: const Duration(seconds: 15),
-    ));
+  static SseSubscription connect(String path, {String? accessToken}) {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: Env.apiBaseUrl,
+        responseType: ResponseType.stream,
+        connectTimeout: const Duration(seconds: 15),
+      ),
+    );
     final cancelToken = CancelToken();
     final controller = StreamController<void>.broadcast();
     final sub = SseSubscription._(dio, cancelToken, controller);

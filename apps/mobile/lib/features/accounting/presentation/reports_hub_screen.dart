@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -15,35 +16,37 @@ class ReportsHubScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Reports')),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          _Tile(
-            icon: Icons.menu_book_outlined,
-            label: 'General Ledger',
-            route: AppRoutes.accountingGeneralLedger(spaceId),
-          ),
-          _Tile(
-            icon: Icons.balance_outlined,
-            label: 'Trial Balance',
-            route: AppRoutes.accountingTrialBalance(spaceId),
-          ),
-          _Tile(
-            icon: Icons.trending_up_outlined,
-            label: 'Income Statement',
-            route: AppRoutes.accountingIncomeStatement(spaceId),
-          ),
-          _Tile(
-            icon: Icons.account_balance_outlined,
-            label: 'Balance Sheet',
-            route: AppRoutes.accountingBalanceSheet(spaceId),
-          ),
-          _Tile(
-            icon: Icons.water_drop_outlined,
-            label: 'Cash Flow',
-            route: AppRoutes.accountingCashFlow(spaceId),
-          ),
-        ],
+      body: AppPageBody(
+        child: ListView(
+          padding: AppSpacing.scrollInsets(context, floatingAction: false),
+          children: [
+            _Tile(
+              icon: Icons.menu_book_outlined,
+              label: 'General Ledger',
+              route: AppRoutes.accountingGeneralLedger(spaceId),
+            ),
+            _Tile(
+              icon: Icons.balance_outlined,
+              label: 'Trial Balance',
+              route: AppRoutes.accountingTrialBalance(spaceId),
+            ),
+            _Tile(
+              icon: Icons.trending_up_outlined,
+              label: 'Income Statement',
+              route: AppRoutes.accountingIncomeStatement(spaceId),
+            ),
+            _Tile(
+              icon: Icons.account_balance_outlined,
+              label: 'Balance Sheet',
+              route: AppRoutes.accountingBalanceSheet(spaceId),
+            ),
+            _Tile(
+              icon: Icons.water_drop_outlined,
+              label: 'Cash Flow',
+              route: AppRoutes.accountingCashFlow(spaceId),
+            ),
+          ],
+        ),
       ),
     );
   }

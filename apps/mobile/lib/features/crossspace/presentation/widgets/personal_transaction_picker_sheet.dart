@@ -31,14 +31,23 @@ class PersonalTransactionPickerSheet extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Select a personal transaction', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Select a personal transaction',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: AppSpacing.xs),
-            Text('Only your own transactions can be linked.', style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              'Only your own transactions can be linked.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             const SizedBox(height: AppSpacing.md),
             Expanded(
               child: transactions.when(
                 data: (page) => page.content.isEmpty
-                    ? const EmptyView(icon: Icons.receipt_long_outlined, title: 'No personal transactions yet')
+                    ? const EmptyView(
+                        icon: Icons.receipt_long_outlined,
+                        title: 'No personal transactions yet',
+                      )
                     : ListView.builder(
                         itemCount: page.content.length,
                         itemBuilder: (context, index) {
@@ -47,7 +56,9 @@ class PersonalTransactionPickerSheet extends ConsumerWidget {
                             title: t.merchant ?? t.description ?? t.type.name,
                             subtitle: t.occurredOn,
                             amount: t.amount,
-                            tone: t.direction == TransactionDirection.IN ? AmountTone.positive : AmountTone.negative,
+                            tone: t.direction == TransactionDirection.IN
+                                ? AmountTone.positive
+                                : AmountTone.negative,
                             leadingIcon: t.direction == TransactionDirection.IN
                                 ? Icons.arrow_downward_rounded
                                 : Icons.arrow_upward_rounded,
@@ -56,7 +67,10 @@ class PersonalTransactionPickerSheet extends ConsumerWidget {
                         },
                       ),
                 loading: () => const LoadingView(),
-                error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(transactionsProvider)),
+                error: (e, _) => ErrorView(
+                  error: e,
+                  onRetry: () => ref.invalidate(transactionsProvider),
+                ),
               ),
             ),
           ],

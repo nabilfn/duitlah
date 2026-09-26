@@ -16,10 +16,10 @@ void main() {
       ),
     );
 
-    expect(find.text('Duitlah'), findsOneWidget);
-    expect(find.widgetWithText(TextField, 'Email'), findsOneWidget);
+    expect(find.text('Hi again.'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Email or phone'), findsOneWidget);
     expect(find.text('Password'), findsOneWidget);
-    expect(find.widgetWithText(ElevatedButton, 'Sign in'), findsOneWidget);
+    expect(find.widgetWithText(EntrySignInButton, 'Sign in'), findsOneWidget);
   });
 
   testWidgets('LoginScreen accepts typed email and password', (tester) async {
@@ -29,7 +29,7 @@ void main() {
       ),
     );
 
-    await tester.enterText(find.widgetWithText(TextField, 'Email'), 'ameer@example.com');
+    await tester.enterText(find.widgetWithText(TextField, 'Email or phone'), 'ameer@example.com');
     await tester.enterText(find.widgetWithText(TextField, 'Password'), 'hunter2');
     await tester.pump();
 

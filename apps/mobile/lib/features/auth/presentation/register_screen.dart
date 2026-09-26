@@ -37,14 +37,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       _error = null;
     });
     try {
-      await ref.read(authProvider.notifier).register(
+      await ref
+          .read(authProvider.notifier)
+          .register(
             _emailController.text.trim(),
             _passwordController.text,
             _nameController.text.trim(),
           );
       if (mounted) context.go(AppRoutes.home);
     } catch (e) {
-      setState(() => _error = e is AppException ? e.message : 'Something went wrong.');
+      setState(
+        () => _error = e is AppException ? e.message : 'Something went wrong.',
+      );
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -61,7 +65,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Create your account', style: theme.textTheme.headlineMedium),
+              Text(
+                'Create your account',
+                style: theme.textTheme.headlineMedium,
+              ),
               const SizedBox(height: AppSpacing.xl),
               AppTextField(label: 'Full name', controller: _nameController),
               const SizedBox(height: AppSpacing.md),
@@ -84,7 +91,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
               ],
               const SizedBox(height: AppSpacing.xl),
-              PrimaryButton(label: 'Create account', onPressed: _submit, loading: _loading),
+              PrimaryButton(
+                label: 'Create account',
+                onPressed: _submit,
+                loading: _loading,
+              ),
             ],
           ),
         ),

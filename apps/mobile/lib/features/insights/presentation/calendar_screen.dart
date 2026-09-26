@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,59 +26,87 @@ class CalendarScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calendar'),
-        actions: [
-          IconButton(
-            icon: const DuitlahIcon(Icons.chevron_left),
-            onPressed: () => ref.read(selectedInsightsMonthProvider.notifier).state =
-                DateTime(month.year, month.month - 1),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(56),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                tooltip: 'Previous month',
+                icon: const DuitlahIcon(Icons.chevron_left),
+                onPressed: () =>
+                    ref.read(selectedInsightsMonthProvider.notifier).state =
+                        DateTime(month.year, month.month - 1),
+              ),
+              Center(
+                child: Text(
+                  '${month.year}-${month.month.toString().padLeft(2, '0')}',
+                ),
+              ),
+              IconButton(
+                tooltip: 'Next month',
+                icon: const DuitlahIcon(Icons.chevron_right),
+                onPressed: () =>
+                    ref.read(selectedInsightsMonthProvider.notifier).state =
+                        DateTime(month.year, month.month + 1),
+              ),
+            ],
           ),
-          Center(child: Text('${month.year}-${month.month.toString().padLeft(2, '0')}')),
-          IconButton(
-            icon: const DuitlahIcon(Icons.chevron_right),
-            onPressed: () => ref.read(selectedInsightsMonthProvider.notifier).state =
-                DateTime(month.year, month.month + 1),
-          ),
-        ],
+        ),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(calendarProvider),
-        child: entries.when(
-          data: (list) {
-            if (list.isEmpty) {
-              return ListView(
-                children: const [
-                  SizedBox(height: 80),
-                  EmptyView(icon: Icons.calendar_today_outlined, title: 'Nothing scheduled this month'),
-                ],
-              );
-            }
-            final byDay = <String, List<CalendarEntry>>{};
-            for (final entry in list) {
-              byDay.putIfAbsent(entry.date, () => []).add(entry);
-            }
-            final days = byDay.keys.toList()..sort();
-            return ListView.builder(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              itemCount: days.length,
-              itemBuilder: (context, index) {
-                final date = days[index];
-                final dayEntries = byDay[date]!;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(date, style: Theme.of(context).textTheme.labelLarge),
-                      const SizedBox(height: 4),
-                      ...dayEntries.map((e) => _CalendarEntryTile(entry: e)),
-                    ],
-                  ),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(calendarProvider),
+          child: entries.when(
+            data: (list) {
+              if (list.isEmpty) {
+                return ListView(
+                  children: const [
+                    SizedBox(height: 80),
+                    EmptyView(
+                      icon: Icons.calendar_today_outlined,
+                      title: 'Nothing scheduled this month',
+                    ),
+                  ],
                 );
-              },
-            );
-          },
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(calendarProvider)),
+              }
+              final byDay = <String, List<CalendarEntry>>{};
+              for (final entry in list) {
+                byDay.putIfAbsent(entry.date, () => []).add(entry);
+              }
+              final days = byDay.keys.toList()..sort();
+              return ListView.builder(
+                padding: AppSpacing.scrollInsets(
+                  context,
+                  floatingAction: false,
+                ),
+                itemCount: days.length,
+                itemBuilder: (context, index) {
+                  final date = days[index];
+                  final dayEntries = byDay[date]!;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          date,
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        const SizedBox(height: 4),
+                        ...dayEntries.map((e) => _CalendarEntryTile(entry: e)),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(calendarProvider),
+            ),
+          ),
         ),
       ),
     );
@@ -94,16 +124,23 @@ class _CalendarEntryTile extends StatelessWidget {
     final isIncome = entry.direction.name == 'IN';
     return Card(
       margin: const EdgeInsets.only(bottom: 4),
-      child: ListTile(
+      child: AppRecordTile(
         dense: true,
         leading: DuitlahIcon(
-          entry.confirmed ? Icons.check_circle_outline : Icons.schedule_outlined,
+          entry.confirmed
+              ? Icons.check_circle_outline
+              : Icons.schedule_outlined,
           size: 20,
-          color: entry.confirmed ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+          color: entry.confirmed
+              ? theme.colorScheme.primary
+              : theme.colorScheme.onSurface.withValues(alpha: 0.4),
         ),
         title: Text(entry.merchant ?? entry.description ?? entry.type.name),
         subtitle: Text(entry.confirmed ? 'Posted' : 'Upcoming'),
-        trailing: AmountText(entry.amount, tone: isIncome ? AmountTone.positive : AmountTone.negative),
+        trailing: AmountText(
+          entry.amount,
+          tone: isIncome ? AmountTone.positive : AmountTone.negative,
+        ),
       ),
     );
   }

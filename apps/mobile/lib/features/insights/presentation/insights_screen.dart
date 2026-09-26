@@ -1,8 +1,13 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
+
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+
+import '../../../core/widgets/dock_insets.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -15,6 +20,8 @@ import '../../../core/widgets/amount_text.dart';
 import '../../../core/widgets/app_state_views.dart';
 import '../../../core/widgets/duitlah_icon.dart';
 import '../../../core/widgets/financial_surfaces.dart';
+import '../../../core/widgets/digital_canvas.dart';
+import '../../../core/widgets/editorial_surfaces.dart';
 import '../../networth/application/net_worth_providers.dart';
 import '../../wrapped/presentation/widgets/wrapped_history_section.dart';
 import '../application/insights_providers.dart';
@@ -46,12 +53,24 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
           ref.invalidate(topMerchantsProvider);
           ref.invalidate(netWorthProvider);
           ref.invalidate(forecastProvider);
-            await ref.read(forecastProvider.future);
+          await ref.read(forecastProvider.future);
         },
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+          padding: EdgeInsets.fromLTRB(
+            20,
+            8,
+            20,
+            32 + DuitlahDockInsets.of(context),
+          ),
           children: [
+            Text(
+              '${DateFormat('MMMM').format(month)},\nat a glance.',
+              style: theme.textTheme.displaySmall?.copyWith(
+                fontSize: MediaQuery.sizeOf(context).width < 360 ? 32 : 40,
+              ),
+            ),
+            const SizedBox(height: 28),
             DuitlahSegmentedControl<int>(
               showSelectedIcon: false,
               segments: const [
@@ -74,7 +93,9 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                     icon: const DuitlahIcon(Icons.chevron_left, size: 18),
                   ),
                   Expanded(
-                    child: OutlinedButton(
+                    child: DuitlahGlassButton(
+                      blur: false,
+                      elevated: false,
                       onPressed: () async {
                         final selected = await showDatePicker(
                           context: context,
@@ -114,6 +135,47 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                 ],
               ),
             const SizedBox(height: 16),
+            if (_tab == 0)
+              trend.maybeWhen(
+                data: (items) {
+                  final current = items
+                      .where(
+                        (t) => t.year == month.year && t.month == month.month,
+                      )
+                      .firstOrNull;
+                  if (current == null) return const SizedBox.shrink();
+                  return DuitlahReveal(
+                    key: ValueKey('story-${month.year}-${month.month}'),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 28),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            Money.isNegative(current.savings)
+                                ? 'Income less expenses'
+                                : 'You kept',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            Money.format(current.savings),
+                            style: theme.textTheme.displaySmall,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            Money.isNegative(current.savings)
+                                ? 'Your expenses were higher than your income.'
+                                : 'after this month’s expenses.',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                orElse: () => const SizedBox.shrink(),
+              ),
             if (_tab == 0)
               categories.when(
                 data: (list) => list.isEmpty
@@ -220,33 +282,45 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
               onTap: () => context.push(AppRoutes.budgets),
             ),
             const SizedBox(height: 24),
-            const SectionHeader('Cash-flow forecast'),
-            const SizedBox(height: 12),
-            forecast.when(
-              data: (f) => _ForecastCard(forecast: f),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(
-                error: e,
-                onRetry: () => ref.invalidate(forecastProvider),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const SectionHeader('6-month trend'),
-            const SizedBox(height: 8),
-            const Text('Income on the left · expenses on the right'),
-            const SizedBox(height: 12),
-            trend.when(
-              data: (list) => list.isEmpty
-                  ? const EmptyView(
-                      icon: Icons.insights_outlined,
-                      title: 'No trend yet',
-                    )
-                  : _MonthlyTrendChart(trend: list),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(
-                error: e,
-                onRetry: () => ref.invalidate(monthlyTrendProvider),
-              ),
+            ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              title: const Text('Look ahead & compare'),
+              subtitle: const Text('Cash-flow forecast and six-month trend'),
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SectionHeader('Cash-flow forecast'),
+                    const SizedBox(height: 12),
+                    forecast.when(
+                      data: (f) => _ForecastCard(forecast: f),
+                      loading: () => const LoadingView(),
+                      error: (e, _) => ErrorView(
+                        error: e,
+                        onRetry: () => ref.invalidate(forecastProvider),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const SectionHeader('6-month trend'),
+                    const SizedBox(height: 8),
+                    const Text('Income on the left · expenses on the right'),
+                    const SizedBox(height: 12),
+                    trend.when(
+                      data: (list) => list.isEmpty
+                          ? const EmptyView(
+                              icon: Icons.insights_outlined,
+                              title: 'No trend yet',
+                            )
+                          : _MonthlyTrendChart(trend: list),
+                      loading: () => const LoadingView(),
+                      error: (e, _) => ErrorView(
+                        error: e,
+                        onRetry: () => ref.invalidate(monthlyTrendProvider),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             const SectionHeader('Top merchants'),
@@ -261,7 +335,7 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
                       children: list
                           .take(10)
                           .map(
-                            (m) => ListTile(
+                            (m) => AppRecordTile(
                               contentPadding: EdgeInsets.zero,
                               title: Text(m.merchant),
                               subtitle: Text(
@@ -302,7 +376,7 @@ class _SpendingDonutState extends State<SpendingDonut> {
   int? _selected;
   @override
   Widget build(BuildContext context) {
-    final palette = DuitlahColors.participants;
+    final palette = context.duitlahColors.chartColors;
     final amounts = widget.items
         .map(
           (i) => (double.tryParse(i.amount) ?? 0).clamp(0.0, double.infinity),
@@ -324,8 +398,19 @@ class _SpendingDonutState extends State<SpendingDonut> {
                 alignment: Alignment.center,
                 children: [
                   Positioned.fill(
-                    child: CustomPaint(
-                      painter: _DonutPainter(amounts, palette, selected),
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: 1),
+                      duration: MediaQuery.disableAnimationsOf(context)
+                          ? Duration.zero
+                          : const Duration(milliseconds: 500),
+                      builder: (_, value, _) => CustomPaint(
+                        painter: _DonutPainter(
+                          amounts,
+                          palette,
+                          selected,
+                          reveal: value,
+                        ),
+                      ),
                     ),
                   ),
                   Padding(
@@ -417,7 +502,13 @@ class _SpendingDonutState extends State<SpendingDonut> {
 }
 
 class _DonutPainter extends CustomPainter {
-  const _DonutPainter(this.amounts, this.colors, this.selected);
+  const _DonutPainter(
+    this.amounts,
+    this.colors,
+    this.selected, {
+    this.reveal = 1,
+  });
+  final double reveal;
   final List<double> amounts;
   final List<Color> colors;
   final int? selected;
@@ -435,7 +526,7 @@ class _DonutPainter extends CustomPainter {
     }
     var start = -math.pi / 2;
     for (var i = 0; i < amounts.length; i++) {
-      final sweep = amounts[i] / total * math.pi * 2;
+      final sweep = amounts[i] / total * math.pi * 2 * reveal;
       pen.color = colors[i % colors.length].withValues(
         alpha: selected == null || selected == i ? 1 : .35,
       );
@@ -446,7 +537,9 @@ class _DonutPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DonutPainter oldDelegate) =>
-      oldDelegate.amounts != amounts || oldDelegate.selected != selected;
+      oldDelegate.amounts != amounts ||
+      oldDelegate.selected != selected ||
+      oldDelegate.reveal != reveal;
 }
 
 class _ForecastCard extends StatelessWidget {

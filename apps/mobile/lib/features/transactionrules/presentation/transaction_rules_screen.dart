@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -26,11 +29,15 @@ class TransactionRulesScreen extends ConsumerWidget {
   const TransactionRulesScreen({super.key});
 
   String _matchTypeLabel(MatchType type) => switch (type) {
-        MatchType.MERCHANT_EQUALS => 'Merchant is exactly',
-        MatchType.MERCHANT_CONTAINS => 'Merchant contains',
-      };
+    MatchType.MERCHANT_EQUALS => 'Merchant is exactly',
+    MatchType.MERCHANT_CONTAINS => 'Merchant contains',
+  };
 
-  Future<void> _openForm(BuildContext context, WidgetRef ref, {TransactionRule? existing}) async {
+  Future<void> _openForm(
+    BuildContext context,
+    WidgetRef ref, {
+    TransactionRule? existing,
+  }) async {
     final categories = ref.read(categoryListProvider).valueOrNull ?? const [];
     if (categories.isEmpty) {
       showErrorSnackBar(context, 'Add a category first.');
@@ -38,16 +45,22 @@ class TransactionRulesScreen extends ConsumerWidget {
     }
     final saved = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => _RuleFormSheet(existing: existing, categories: categories),
+      builder: (context) =>
+          _RuleFormSheet(existing: existing, categories: categories),
     );
     if (saved == true) ref.invalidate(transactionRuleListProvider);
   }
 
-  Future<void> _delete(BuildContext context, WidgetRef ref, TransactionRule rule) async {
+  Future<void> _delete(
+    BuildContext context,
+    WidgetRef ref,
+    TransactionRule rule,
+  ) async {
     final confirmed = await showConfirmDialog(
       context,
       title: 'Delete this rule?',
-      message: 'Future AutoTrack suggestions at "${rule.matchValue}" will fall back to the default heuristic.',
+      message:
+          'Future AutoTrack suggestions at "${rule.matchValue}" will fall back to the default heuristic.',
       confirmLabel: 'Delete',
       destructive: true,
     );
@@ -56,7 +69,12 @@ class TransactionRulesScreen extends ConsumerWidget {
       await ref.read(transactionRuleRepositoryProvider).delete(rule.id);
       ref.invalidate(transactionRuleListProvider);
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
@@ -65,68 +83,106 @@ class TransactionRulesScreen extends ConsumerWidget {
     final rules = ref.watch(transactionRuleListProvider);
     final categories = ref.watch(categoryListProvider).valueOrNull ?? const [];
     String categoryName(String id) =>
-        categories.where((c) => c.id == id).firstOrNull?.name ?? 'Unknown category';
+        categories.where((c) => c.id == id).firstOrNull?.name ??
+        'Unknown category';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Transaction Rules')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(transactionRuleListProvider),
-        child: rules.when(
-          data: (items) => items.isEmpty
-              ? ListView(
-                  children: const [
-                    SizedBox(height: 80),
-                    EmptyView(
-                      icon: Icons.rule_outlined,
-                      title: 'No rules yet',
-                      message: 'Add a rule so AutoTrack picks the right category automatically, '
-                          'or confirm a transaction once to let Duitlah learn one for you.',
-                    ),
-                  ],
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: items.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, index) {
-                    final rule = items[index];
-                    return Card(
-                      child: ListTile(
-                        title: Text('${_matchTypeLabel(rule.matchType)} "${rule.matchValue}"'),
-                        subtitle: Row(
-                          children: [
-                            Expanded(child: Text('→ ${categoryName(rule.categoryId)}  ·  priority ${rule.priority}')),
-                          ],
-                        ),
-                        onTap: () => _openForm(context, ref, existing: rule),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (rule.learned)
-                              Padding(
-                                padding: EdgeInsets.only(right: AppSpacing.xs),
-                                child: StatusChip(label: 'Auto-learned', color: context.duitlahColors.primary, icon: Icons.auto_awesome),
-                              ),
-                            if (!rule.active)
-                              Padding(
-                                padding: EdgeInsets.only(right: AppSpacing.xs),
-                                child: StatusChip(label: 'Inactive', color: context.duitlahColors.textTertiary),
-                              ),
-                            IconButton(
-                              icon: const DuitlahIcon(Icons.delete_outline, size: 18),
-                              onPressed: () => _delete(context, ref, rule),
-                            ),
-                          ],
-                        ),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(transactionRuleListProvider),
+          child: rules.when(
+            data: (items) => items.isEmpty
+                ? ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: const [
+                      SizedBox(height: 80),
+                      EmptyView(
+                        icon: Icons.rule_outlined,
+                        title: 'No rules yet',
+                        message:
+                            'Add a rule so AutoTrack picks the right category automatically, '
+                            'or confirm a transaction once to let Duitlah learn one for you.',
                       ),
-                    );
-                  },
-                ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(transactionRuleListProvider)),
+                    ],
+                  )
+                : ListView.separated(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: AppSpacing.scrollInsets(
+                      context,
+                      floatingAction: true,
+                    ),
+                    itemCount: items.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: AppSpacing.sm),
+                    itemBuilder: (context, index) {
+                      final rule = items[index];
+                      return Card(
+                        child: AppRecordTile(
+                          title: Text(
+                            '${_matchTypeLabel(rule.matchType)} "${rule.matchValue}"',
+                          ),
+                          subtitle: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '→ ${categoryName(rule.categoryId)}  ·  priority ${rule.priority}',
+                                ),
+                              ),
+                            ],
+                          ),
+                          onTap: () => _openForm(context, ref, existing: rule),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (rule.learned)
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    right: AppSpacing.xs,
+                                  ),
+                                  child: StatusChip(
+                                    label: 'Auto-learned',
+                                    color: context.duitlahColors.primary,
+                                    icon: Icons.auto_awesome,
+                                  ),
+                                ),
+                              if (!rule.active)
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    right: AppSpacing.xs,
+                                  ),
+                                  child: StatusChip(
+                                    label: 'Inactive',
+                                    color: context.duitlahColors.textTertiary,
+                                  ),
+                                ),
+                              IconButton(
+                                icon: const DuitlahIcon(
+                                  Icons.delete_outline,
+                                  size: 18,
+                                ),
+                                onPressed: () => _delete(context, ref, rule),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(transactionRuleListProvider),
+            ),
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _openForm(context, ref), child: const DuitlahIcon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _openForm(context, ref),
+        child: const DuitlahIcon(Icons.add),
+      ),
     );
   }
 }
@@ -142,11 +198,16 @@ class _RuleFormSheet extends ConsumerStatefulWidget {
 }
 
 class _RuleFormSheetState extends ConsumerState<_RuleFormSheet> {
-  late final _matchValueController = TextEditingController(text: widget.existing?.matchValue ?? '');
-  late final _priorityController =
-      TextEditingController(text: (widget.existing?.priority ?? 0).toString());
-  late MatchType _matchType = widget.existing?.matchType ?? MatchType.MERCHANT_EQUALS;
-  late String _categoryId = widget.existing?.categoryId ?? widget.categories.first.id;
+  late final _matchValueController = TextEditingController(
+    text: widget.existing?.matchValue ?? '',
+  );
+  late final _priorityController = TextEditingController(
+    text: (widget.existing?.priority ?? 0).toString(),
+  );
+  late MatchType _matchType =
+      widget.existing?.matchType ?? MatchType.MERCHANT_EQUALS;
+  late String _categoryId =
+      widget.existing?.categoryId ?? widget.categories.first.id;
   late bool _active = widget.existing?.active ?? true;
   bool _submitting = false;
 
@@ -165,7 +226,9 @@ class _RuleFormSheetState extends ConsumerState<_RuleFormSheet> {
     try {
       final priority = int.tryParse(_priorityController.text.trim());
       if (_isEditing) {
-        await ref.read(transactionRuleRepositoryProvider).update(
+        await ref
+            .read(transactionRuleRepositoryProvider)
+            .update(
               widget.existing!.id,
               matchType: _matchType,
               matchValue: _matchValueController.text.trim(),
@@ -174,7 +237,9 @@ class _RuleFormSheetState extends ConsumerState<_RuleFormSheet> {
               active: _active,
             );
       } else {
-        await ref.read(transactionRuleRepositoryProvider).create(
+        await ref
+            .read(transactionRuleRepositoryProvider)
+            .create(
               matchType: _matchType,
               matchValue: _matchValueController.text.trim(),
               categoryId: _categoryId,
@@ -183,7 +248,12 @@ class _RuleFormSheetState extends ConsumerState<_RuleFormSheet> {
       }
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -193,17 +263,21 @@ class _RuleFormSheetState extends ConsumerState<_RuleFormSheet> {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        left: AppSpacing.lg,
-        right: AppSpacing.lg,
+        left: AppSpacing.pageMargin,
+        right: AppSpacing.pageMargin,
         top: AppSpacing.lg,
         bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
       child: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(_isEditing ? 'Edit rule' : 'New rule', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              _isEditing ? 'Edit rule' : 'New rule',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             if (widget.existing?.learned == true) ...[
               const SizedBox(height: 4),
               Text(
@@ -213,28 +287,58 @@ class _RuleFormSheetState extends ConsumerState<_RuleFormSheet> {
               ),
             ],
             const SizedBox(height: AppSpacing.md),
-            DropdownButtonFormField<MatchType>(
-              icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _matchType,
-              decoration: const InputDecoration(labelText: 'Match type'),
-              items: MatchType.values
-                  .map((t) => DropdownMenuItem(value: t, child: Text(t == MatchType.MERCHANT_EQUALS ? 'Merchant is exactly' : 'Merchant contains')))
-                  .toList(),
-              onChanged: (v) => setState(() => _matchType = v ?? _matchType),
+            AppFieldGroup(
+              label: 'Match type',
+              child: DropdownButtonFormField<MatchType>(
+                itemHeight: null,
+                isExpanded: true,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                initialValue: _matchType,
+                decoration: const InputDecoration(),
+                items: MatchType.values
+                    .map(
+                      (t) => DropdownMenuItem(
+                        value: t,
+                        child: Text(
+                          t == MatchType.MERCHANT_EQUALS
+                              ? 'Merchant is exactly'
+                              : 'Merchant contains',
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (v) => setState(() => _matchType = v ?? _matchType),
+              ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'Merchant text', controller: _matchValueController),
-            const SizedBox(height: AppSpacing.sm),
-            DropdownButtonFormField<String>(
-              icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: _categoryId,
-              isExpanded: true,
-              decoration: const InputDecoration(labelText: 'Category'),
-              items: widget.categories.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
-              onChanged: (v) => setState(() => _categoryId = v ?? _categoryId),
+            AppTextField(
+              label: 'Merchant text',
+              controller: _matchValueController,
             ),
             const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'Priority (higher wins ties)', controller: _priorityController, keyboardType: TextInputType.number),
+            AppFieldGroup(
+              label: 'Category',
+              child: DropdownButtonFormField<String>(
+                itemHeight: null,
+                icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                initialValue: _categoryId,
+                isExpanded: true,
+                decoration: const InputDecoration(),
+                items: widget.categories
+                    .map(
+                      (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
+                    )
+                    .toList(),
+                onChanged: (v) =>
+                    setState(() => _categoryId = v ?? _categoryId),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              label: 'Priority (higher wins ties)',
+              controller: _priorityController,
+              keyboardType: TextInputType.number,
+            ),
             if (_isEditing) ...[
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
@@ -244,7 +348,11 @@ initialValue: _categoryId,
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
-            PrimaryButton(label: _isEditing ? 'Save' : 'Create', onPressed: _submit, loading: _submitting),
+            PrimaryButton(
+              label: _isEditing ? 'Save' : 'Create',
+              onPressed: _submit,
+              loading: _submitting,
+            ),
           ],
         ),
       ),

@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +21,8 @@ class ReceiptCaptureScreen extends ConsumerStatefulWidget {
   const ReceiptCaptureScreen({super.key});
 
   @override
-  ConsumerState<ReceiptCaptureScreen> createState() => _ReceiptCaptureScreenState();
+  ConsumerState<ReceiptCaptureScreen> createState() =>
+      _ReceiptCaptureScreenState();
 }
 
 class _ReceiptCaptureScreenState extends ConsumerState<ReceiptCaptureScreen> {
@@ -37,7 +39,9 @@ class _ReceiptCaptureScreenState extends ConsumerState<ReceiptCaptureScreen> {
       _progress = 0;
     });
     try {
-      final scan = await ref.read(receiptScanRepositoryProvider).upload(
+      final scan = await ref
+          .read(receiptScanRepositoryProvider)
+          .upload(
             file.path,
             onProgress: (sent, total) {
               if (total > 0) setState(() => _progress = sent / total);
@@ -49,7 +53,10 @@ class _ReceiptCaptureScreenState extends ConsumerState<ReceiptCaptureScreen> {
         if (e is AppException && e.code == 'RECEIPT_SCAN_LIMIT_REACHED') {
           showUpgradeDialog(context, message: e.message);
         } else {
-          showErrorSnackBar(context, e is AppException ? e.message : 'Could not upload the receipt.');
+          showErrorSnackBar(
+            context,
+            e is AppException ? e.message : 'Could not upload the receipt.',
+          );
         }
       }
     } finally {
@@ -61,49 +68,58 @@ class _ReceiptCaptureScreenState extends ConsumerState<ReceiptCaptureScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Scan a receipt')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
-          child: _uploading
-              ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(value: _progress > 0 ? _progress : null),
-                    const SizedBox(height: AppSpacing.lg),
-                    const Text('Uploading receipt…'),
-                  ],
-                )
-              : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    DuitlahIcon(Icons.receipt_long_rounded, size: 64, color: Theme.of(context).colorScheme.primary),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      "Take a photo of the receipt and we'll pull out the items automatically. "
-                      "You can always fix anything it gets wrong before creating the bill.",
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    PrimaryButton(
-                      label: 'Take photo',
-                      icon: Icons.camera_alt_outlined,
-                      onPressed: () => _pick(ImageSource.camera),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    SecondaryButton(
-                      label: 'Choose from gallery',
-                      icon: Icons.photo_library_outlined,
-                      onPressed: () => _pick(ImageSource.gallery),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    TextButton(
-                      onPressed: () => context.pushReplacement(AppRoutes.bagilahCreate),
-                      child: const Text("I'll enter it manually"),
-                    ),
-                  ],
-                ),
+      body: AppPageBody(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: _uploading
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(
+                        value: _progress > 0 ? _progress : null,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      const Text('Uploading receipt…'),
+                    ],
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      DuitlahIcon(
+                        Icons.receipt_long_rounded,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      Text(
+                        "Take a photo of the receipt and we'll pull out the items automatically. "
+                        "You can always fix anything it gets wrong before creating the bill.",
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                      PrimaryButton(
+                        label: 'Take photo',
+                        icon: Icons.camera_alt_outlined,
+                        onPressed: () => _pick(ImageSource.camera),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      SecondaryButton(
+                        label: 'Choose from gallery',
+                        icon: Icons.photo_library_outlined,
+                        onPressed: () => _pick(ImageSource.gallery),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      TextButton(
+                        onPressed: () =>
+                            context.pushReplacement(AppRoutes.bagilahCreate),
+                        child: const Text("I'll enter it manually"),
+                      ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );

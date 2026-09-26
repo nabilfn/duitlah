@@ -9,7 +9,10 @@ import '../../../core/routing/app_routes.dart';
 /// moment rather than a raw error snackbar, per the product spec's "never destroy the social growth
 /// loop through excessive paywalls" principle. Never blocks anything else in the app; this is the
 /// only place a FREE-tier limit becomes visible.
-Future<void> showUpgradeDialog(BuildContext context, {required String message}) {
+Future<void> showUpgradeDialog(
+  BuildContext context, {
+  required String message,
+}) {
   return showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
@@ -17,7 +20,10 @@ Future<void> showUpgradeDialog(BuildContext context, {required String message}) 
       title: const Text('Duitlah+'),
       content: Text(message),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Not now')),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Not now'),
+        ),
         FilledButton(
           onPressed: () {
             Navigator.of(context).pop();

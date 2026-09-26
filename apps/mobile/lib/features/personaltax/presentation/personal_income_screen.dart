@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -24,52 +27,85 @@ class PersonalIncomeScreen extends ConsumerWidget {
     final added = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            top: AppSpacing.lg,
-            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Add income — YA $ya', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: AppSpacing.md),
-              DropdownButtonFormField<IncomeType>(
-                icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: type,
-                decoration: const InputDecoration(labelText: 'Type'),
-                items: IncomeType.values.map((t) => DropdownMenuItem(value: t, child: Text(t.name))).toList(),
-                onChanged: (v) => setSheetState(() => type = v ?? type),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Amount (RM)', controller: amountController, keyboardType: TextInputType.number),
-              const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Description (optional)', controller: descriptionController),
-              const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(
-                label: 'Add',
-                onPressed: () async {
-                  try {
-                    await ref.read(personalTaxRepositoryProvider).addIncome(
-                          yearOfAssessment: ya,
-                          incomeType: type,
-                          amount: amountController.text.trim(),
-                          description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
+        builder: (context, setSheetState) => SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: AppSpacing.pageMargin,
+              right: AppSpacing.pageMargin,
+              top: AppSpacing.lg,
+              bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Add income — YA $ya',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                AppFieldGroup(
+                  label: 'Type',
+                  child: DropdownButtonFormField<IncomeType>(
+                    itemHeight: null,
+                    isExpanded: true,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                    initialValue: type,
+                    decoration: const InputDecoration(),
+                    items: IncomeType.values
+                        .map(
+                          (t) =>
+                              DropdownMenuItem(value: t, child: Text(t.name)),
+                        )
+                        .toList(),
+                    onChanged: (v) => setSheetState(() => type = v ?? type),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppTextField(
+                  label: 'Amount (RM)',
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppTextField(
+                  label: 'Description (optional)',
+                  controller: descriptionController,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                PrimaryButton(
+                  label: 'Add',
+                  onPressed: () async {
+                    try {
+                      await ref
+                          .read(personalTaxRepositoryProvider)
+                          .addIncome(
+                            yearOfAssessment: ya,
+                            incomeType: type,
+                            amount: amountController.text.trim(),
+                            description:
+                                descriptionController.text.trim().isEmpty
+                                ? null
+                                : descriptionController.text.trim(),
+                          );
+                      if (context.mounted) Navigator.of(context).pop(true);
+                    } catch (e) {
+                      if (context.mounted) {
+                        showErrorSnackBar(
+                          context,
+                          e is AppException
+                              ? e.message
+                              : 'Something went wrong.',
                         );
-                    if (context.mounted) Navigator.of(context).pop(true);
-                  } catch (e) {
-                    if (context.mounted) {
-                      showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+                      }
                     }
-                  }
-                },
-              ),
-            ],
+                  },
+                ),
+              ],
+            ),
           ),
-        )),
+        ),
       ),
     );
     if (added == true) {
@@ -84,30 +120,55 @@ initialValue: type,
     final income = ref.watch(personalIncomeListProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('Income')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(personalIncomeListProvider),
-        child: income.when(
-          data: (items) => items.isEmpty
-              ? ListView(children: const [SizedBox(height: 80), EmptyView(icon: Icons.payments_outlined, title: 'No income recorded yet')])
-              : ListView.builder(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    final record = items[index];
-                    return Card(
-                      child: ListTile(
-                        title: Text(record.incomeType.name),
-                        subtitle: record.description != null ? Text(record.description!) : null,
-                        trailing: Text(Money.format(record.amount)),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(personalIncomeListProvider),
+          child: income.when(
+            data: (items) => items.isEmpty
+                ? ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: const [
+                      SizedBox(height: 80),
+                      EmptyView(
+                        icon: Icons.payments_outlined,
+                        title: 'No income recorded yet',
                       ),
-                    );
-                  },
-                ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(personalIncomeListProvider)),
+                    ],
+                  )
+                : ListView.builder(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: AppSpacing.scrollInsets(
+                      context,
+                      floatingAction: true,
+                    ),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final record = items[index];
+                      return Card(
+                        child: AppRecordTile(
+                          title: Text(record.incomeType.name),
+                          subtitle: record.description != null
+                              ? Text(record.description!)
+                              : null,
+                          trailing: Text(Money.format(record.amount)),
+                        ),
+                      );
+                    },
+                  ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(personalIncomeListProvider),
+            ),
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addIncome(context, ref), child: const DuitlahIcon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _addIncome(context, ref),
+        child: const DuitlahIcon(Icons.add),
+      ),
     );
   }
 }

@@ -12,7 +12,7 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     children: [
       Expanded(
-        child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+        child: Text(title, style: Theme.of(context).textTheme.titleLarge),
       ),
       if (action != null) TextButton(onPressed: onAction, child: Text(action!)),
     ],
@@ -108,15 +108,9 @@ class QuickAction extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 4),
         child: Column(
           children: [
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(color: color ?? context.duitlahColors.primarySoft, shape: BoxShape.circle),
-              child: DuitlahIcon(icon, color: context.duitlahColors.primary, size: 25),
-            ),
-            const SizedBox(height: 8),
             Text(
               label,
               style: Theme.of(context).textTheme.labelMedium
@@ -140,7 +134,10 @@ class ForestSurface extends StatelessWidget {
     borderRadius: BorderRadius.circular(radius),
     child: ColoredBox(
       color: context.duitlahColors.balanceBackground,
-      child: CustomPaint(painter: _ForestPainter(context.duitlahColors.balanceHighlight), child: child),
+      child: CustomPaint(
+        painter: _ForestPainter(context.duitlahColors.balanceHighlight),
+        child: child,
+      ),
     ),
   );
 }
@@ -150,39 +147,10 @@ class _ForestPainter extends CustomPainter {
   final Color highlight;
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = highlight.withValues(alpha: .16);
-    canvas.drawOval(
-      Rect.fromLTWH(
-        -size.width * .4,
-        -size.height * .9,
-        size.width * 1.35,
-        size.height * 1.8,
-      ),
-      paint,
-    );
-    canvas.drawOval(
-      Rect.fromLTWH(
-        size.width * .65,
-        size.height * .45,
-        size.width * .65,
-        size.height,
-      ),
-      paint,
-    );
-    paint.style = PaintingStyle.stroke;
-    paint.strokeWidth = 1;
-    canvas.drawOval(
-      Rect.fromLTWH(
-        size.width * .64,
-        size.height * .44,
-        size.width * .65,
-        size.height,
-      ),
-      paint,
-    );
+    // Tonal matte surface; no decorative shapes behind financial content.
   }
 
   @override
-  bool shouldRepaint(_ForestPainter oldDelegate) => oldDelegate.highlight != highlight;
+  bool shouldRepaint(_ForestPainter oldDelegate) =>
+      oldDelegate.highlight != highlight;
 }

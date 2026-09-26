@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -14,10 +15,14 @@ import '../../../core/widgets/dialogs.dart';
 import '../../receipts/application/receipts_providers.dart';
 
 class _EditableItem {
-  _EditableItem({String? name, String? quantity, String? unitPrice, this.confidence = 1})
-      : nameController = TextEditingController(text: name ?? ''),
-        quantityController = TextEditingController(text: quantity ?? '1'),
-        unitPriceController = TextEditingController(text: unitPrice ?? '0.00');
+  _EditableItem({
+    String? name,
+    String? quantity,
+    String? unitPrice,
+    this.confidence = 1,
+  }) : nameController = TextEditingController(text: name ?? ''),
+       quantityController = TextEditingController(text: quantity ?? '1'),
+       unitPriceController = TextEditingController(text: unitPrice ?? '0.00');
 
   final TextEditingController nameController;
   final TextEditingController quantityController;
@@ -36,7 +41,8 @@ class ReceiptReviewScreen extends ConsumerStatefulWidget {
   final String scanId;
 
   @override
-  ConsumerState<ReceiptReviewScreen> createState() => _ReceiptReviewScreenState();
+  ConsumerState<ReceiptReviewScreen> createState() =>
+      _ReceiptReviewScreenState();
 }
 
 class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
@@ -61,12 +67,14 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
       _date = DateTime.tryParse(parsed.receiptDate as String) ?? DateTime.now();
     }
     for (final item in parsed.items) {
-      _items.add(_EditableItem(
-        name: item.name,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        confidence: item.confidence,
-      ));
+      _items.add(
+        _EditableItem(
+          name: item.name,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          confidence: item.confidence,
+        ),
+      );
     }
     if (_items.isEmpty) _items.add(_EditableItem());
   }
@@ -74,26 +82,41 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
   Future<void> _confirm() async {
     setState(() => _submitting = true);
     try {
-      final result = await ref.read(receiptScanRepositoryProvider).confirm(
+      final result = await ref
+          .read(receiptScanRepositoryProvider)
+          .confirm(
             widget.scanId,
             merchant: _merchantController.text.trim(),
             receiptDate: _date.toIso8601String().split('T').first,
             items: _items
                 .where((i) => i.nameController.text.trim().isNotEmpty)
-                .map((i) => {
-                      'name': i.nameController.text.trim(),
-                      'quantity': i.quantityController.text.trim(),
-                      'unitPrice': i.unitPriceController.text.trim(),
-                    })
+                .map(
+                  (i) => {
+                    'name': i.nameController.text.trim(),
+                    'quantity': i.quantityController.text.trim(),
+                    'unitPrice': i.unitPriceController.text.trim(),
+                  },
+                )
                 .toList(),
-            tax: _taxController.text.trim().isEmpty ? '0' : _taxController.text.trim(),
-            serviceCharge: _serviceController.text.trim().isEmpty ? '0' : _serviceController.text.trim(),
-            discount: _discountController.text.trim().isEmpty ? '0' : _discountController.text.trim(),
+            tax: _taxController.text.trim().isEmpty
+                ? '0'
+                : _taxController.text.trim(),
+            serviceCharge: _serviceController.text.trim().isEmpty
+                ? '0'
+                : _serviceController.text.trim(),
+            discount: _discountController.text.trim().isEmpty
+                ? '0'
+                : _discountController.text.trim(),
           );
       final billId = result['billId'] as String? ?? result['id'] as String;
       if (mounted) context.pushReplacement(AppRoutes.bagilahDetail(billId));
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -118,57 +141,83 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
     final scanAsync = ref.watch(receiptScanForReviewProvider(widget.scanId));
     return Scaffold(
       appBar: AppBar(title: const Text('Review receipt')),
-      body: scanAsync.when(
-        data: (scan) {
-          _initFromScan(scan);
-          return ListView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            children: [
-              if (scan.needsReview) ...[
-                _needsReviewBanner(),
-                const SizedBox(height: AppSpacing.md),
-              ],
-              AppTextField(label: 'Merchant', controller: _merchantController),
-              const SizedBox(height: AppSpacing.md),
-              OutlinedButton.icon(
-                icon: const DuitlahIcon(Icons.calendar_today_outlined),
-                label: Text(_date.toIso8601String().split('T').first),
-                onPressed: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: _date,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime.now(),
-                  );
-                  if (picked != null) setState(() => _date = picked);
-                },
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              Text('Items', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: AppSpacing.sm),
-              for (var i = 0; i < _items.length; i++) _buildItemRow(i),
-              TextButton.icon(
-                icon: const DuitlahIcon(Icons.add),
-                label: const Text('Add item'),
-                onPressed: () => setState(() => _items.add(_EditableItem())),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Row(
-                children: [
-                  Expanded(child: AppTextField(label: 'Tax', controller: _taxController, keyboardType: TextInputType.number)),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(child: AppTextField(label: 'Service', controller: _serviceController, keyboardType: TextInputType.number)),
+      body: AppPageBody(
+        child: scanAsync.when(
+          data: (scan) {
+            _initFromScan(scan);
+            return ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: AppSpacing.scrollInsets(context, floatingAction: false),
+              children: [
+                if (scan.needsReview) ...[
+                  _needsReviewBanner(),
+                  const SizedBox(height: AppSpacing.md),
                 ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Discount', controller: _discountController, keyboardType: TextInputType.number),
-              const SizedBox(height: AppSpacing.xl),
-              PrimaryButton(label: 'Create bill from this receipt', onPressed: _confirm, loading: _submitting),
-            ],
-          );
-        },
-        loading: () => const LoadingView(),
-        error: (e, _) => ErrorView(error: e),
+                AppTextField(
+                  label: 'Merchant',
+                  controller: _merchantController,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                OutlinedButton.icon(
+                  icon: const DuitlahIcon(Icons.calendar_today_outlined),
+                  label: Text(_date.toIso8601String().split('T').first),
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _date,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) setState(() => _date = picked);
+                  },
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Text('Items', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: AppSpacing.sm),
+                for (var i = 0; i < _items.length; i++) _buildItemRow(i),
+                TextButton.icon(
+                  icon: const DuitlahIcon(Icons.add),
+                  label: const Text('Add item'),
+                  onPressed: () => setState(() => _items.add(_EditableItem())),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppTextField(
+                        label: 'Tax',
+                        controller: _taxController,
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: AppTextField(
+                        label: 'Service',
+                        controller: _serviceController,
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppTextField(
+                  label: 'Discount',
+                  controller: _discountController,
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                PrimaryButton(
+                  label: 'Create bill from this receipt',
+                  onPressed: _confirm,
+                  loading: _submitting,
+                ),
+              ],
+            );
+          },
+          loading: () => const LoadingView(),
+          error: (e, _) => ErrorView(error: e),
+        ),
       ),
     );
   }
@@ -179,11 +228,17 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
       decoration: BoxDecoration(
         color: context.duitlahColors.warning.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(color: context.duitlahColors.warning.withValues(alpha: 0.4)),
+        border: Border.all(
+          color: context.duitlahColors.warning.withValues(alpha: 0.4),
+        ),
       ),
       child: Row(
         children: [
-          DuitlahIcon(Icons.info_outline, color: context.duitlahColors.warning, size: 20),
+          DuitlahIcon(
+            Icons.info_outline,
+            color: context.duitlahColors.warning,
+            size: 20,
+          ),
           SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -199,29 +254,46 @@ class _ReceiptReviewScreenState extends ConsumerState<ReceiptReviewScreen> {
     final item = _items[index];
     final lowConfidence = item.confidence < 0.6;
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            flex: 3,
-            child: AppTextField(
-              label: lowConfidence ? 'Name (double-check)' : 'Name',
-              controller: item.nameController,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: AppTextField(
+                  label: lowConfidence ? 'Name (double-check)' : 'Name',
+                  controller: item.nameController,
+                ),
+              ),
+              IconButton(
+                tooltip: 'Remove item ${index + 1}',
+                icon: const DuitlahIcon(Icons.close, size: 18),
+                onPressed: () => setState(() => _items.removeAt(index)),
+              ),
+            ],
           ),
-          const SizedBox(width: AppSpacing.xs),
-          Expanded(
-            child: AppTextField(label: 'Qty', controller: item.quantityController, keyboardType: TextInputType.number),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Expanded(
-            flex: 2,
-            child: AppTextField(label: 'Price', controller: item.unitPriceController, keyboardType: TextInputType.number),
-          ),
-          IconButton(
-            icon: const DuitlahIcon(Icons.close, size: 18),
-            onPressed: () => setState(() => _items.removeAt(index)),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: AppTextField(
+                  label: 'Quantity',
+                  controller: item.quantityController,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: AppTextField(
+                  label: 'Unit price',
+                  controller: item.unitPriceController,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+            ],
           ),
         ],
       ),

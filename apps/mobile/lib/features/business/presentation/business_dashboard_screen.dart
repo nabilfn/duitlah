@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/glass_account_selector.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -25,49 +28,168 @@ class BusinessDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboard = ref.watch(businessDashboardProvider(spaceId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Business')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(businessDashboardProvider(spaceId)),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-          children: [
-            dashboard.when(
-              data: (d) => _HeadlineCard(dashboard: d),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(businessDashboardProvider(spaceId))),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Expanded(child: QuickAction(label: 'Expenses', icon: Icons.request_quote_outlined, onTap: () => context.push(AppRoutes.businessExpenses(spaceId)))),
-              Expanded(child: QuickAction(label: 'Invoices', icon: Icons.receipt_outlined, onTap: () => context.push(AppRoutes.businessInvoices(spaceId)))),
-              Expanded(child: QuickAction(label: 'Accounts', icon: Icons.account_balance_outlined, onTap: () => context.push(AppRoutes.businessAccounts(spaceId)))),
-              Expanded(child: QuickAction(label: 'Reports', icon: Icons.insights_outlined, onTap: () => context.push(AppRoutes.accountingReports(spaceId)))),
-            ]),
-            const SizedBox(height: 20),
-            const SectionHeader('People & business'),
-            _NavTile(icon: Icons.groups_outlined, label: 'Team', route: AppRoutes.businessTeam(spaceId)),
-            _NavTile(icon: Icons.badge_outlined, label: 'Business Profile', route: AppRoutes.businessProfile(spaceId)),
-            const SizedBox(height: AppSpacing.md),
-            _NavTile(icon: Icons.people_alt_outlined, label: 'Customers', route: AppRoutes.businessCustomers(spaceId)),
-            _NavTile(icon: Icons.local_shipping_outlined, label: 'Suppliers', route: AppRoutes.businessSuppliers(spaceId)),
-            _NavTile(icon: Icons.inventory_2_outlined, label: 'Products', route: AppRoutes.businessProducts(spaceId)),
-            _NavTile(icon: Icons.account_balance_outlined, label: 'Business Accounts', route: AppRoutes.businessAccounts(spaceId)),
-            const SizedBox(height: 20),
-            const SectionHeader('Sales & payments'),
-            _NavTile(icon: Icons.request_quote_outlined, label: 'Expenses', route: AppRoutes.businessExpenses(spaceId)),
-            _NavTile(icon: Icons.description_outlined, label: 'Quotations', route: AppRoutes.businessQuotations(spaceId)),
-            _NavTile(icon: Icons.receipt_long_outlined, label: 'Invoices', route: AppRoutes.businessInvoices(spaceId)),
-            _NavTile(icon: Icons.event_repeat_outlined, label: 'Recurring Invoices', route: AppRoutes.businessRecurringInvoices(spaceId)),
-            _NavTile(icon: Icons.assignment_return_outlined, label: 'Credit Notes', route: AppRoutes.businessCreditNotes(spaceId)),
-            const SizedBox(height: AppSpacing.md),
-            const SectionHeader('Operations & reporting'),
-            _NavTile(icon: Icons.calculate_outlined, label: 'Accounting', route: AppRoutes.accountingHub(spaceId)),
-            _NavTile(icon: Icons.fact_check_outlined, label: 'Reconciliation', route: AppRoutes.reconciliationHub(spaceId)),
-            _NavTile(icon: Icons.warehouse_outlined, label: 'Inventory', route: AppRoutes.inventoryHub(spaceId)),
-            _NavTile(icon: Icons.chair_outlined, label: 'Fixed Assets', route: AppRoutes.assetsHub(spaceId)),
-            _NavTile(icon: Icons.gavel_outlined, label: 'Business Tax', route: AppRoutes.businessTaxHub(spaceId)),
-            _NavTile(icon: Icons.swap_horiz_outlined, label: 'Owner Transactions', route: AppRoutes.crossSpaceHub(spaceId)),
-          ],
+      appBar: AppBar(
+        title: const Text('Business'),
+        actions: const [
+          GlassAccountSelector(view: AccountView.business),
+          SizedBox(width: 12),
+        ],
+      ),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async =>
+              ref.invalidate(businessDashboardProvider(spaceId)),
+          child: ListView(
+            padding: AppSpacing.scrollInsets(context, floatingAction: false),
+            children: [
+              dashboard.when(
+                data: (d) => _HeadlineCard(dashboard: d),
+                loading: () => const LoadingView(),
+                error: (e, _) => ErrorView(
+                  error: e,
+                  onRetry: () =>
+                      ref.invalidate(businessDashboardProvider(spaceId)),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 110,
+                      child: QuickAction(
+                        label: 'Expenses',
+                        icon: Icons.request_quote_outlined,
+                        onTap: () =>
+                            context.push(AppRoutes.businessExpenses(spaceId)),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 110,
+                      child: QuickAction(
+                        label: 'Invoices',
+                        icon: Icons.receipt_outlined,
+                        onTap: () =>
+                            context.push(AppRoutes.businessInvoices(spaceId)),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 110,
+                      child: QuickAction(
+                        label: 'Accounts',
+                        icon: Icons.account_balance_outlined,
+                        onTap: () =>
+                            context.push(AppRoutes.businessAccounts(spaceId)),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 110,
+                      child: QuickAction(
+                        label: 'Reports',
+                        icon: Icons.insights_outlined,
+                        onTap: () =>
+                            context.push(AppRoutes.accountingReports(spaceId)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const SectionHeader('People & business'),
+              _NavTile(
+                icon: Icons.groups_outlined,
+                label: 'Team',
+                route: AppRoutes.businessTeam(spaceId),
+              ),
+              _NavTile(
+                icon: Icons.badge_outlined,
+                label: 'Business Profile',
+                route: AppRoutes.businessProfile(spaceId),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _NavTile(
+                icon: Icons.people_alt_outlined,
+                label: 'Customers',
+                route: AppRoutes.businessCustomers(spaceId),
+              ),
+              _NavTile(
+                icon: Icons.local_shipping_outlined,
+                label: 'Suppliers',
+                route: AppRoutes.businessSuppliers(spaceId),
+              ),
+              _NavTile(
+                icon: Icons.inventory_2_outlined,
+                label: 'Products',
+                route: AppRoutes.businessProducts(spaceId),
+              ),
+              _NavTile(
+                icon: Icons.account_balance_outlined,
+                label: 'Business Accounts',
+                route: AppRoutes.businessAccounts(spaceId),
+              ),
+              const SizedBox(height: 20),
+              const SectionHeader('Sales & payments'),
+              _NavTile(
+                icon: Icons.request_quote_outlined,
+                label: 'Expenses',
+                route: AppRoutes.businessExpenses(spaceId),
+              ),
+              _NavTile(
+                icon: Icons.description_outlined,
+                label: 'Quotations',
+                route: AppRoutes.businessQuotations(spaceId),
+              ),
+              _NavTile(
+                icon: Icons.receipt_long_outlined,
+                label: 'Invoices',
+                route: AppRoutes.businessInvoices(spaceId),
+              ),
+              _NavTile(
+                icon: Icons.event_repeat_outlined,
+                label: 'Recurring Invoices',
+                route: AppRoutes.businessRecurringInvoices(spaceId),
+              ),
+              _NavTile(
+                icon: Icons.assignment_return_outlined,
+                label: 'Credit Notes',
+                route: AppRoutes.businessCreditNotes(spaceId),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              const SectionHeader('Operations & reporting'),
+              _NavTile(
+                icon: Icons.calculate_outlined,
+                label: 'Accounting',
+                route: AppRoutes.accountingHub(spaceId),
+              ),
+              _NavTile(
+                icon: Icons.fact_check_outlined,
+                label: 'Reconciliation',
+                route: AppRoutes.reconciliationHub(spaceId),
+              ),
+              _NavTile(
+                icon: Icons.warehouse_outlined,
+                label: 'Inventory',
+                route: AppRoutes.inventoryHub(spaceId),
+              ),
+              _NavTile(
+                icon: Icons.chair_outlined,
+                label: 'Fixed Assets',
+                route: AppRoutes.assetsHub(spaceId),
+              ),
+              _NavTile(
+                icon: Icons.gavel_outlined,
+                label: 'Business Tax',
+                route: AppRoutes.businessTaxHub(spaceId),
+              ),
+              _NavTile(
+                icon: Icons.swap_horiz_outlined,
+                label: 'Owner Transactions',
+                route: AppRoutes.crossSpaceHub(spaceId),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -81,43 +203,81 @@ class _HeadlineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ForestSurface(radius: 20, child: SizedBox(width: double.infinity, child: Padding(padding: const EdgeInsets.all(24), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Business cash position', style: TextStyle(color: context.duitlahColors.balanceText)),
-              const SizedBox(height: 8),
-              Text(Money.format(dashboard.cashPosition), style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: context.duitlahColors.balanceText)),
-              const SizedBox(height: 8),
-              Text('Your business, in balance.', style: TextStyle(color: context.duitlahColors.balanceSecondary, fontSize: 13)),
-            ])))),
-            const Divider(height: AppSpacing.lg),
-            Row(
-              children: [
-                Expanded(
-                  child: _Stat(label: 'Receivables', amount: dashboard.totalReceivables, count: '${dashboard.openInvoiceCount} open invoices'),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: _Stat(label: 'Payables', amount: dashboard.totalPayables, count: '${dashboard.unpaidExpenseCount} unpaid expenses'),
-                ),
-              ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ForestSurface(
+          radius: 20,
+          child: SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Business cash position',
+                    style: TextStyle(color: context.duitlahColors.balanceText),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    Money.format(dashboard.cashPosition),
+                    style: Theme.of(context).textTheme.headlineMedium
+                        ?.copyWith(color: context.duitlahColors.balanceText),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Cash available across business accounts',
+                    style: TextStyle(
+                      color: context.duitlahColors.balanceSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.md),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('${dashboard.customerCount} customers', style: Theme.of(context).textTheme.bodySmall),
-                Text('${dashboard.supplierCount} suppliers', style: Theme.of(context).textTheme.bodySmall),
-                Text('${dashboard.productCount} products', style: Theme.of(context).textTheme.bodySmall),
-              ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        AppMetricRow(
+          children: [
+            Expanded(
+              child: _Stat(
+                label: 'Receivables',
+                amount: dashboard.totalReceivables,
+                count: '${dashboard.openInvoiceCount} open invoices',
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: _Stat(
+                label: 'Payables',
+                amount: dashboard.totalPayables,
+                count: '${dashboard.unpaidExpenseCount} unpaid expenses',
+              ),
             ),
           ],
         ),
-      ),
+        const SizedBox(height: AppSpacing.md),
+        Wrap(
+          spacing: 16,
+          runSpacing: 8,
+          children: [
+            Text(
+              '${dashboard.customerCount} customers',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            Text(
+              '${dashboard.supplierCount} suppliers',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            Text(
+              '${dashboard.productCount} products',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -135,7 +295,10 @@ class _Stat extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: Theme.of(context).textTheme.bodySmall),
-        Text(Money.format(amount), style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          Money.format(amount),
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
         Text(count, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
@@ -143,7 +306,11 @@ class _Stat extends StatelessWidget {
 }
 
 class _NavTile extends StatelessWidget {
-  const _NavTile({required this.icon, required this.label, required this.route});
+  const _NavTile({
+    required this.icon,
+    required this.label,
+    required this.route,
+  });
 
   final IconData icon;
   final String label;

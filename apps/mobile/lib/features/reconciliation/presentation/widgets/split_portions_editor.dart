@@ -11,8 +11,8 @@ import '../../domain/reconciliation.dart';
 /// handed to the server.
 class SplitPortionDraft {
   SplitPortionDraft({String description = '', String amount = ''})
-      : descriptionController = TextEditingController(text: description),
-        amountController = TextEditingController(text: amount);
+    : descriptionController = TextEditingController(text: description),
+      amountController = TextEditingController(text: amount);
 
   final TextEditingController descriptionController;
   final TextEditingController amountController;
@@ -23,7 +23,9 @@ class SplitPortionDraft {
     final amount = amountController.text.trim();
     if (amount.isEmpty) return null;
     return SplitPortionInput(
-      description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
+      description: descriptionController.text.trim().isEmpty
+          ? null
+          : descriptionController.text.trim(),
       amount: amount,
     );
   }
@@ -39,7 +41,11 @@ class SplitPortionDraft {
 /// in the caller (which owns the [Listenable] driving live updates), same
 /// division of responsibility as [JournalLineEditor].
 class SplitPortionsEditor extends StatelessWidget {
-  const SplitPortionsEditor({super.key, required this.portions, required this.onChanged});
+  const SplitPortionsEditor({
+    super.key,
+    required this.portions,
+    required this.onChanged,
+  });
 
   final List<SplitPortionDraft> portions;
   final ValueChanged<List<SplitPortionDraft>> onChanged;
@@ -75,7 +81,10 @@ class SplitPortionsEditor extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                AppTextField(label: 'Description (optional)', controller: portion.descriptionController),
+                AppTextField(
+                  label: 'Description (optional)',
+                  controller: portion.descriptionController,
+                ),
                 const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   label: 'Amount',
@@ -87,7 +96,9 @@ class SplitPortionsEditor extends StatelessWidget {
           ),
           IconButton(
             icon: const DuitlahIcon(Icons.close),
-            onPressed: portions.length <= 2 ? null : () => onChanged([...portions]..removeAt(index)),
+            onPressed: portions.length <= 2
+                ? null
+                : () => onChanged([...portions]..removeAt(index)),
           ),
         ],
       ),

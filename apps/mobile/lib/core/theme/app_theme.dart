@@ -18,6 +18,20 @@ class AppSpacing {
   /// distinct from the xs/sm/md/lg/xl/xxl rhythm since it's a fixed layout
   /// constant, not a step in that scale.
   static const pageMargin = 20.0;
+  static const sectionGap = 32.0;
+  static const fieldGap = 20.0;
+  static const labelGap = 8.0;
+  static const pageInsets = EdgeInsets.fromLTRB(pageMargin, 12, pageMargin, 32);
+
+  static EdgeInsets scrollInsets(
+    BuildContext context, {
+    bool floatingAction = false,
+  }) => EdgeInsets.fromLTRB(
+    pageMargin,
+    12,
+    pageMargin,
+    (floatingAction ? 104 : 32) + MediaQuery.paddingOf(context).bottom,
+  );
 }
 
 /// Radii scale from the mobile redesign spec — small controls (10–12px),
@@ -30,11 +44,11 @@ class AppRadius {
   static const sm = 12.0;
   static const input = 14.0;
   static const md = 20.0;
-  static const lg = 22.0;
+  static const lg = 30.0;
   static const pill = 999.0;
 }
 
-/// The existing design with the supplied berry light/dark colour palettes.
+/// Soft Editorial Glass: matte foundations, navy emphasis, quiet controls.
 class AppTheme {
   AppTheme._();
 
@@ -96,14 +110,29 @@ class AppTheme {
       fontFamily: _fontFamily,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: background,
-      extensions: [palette, isDark ? AppSemanticColors.dark : AppSemanticColors.light],
+      extensions: [
+        palette,
+        isDark ? AppSemanticColors.dark : AppSemanticColors.light,
+      ],
       disabledColor: palette.textTertiary,
       hintColor: palette.textTertiary,
       focusColor: palette.primarySoft.withValues(alpha: .35),
       hoverColor: palette.primarySubtle,
-      textSelectionTheme: TextSelectionThemeData(cursorColor: palette.primary, selectionColor: palette.primarySoft, selectionHandleColor: palette.primary),
-      popupMenuTheme: PopupMenuThemeData(color: palette.surfaceElevated, surfaceTintColor: Colors.transparent),
-      menuTheme: MenuThemeData(style: MenuStyle(backgroundColor: WidgetStatePropertyAll(palette.surfaceElevated), surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent))),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: palette.primary,
+        selectionColor: palette.primarySoft,
+        selectionHandleColor: palette.primary,
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: palette.surfaceElevated,
+        surfaceTintColor: Colors.transparent,
+      ),
+      menuTheme: MenuThemeData(
+        style: MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(palette.surfaceElevated),
+          surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+        ),
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: background,
         foregroundColor: ink,
@@ -111,6 +140,7 @@ class AppTheme {
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: false,
+        titleSpacing: AppSpacing.pageMargin,
         titleTextStyle: TextStyle(
           fontFamily: _fontFamily,
           fontSize: 24,
@@ -123,18 +153,34 @@ class AppTheme {
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: ButtonStyle(
           side: const WidgetStatePropertyAll(BorderSide.none),
-          shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))),
-          backgroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? teal : palette.surfaceSecondary),
-          foregroundColor: WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? colorScheme.onPrimary : muted),
-          minimumSize: const WidgetStatePropertyAll(Size(48, 44)),
-          textStyle: const WidgetStatePropertyAll(TextStyle(fontFamily: _fontFamily, fontSize: 13, fontWeight: FontWeight.w500)),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+          backgroundColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? teal
+                : palette.surfaceSecondary,
+          ),
+          foregroundColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.selected)
+                ? colorScheme.onPrimary
+                : muted,
+          ),
+          minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
+          textStyle: const WidgetStatePropertyAll(
+            TextStyle(
+              fontFamily: _fontFamily,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: tealSoft,
         selectedColor: tealSoft,
         side: BorderSide.none,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       ),
       cardTheme: CardThemeData(
@@ -159,14 +205,28 @@ class AppTheme {
         iconColor: teal,
         minVerticalPadding: 8,
       ),
-      dividerTheme: DividerThemeData(color: palette.borderSubtle, thickness: 1, space: 1),
+      dividerTheme: DividerThemeData(
+        color: palette.borderSubtle,
+        thickness: 1,
+        space: 1,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: palette.balanceBackground,
+          foregroundColor: palette.balanceText,
+          minimumSize: const Size(48, 52),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style:
             ElevatedButton.styleFrom(
-              backgroundColor: teal,
-              foregroundColor: colorScheme.onPrimary,
+              backgroundColor: palette.balanceBackground,
+              foregroundColor: palette.balanceText,
               disabledBackgroundColor: teal.withValues(alpha: 0.35),
-              minimumSize: const Size.fromHeight(52),
+              minimumSize: const Size(48, 52),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -189,7 +249,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: ink,
-          minimumSize: const Size.fromHeight(52),
+          minimumSize: const Size(48, 52),
           side: BorderSide(color: border),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -204,6 +264,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: palette.primary,
+          minimumSize: const Size(48, 48),
           textStyle: const TextStyle(
             fontFamily: _fontFamily,
             fontSize: 15,
@@ -216,7 +277,16 @@ class AppTheme {
         fillColor: card,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
+          vertical: 16,
+        ),
+        alignLabelWithHint: true,
+        floatingLabelAlignment: FloatingLabelAlignment.start,
+        errorMaxLines: 4,
+        helperMaxLines: 3,
+        labelStyle: TextStyle(
+          fontFamily: _fontFamily,
+          fontSize: 14,
+          color: muted,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.input),
@@ -224,7 +294,7 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.input),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(color: palette.borderSubtle),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.input),
@@ -235,6 +305,23 @@ class AppTheme {
           borderSide: BorderSide(color: negative, width: 1.5),
         ),
         hintStyle: TextStyle(fontFamily: _fontFamily, color: muted),
+      ),
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: palette.surfaceElevated,
+        surfaceTintColor: Colors.transparent,
+        headerBackgroundColor: palette.balanceBackground,
+        headerForegroundColor: palette.balanceText,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: palette.surfaceElevated,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          minimumSize: const Size(48, 48),
+          foregroundColor: ink,
+        ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: palette.surfaceElevated,
@@ -299,9 +386,36 @@ class AppTheme {
   /// weight, since "financial values should always be visually prominent".
   static TextTheme _textTheme(Color ink, Color muted) {
     return TextTheme(
+      displayLarge: TextStyle(
+        fontFamily: _fontFamily,
+        fontSize: 48,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -1.2,
+        color: ink,
+      ),
+      displayMedium: TextStyle(
+        fontFamily: _fontFamily,
+        fontSize: 44,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -1,
+        color: ink,
+      ),
+      headlineLarge: TextStyle(
+        fontFamily: _fontFamily,
+        fontSize: 32,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -.6,
+        color: ink,
+      ),
+      labelSmall: TextStyle(
+        fontFamily: _fontFamily,
+        fontSize: 11,
+        fontWeight: FontWeight.w500,
+        color: muted,
+      ),
       displaySmall: TextStyle(
         fontFamily: _fontFamily,
-        fontSize: 36,
+        fontSize: 40,
         fontWeight: FontWeight.w800,
         letterSpacing: -0.6,
         color: ink,

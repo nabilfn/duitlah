@@ -46,7 +46,11 @@ class QrInviteSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(color: theme.colorScheme.outline),
             ),
-            child: QrImageView(data: _link, size: 200, backgroundColor: Colors.white),
+            child: QrImageView(
+              data: _link,
+              size: 200,
+              backgroundColor: Colors.white,
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           Row(
@@ -58,7 +62,9 @@ class QrInviteSheet extends StatelessWidget {
                   onPressed: () async {
                     await Clipboard.setData(ClipboardData(text: _link));
                     AppHaptics.qrScanSuccess();
-                    if (context.mounted) showSuccessSnackBar(context, 'Link copied');
+                    if (context.mounted) {
+                      showSuccessSnackBar(context, 'Link copied');
+                    }
                   },
                 ),
               ),

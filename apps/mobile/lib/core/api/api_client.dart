@@ -47,17 +47,19 @@ class ApiClient {
     _dio.interceptors.add(CookieManager(_cookieJar));
 
     _dio.interceptors.add(
-      InterceptorsWrapper(onRequest: (options, handler) {
-        final skipAuth = options.extra['skipAuth'] == true;
-        if (!skipAuth && _accessToken != null) {
-          options.headers['Authorization'] = 'Bearer $_accessToken';
-        }
-        final idempotencyKey = options.extra['idempotencyKey'] as String?;
-        if (idempotencyKey != null) {
-          options.headers['Idempotency-Key'] = idempotencyKey;
-        }
-        handler.next(options);
-      }),
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          final skipAuth = options.extra['skipAuth'] == true;
+          if (!skipAuth && _accessToken != null) {
+            options.headers['Authorization'] = 'Bearer $_accessToken';
+          }
+          final idempotencyKey = options.extra['idempotencyKey'] as String?;
+          if (idempotencyKey != null) {
+            options.headers['Idempotency-Key'] = idempotencyKey;
+          }
+          handler.next(options);
+        },
+      ),
     );
   }
 
@@ -89,51 +91,66 @@ class ApiClient {
     String path, {
     Map<String, dynamic>? query,
     bool skipAuth = false,
-  }) =>
-      _send(() => _dio.get(
-            path,
-            queryParameters: query,
-            options: Options(extra: {'skipAuth': skipAuth}),
-          ));
+  }) => _send(
+    () => _dio.get(
+      path,
+      queryParameters: query,
+      options: Options(extra: {'skipAuth': skipAuth}),
+    ),
+  );
 
   Future<dynamic> post(
     String path, {
     dynamic data,
     bool skipAuth = false,
     String? idempotencyKey,
-  }) =>
-      _send(() => _dio.post(
-            path,
-            data: data,
-            options: Options(extra: {'skipAuth': skipAuth, 'idempotencyKey': idempotencyKey}),
-          ));
+  }) => _send(
+    () => _dio.post(
+      path,
+      data: data,
+      options: Options(
+        extra: {'skipAuth': skipAuth, 'idempotencyKey': idempotencyKey},
+      ),
+    ),
+  );
 
   Future<dynamic> put(
     String path, {
     dynamic data,
     bool skipAuth = false,
     String? idempotencyKey,
-  }) =>
-      _send(() => _dio.put(
-            path,
-            data: data,
-            options: Options(extra: {'skipAuth': skipAuth, 'idempotencyKey': idempotencyKey}),
-          ));
+  }) => _send(
+    () => _dio.put(
+      path,
+      data: data,
+      options: Options(
+        extra: {'skipAuth': skipAuth, 'idempotencyKey': idempotencyKey},
+      ),
+    ),
+  );
 
   Future<dynamic> patch(
     String path, {
     dynamic data,
     bool skipAuth = false,
     String? idempotencyKey,
-  }) =>
-      _send(() => _dio.patch(
-            path,
-            data: data,
-            options: Options(extra: {'skipAuth': skipAuth, 'idempotencyKey': idempotencyKey}),
-          ));
+  }) => _send(
+    () => _dio.patch(
+      path,
+      data: data,
+      options: Options(
+        extra: {'skipAuth': skipAuth, 'idempotencyKey': idempotencyKey},
+      ),
+    ),
+  );
 
-  Future<dynamic> delete(String path, {dynamic data, bool skipAuth = false}) => _send(
-        () => _dio.delete(path, data: data, options: Options(extra: {'skipAuth': skipAuth})),
+  Future<dynamic> delete(String path, {dynamic data, bool skipAuth = false}) =>
+      _send(
+        () => _dio.delete(
+          path,
+          data: data,
+          options: Options(extra: {'skipAuth': skipAuth}),
+        ),
       );
 
   /// Multipart upload (receipt photos) — a separate path from [post]
@@ -146,14 +163,15 @@ class ApiClient {
     required String filePath,
     required String fileName,
     void Function(int sent, int total)? onProgress,
-  }) =>
-      _send(() => _dio.post(
-            path,
-            data: FormData.fromMap({
-              fieldName: MultipartFile.fromFileSync(filePath, filename: fileName),
-            }),
-            onSendProgress: onProgress,
-          ));
+  }) => _send(
+    () => _dio.post(
+      path,
+      data: FormData.fromMap({
+        fieldName: MultipartFile.fromFileSync(filePath, filename: fileName),
+      }),
+      onSendProgress: onProgress,
+    ),
+  );
 
   /// Same shape as [uploadFile] but for endpoints needing more than one file
   /// part and/or extra query parameters alongside it (AutoTrack's statement
@@ -168,27 +186,36 @@ class ApiClient {
     required List<String> filePaths,
     Map<String, dynamic>? query,
     void Function(int sent, int total)? onProgress,
-  }) =>
-      _send(() => _dio.post(
-            path,
-            queryParameters: query,
-            data: FormData.fromMap({
-              fieldName: [
-                for (final filePath in filePaths)
-                  MultipartFile.fromFileSync(filePath, filename: filePath.split('/').last),
-              ],
-            }),
-            onSendProgress: onProgress,
-          ));
+  }) => _send(
+    () => _dio.post(
+      path,
+      queryParameters: query,
+      data: FormData.fromMap({
+        fieldName: [
+          for (final filePath in filePaths)
+            MultipartFile.fromFileSync(
+              filePath,
+              filename: filePath.split('/').last,
+            ),
+        ],
+      }),
+      onSendProgress: onProgress,
+    ),
+  );
 
   /// Binary downloads (exports) — a normal [get] would try to JSON-decode a CSV/XLSX/PDF/ZIP body
   /// and fail; this forces Dio's raw-bytes response type instead.
-  Future<List<int>> downloadBytes(String path, {Map<String, dynamic>? query}) async {
-    final data = await _send(() => _dio.get(
-          path,
-          queryParameters: query,
-          options: Options(responseType: ResponseType.bytes),
-        ));
+  Future<List<int>> downloadBytes(
+    String path, {
+    Map<String, dynamic>? query,
+  }) async {
+    final data = await _send(
+      () => _dio.get(
+        path,
+        queryParameters: query,
+        options: Options(responseType: ResponseType.bytes),
+      ),
+    );
     return data as List<int>;
   }
 
@@ -222,7 +249,9 @@ class ApiClient {
       }
     }
 
-    if (response.statusCode != null && response.statusCode! >= 200 && response.statusCode! < 300) {
+    if (response.statusCode != null &&
+        response.statusCode! >= 200 &&
+        response.statusCode! < 300) {
       return response.data;
     }
     throw _mapErrorResponse(response);
@@ -240,7 +269,8 @@ class ApiClient {
             response.statusCode! >= 300) {
           throw _mapErrorResponse(response);
         }
-        final token = (response.data as Map<String, dynamic>)['accessToken'] as String;
+        final token =
+            (response.data as Map<String, dynamic>)['accessToken'] as String;
         _accessToken = token;
         return token;
       } on DioException catch (e) {
@@ -272,11 +302,17 @@ class ApiClient {
     if (e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.sendTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
-      return AppException.local('TIMEOUT', 'The request timed out. Please try again.');
-    }
-    if (e.type == DioExceptionType.connectionError || e.error is SocketException) {
       return AppException.local(
-          'NO_CONNECTION', 'Connection required. Check your internet and try again.');
+        'TIMEOUT',
+        'The request timed out. Please try again.',
+      );
+    }
+    if (e.type == DioExceptionType.connectionError ||
+        e.error is SocketException) {
+      return AppException.local(
+        'NO_CONNECTION',
+        'Connection required. Check your internet and try again.',
+      );
     }
     if (e.type == DioExceptionType.cancel) {
       return AppException.local('CANCELLED', 'Request was cancelled.');

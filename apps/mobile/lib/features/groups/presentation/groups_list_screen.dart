@@ -1,3 +1,4 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,36 +19,55 @@ class GroupsListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Groups'),
         actions: [
-          IconButton(icon: const DuitlahIcon(Icons.group_add_outlined), onPressed: () => context.push(AppRoutes.groupJoin)),
+          IconButton(
+            icon: const DuitlahIcon(Icons.group_add_outlined),
+            onPressed: () => context.push(AppRoutes.groupJoin),
+          ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(groupListProvider),
-        child: groups.when(
-          data: (list) => list.isEmpty
-              ? ListView(
-                  children: const [
-                    SizedBox(height: 80),
-                    EmptyView(icon: Icons.groups_outlined, title: 'No groups yet', message: 'Create one to share expenses.'),
-                  ],
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  itemCount: list.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, index) {
-                    final group = list[index];
-                    return Card(
-                      child: ListTile(
-                        title: Text(group.name),
-                        subtitle: Text('${group.memberCount} members · ${group.type.name}'),
-                        onTap: () => context.push(AppRoutes.groupDetail(group.id)),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(groupListProvider),
+          child: groups.when(
+            data: (list) => list.isEmpty
+                ? ListView(
+                    children: const [
+                      SizedBox(height: 80),
+                      EmptyView(
+                        icon: Icons.groups_outlined,
+                        title: 'No groups yet',
+                        message: 'Create one to share expenses.',
                       ),
-                    );
-                  },
-                ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(groupListProvider)),
+                    ],
+                  )
+                : ListView.separated(
+                    padding: AppSpacing.scrollInsets(
+                      context,
+                      floatingAction: true,
+                    ),
+                    itemCount: list.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: AppSpacing.sm),
+                    itemBuilder: (context, index) {
+                      final group = list[index];
+                      return Card(
+                        child: ListTile(
+                          title: Text(group.name),
+                          subtitle: Text(
+                            '${group.memberCount} members · ${group.type.name}',
+                          ),
+                          onTap: () =>
+                              context.push(AppRoutes.groupDetail(group.id)),
+                        ),
+                      );
+                    },
+                  ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(groupListProvider),
+            ),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(

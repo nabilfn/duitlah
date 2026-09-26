@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +27,11 @@ import 'widgets/split_portions_editor.dart';
 /// being resolved, since a user may want to check the balance comparison
 /// mid-way through.
 class ReconciliationSessionScreen extends ConsumerWidget {
-  const ReconciliationSessionScreen({super.key, required this.spaceId, required this.sessionId});
+  const ReconciliationSessionScreen({
+    super.key,
+    required this.spaceId,
+    required this.sessionId,
+  });
 
   final String spaceId;
   final String sessionId;
@@ -35,28 +41,48 @@ class ReconciliationSessionScreen extends ConsumerWidget {
   void _invalidateAll(WidgetRef ref, String importId) {
     ref.invalidate(reconciliationSessionProvider(_sessionKey));
     ref.invalidate(reconciliationSummaryProvider(_sessionKey));
-    ref.invalidate(statementLinesProvider((spaceId: spaceId, importId: importId)));
+    ref.invalidate(
+      statementLinesProvider((spaceId: spaceId, importId: importId)),
+    );
     ref.invalidate(statementImportListProvider(spaceId));
     ref.invalidate(reconciliationSessionListProvider(spaceId));
   }
 
-  Future<void> _createTransaction(BuildContext context, WidgetRef ref, String importId, StatementLineResponse line) async {
+  Future<void> _createTransaction(
+    BuildContext context,
+    WidgetRef ref,
+    String importId,
+    StatementLineResponse line,
+  ) async {
     final confirmed = await showConfirmDialog(
       context,
       title: 'Create transaction',
-      message: 'Post a new ledger entry for this line (${line.occurredOn}, ${line.amount})?',
+      message:
+          'Post a new ledger entry for this line (${line.occurredOn}, ${line.amount})?',
     );
     if (!confirmed) return;
     try {
-      await ref.read(reconciliationRepositoryProvider).createTransactionForLine(spaceId, importId, line.id);
+      await ref
+          .read(reconciliationRepositoryProvider)
+          .createTransactionForLine(spaceId, importId, line.id);
       _invalidateAll(ref, importId);
       if (context.mounted) showSuccessSnackBar(context, 'Transaction created.');
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
-  Future<void> _ignoreLine(BuildContext context, WidgetRef ref, String importId, StatementLineResponse line) async {
+  Future<void> _ignoreLine(
+    BuildContext context,
+    WidgetRef ref,
+    String importId,
+    StatementLineResponse line,
+  ) async {
     final confirmed = await showConfirmDialog(
       context,
       title: 'Ignore line',
@@ -64,11 +90,18 @@ class ReconciliationSessionScreen extends ConsumerWidget {
     );
     if (!confirmed) return;
     try {
-      await ref.read(reconciliationRepositoryProvider).ignoreLine(spaceId, importId, line.id);
+      await ref
+          .read(reconciliationRepositoryProvider)
+          .ignoreLine(spaceId, importId, line.id);
       _invalidateAll(ref, importId);
       if (context.mounted) showSuccessSnackBar(context, 'Line ignored.');
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
@@ -91,10 +124,16 @@ class ReconciliationSessionScreen extends ConsumerWidget {
     if (matched == true) _invalidateAll(ref, importId);
   }
 
-  Future<void> _openSplitSheet(BuildContext context, WidgetRef ref, String importId, StatementLineResponse line) async {
+  Future<void> _openSplitSheet(
+    BuildContext context,
+    WidgetRef ref,
+    String importId,
+    StatementLineResponse line,
+  ) async {
     final split = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => _SplitSheet(spaceId: spaceId, importId: importId, line: line),
+      builder: (context) =>
+          _SplitSheet(spaceId: spaceId, importId: importId, line: line),
     );
     if (split == true) _invalidateAll(ref, importId);
   }
@@ -114,7 +153,10 @@ class ReconciliationSessionScreen extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Text(line.description ?? line.occurredOn, style: Theme.of(context).textTheme.titleLarge),
+              child: Text(
+                line.description ?? line.occurredOn,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
             ),
             ListTile(
               leading: const DuitlahIcon(Icons.link),
@@ -130,7 +172,9 @@ class ReconciliationSessionScreen extends ConsumerWidget {
             ListTile(
               leading: const DuitlahIcon(Icons.call_split),
               title: const Text('Split into portions'),
-              subtitle: const Text('One statement line, several ledger entries'),
+              subtitle: const Text(
+                'One statement line, several ledger entries',
+              ),
               onTap: () => Navigator.of(context).pop('split'),
             ),
             ListTile(
@@ -156,9 +200,15 @@ class ReconciliationSessionScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _autoMatch(BuildContext context, WidgetRef ref, String importId) async {
+  Future<void> _autoMatch(
+    BuildContext context,
+    WidgetRef ref,
+    String importId,
+  ) async {
     try {
-      final result = await ref.read(reconciliationRepositoryProvider).autoMatch(spaceId, importId);
+      final result = await ref
+          .read(reconciliationRepositoryProvider)
+          .autoMatch(spaceId, importId);
       _invalidateAll(ref, importId);
       if (context.mounted) {
         showSuccessSnackBar(
@@ -169,64 +219,94 @@ class ReconciliationSessionScreen extends ConsumerWidget {
         );
       }
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
-  Future<void> _resolveDifference(BuildContext context, WidgetRef ref, ReconciliationSessionResponse session) async {
-    final balanceController = TextEditingController(text: session.statementEndingBalance ?? '');
+  Future<void> _resolveDifference(
+    BuildContext context,
+    WidgetRef ref,
+    ReconciliationSessionResponse session,
+  ) async {
+    final balanceController = TextEditingController(
+      text: session.statementEndingBalance ?? '',
+    );
     final descriptionController = TextEditingController();
 
     final saved = await showAppBottomSheet<bool>(
       context,
-      builder: (context) => SingleChildScrollView(child: Padding(
-        padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Resolve difference', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'If the statement ending balance still differs from your ledger balance, '
-              'Duitlah will post one adjustment entry for the gap before completing this session.',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(
-              label: 'Statement ending balance (optional)',
-              controller: balanceController,
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            AppTextField(label: 'Adjustment description (optional)', controller: descriptionController),
-            const SizedBox(height: AppSpacing.lg),
-            PrimaryButton(
-              label: 'Complete session',
-              onPressed: () async {
-                try {
-                  await ref.read(reconciliationRepositoryProvider).resolveDifference(
-                        spaceId,
-                        session.id,
-                        statementEndingBalance: balanceController.text.trim().isEmpty ? null : balanceController.text.trim(),
-                        description: descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
+      builder: (context) => SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.pageMargin,
+            right: AppSpacing.pageMargin,
+            top: AppSpacing.lg,
+            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Resolve difference',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'If the statement ending balance still differs from your ledger balance, '
+                'Duitlah will post one adjustment entry for the gap before completing this session.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              AppTextField(
+                label: 'Statement ending balance (optional)',
+                controller: balanceController,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              AppTextField(
+                label: 'Adjustment description (optional)',
+                controller: descriptionController,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              PrimaryButton(
+                label: 'Complete session',
+                onPressed: () async {
+                  try {
+                    await ref
+                        .read(reconciliationRepositoryProvider)
+                        .resolveDifference(
+                          spaceId,
+                          session.id,
+                          statementEndingBalance:
+                              balanceController.text.trim().isEmpty
+                              ? null
+                              : balanceController.text.trim(),
+                          description: descriptionController.text.trim().isEmpty
+                              ? null
+                              : descriptionController.text.trim(),
+                        );
+                    if (context.mounted) Navigator.of(context).pop(true);
+                  } catch (e) {
+                    if (context.mounted) {
+                      showErrorSnackBar(
+                        context,
+                        e is AppException ? e.message : 'Something went wrong.',
                       );
-                  if (context.mounted) Navigator.of(context).pop(true);
-                } catch (e) {
-                  if (context.mounted) {
-                    showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+                    }
                   }
-                }
-              },
-            ),
-          ],
+                },
+              ),
+            ],
+          ),
         ),
-      )),
+      ),
     );
     if (saved == true) _invalidateAll(ref, session.businessStatementImportId);
   }
@@ -237,17 +317,27 @@ class ReconciliationSessionScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Reconciliation')),
-      body: session.when(
-        data: (s) => _Body(spaceId: spaceId, session: s, screen: this),
-        loading: () => const LoadingView(),
-        error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(reconciliationSessionProvider(_sessionKey))),
+      body: AppPageBody(
+        child: session.when(
+          data: (s) => _Body(spaceId: spaceId, session: s, screen: this),
+          loading: () => const LoadingView(),
+          error: (e, _) => ErrorView(
+            error: e,
+            onRetry: () =>
+                ref.invalidate(reconciliationSessionProvider(_sessionKey)),
+          ),
+        ),
       ),
     );
   }
 }
 
 class _Body extends ConsumerWidget {
-  const _Body({required this.spaceId, required this.session, required this.screen});
+  const _Body({
+    required this.spaceId,
+    required this.session,
+    required this.screen,
+  });
 
   final String spaceId;
   final ReconciliationSessionResponse session;
@@ -257,23 +347,37 @@ class _Body extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final key = (spaceId: spaceId, sessionId: session.id);
     final summary = ref.watch(reconciliationSummaryProvider(key));
-    final lines = ref.watch(statementLinesProvider((spaceId: spaceId, importId: session.businessStatementImportId)));
+    final lines = ref.watch(
+      statementLinesProvider((
+        spaceId: spaceId,
+        importId: session.businessStatementImportId,
+      )),
+    );
 
     return RefreshIndicator(
-      onRefresh: () async => screen._invalidateAll(ref, session.businessStatementImportId),
+      onRefresh: () async =>
+          screen._invalidateAll(ref, session.businessStatementImportId),
       child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: AppSpacing.scrollInsets(context, floatingAction: false),
         children: [
           summary.when(
             data: (s) => _SummaryCard(session: session, summary: s),
             loading: () => const LoadingView(),
-            error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(reconciliationSummaryProvider(key))),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(reconciliationSummaryProvider(key)),
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           if (session.status == ReconciliationSessionStatus.IN_PROGRESS) ...[
             SecondaryButton(
               label: 'Auto-match exact lines',
-              onPressed: () => screen._autoMatch(context, ref, session.businessStatementImportId),
+              onPressed: () => screen._autoMatch(
+                context,
+                ref,
+                session.businessStatementImportId,
+              ),
             ),
             const SizedBox(height: AppSpacing.sm),
             SecondaryButton(
@@ -289,7 +393,10 @@ class _Body extends ConsumerWidget {
               ),
             ),
           const SizedBox(height: AppSpacing.lg),
-          Text('Statement lines', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'Statement lines',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
@@ -302,34 +409,49 @@ class _Body extends ConsumerWidget {
                 ),
               ),
               TextButton(
-                onPressed: () => context.push(AppRoutes.businessAccountDetail(spaceId, session.businessAccountId)),
+                onPressed: () => context.push(
+                  AppRoutes.businessAccountDetail(
+                    spaceId,
+                    session.businessAccountId,
+                  ),
+                ),
                 child: const Text('Open ledger'),
               ),
             ],
           ),
           lines.when(
             data: (items) => items.isEmpty
-                ? const EmptyView(icon: Icons.receipt_long_outlined, title: 'No lines in this statement')
+                ? const EmptyView(
+                    icon: Icons.receipt_long_outlined,
+                    title: 'No lines in this statement',
+                  )
                 : Column(
                     children: items
-                        .map((line) => _LineTile(
-                              line: line,
-                              onTap: line.status == StatementLineStatus.UNMATCHED
-                                  ? () => screen._openLineActions(
-                                        context,
-                                        ref,
-                                        session.businessStatementImportId,
-                                        session.businessAccountId,
-                                        line,
-                                      )
-                                  : null,
-                            ))
+                        .map(
+                          (line) => _LineTile(
+                            line: line,
+                            onTap: line.status == StatementLineStatus.UNMATCHED
+                                ? () => screen._openLineActions(
+                                    context,
+                                    ref,
+                                    session.businessStatementImportId,
+                                    session.businessAccountId,
+                                    line,
+                                  )
+                                : null,
+                          ),
+                        )
                         .toList(),
                   ),
             loading: () => const LoadingView(),
             error: (e, _) => ErrorView(
               error: e,
-              onRetry: () => ref.invalidate(statementLinesProvider((spaceId: spaceId, importId: session.businessStatementImportId))),
+              onRetry: () => ref.invalidate(
+                statementLinesProvider((
+                  spaceId: spaceId,
+                  importId: session.businessStatementImportId,
+                )),
+              ),
             ),
           ),
         ],
@@ -355,38 +477,80 @@ class _SummaryCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Expanded(child: _Count(label: 'Unmatched', value: summary.unmatchedCount, color: context.duitlahColors.warning)),
-                Expanded(child: _Count(label: 'Matched', value: summary.matchedCount, color: context.duitlahColors.information)),
-                Expanded(child: _Count(label: 'Created', value: summary.createdCount, color: context.duitlahColors.positive)),
+                Expanded(
+                  child: _Count(
+                    label: 'Unmatched',
+                    value: summary.unmatchedCount,
+                    color: context.duitlahColors.warning,
+                  ),
+                ),
+                Expanded(
+                  child: _Count(
+                    label: 'Matched',
+                    value: summary.matchedCount,
+                    color: context.duitlahColors.information,
+                  ),
+                ),
+                Expanded(
+                  child: _Count(
+                    label: 'Created',
+                    value: summary.createdCount,
+                    color: context.duitlahColors.positive,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
-                Expanded(child: _Count(label: 'Ignored', value: summary.ignoredCount, color: context.duitlahColors.textTertiary)),
-                Expanded(child: _Count(label: 'Split', value: summary.splitCount, color: context.duitlahColors.primary)),
+                Expanded(
+                  child: _Count(
+                    label: 'Ignored',
+                    value: summary.ignoredCount,
+                    color: context.duitlahColors.textTertiary,
+                  ),
+                ),
+                Expanded(
+                  child: _Count(
+                    label: 'Split',
+                    value: summary.splitCount,
+                    color: context.duitlahColors.primary,
+                  ),
+                ),
                 const Expanded(child: SizedBox()),
               ],
             ),
             const Divider(height: AppSpacing.lg),
-            Row(
+            AppAdaptiveRow(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Ledger balance', style: Theme.of(context).textTheme.bodyMedium),
-                Text(summary.ledgerBalance, style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  'Ledger balance',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                Text(
+                  summary.ledgerBalance,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ],
             ),
             const SizedBox(height: 4),
-            Row(
+            AppAdaptiveRow(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Statement ending balance', style: Theme.of(context).textTheme.bodyMedium),
-                Text(summary.statementEndingBalance ?? 'Not set', style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  'Statement ending balance',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                Text(
+                  summary.statementEndingBalance ?? 'Not set',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ],
             ),
             if (difference != null) ...[
               const SizedBox(height: 4),
-              Row(
+              AppAdaptiveRow(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Difference'),
@@ -394,7 +558,9 @@ class _SummaryCard extends StatelessWidget {
                     difference,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: (double.tryParse(difference) ?? 0).abs() < 0.005 ? context.duitlahColors.positive : context.duitlahColors.negative,
+                      color: (double.tryParse(difference) ?? 0).abs() < 0.005
+                          ? context.duitlahColors.positive
+                          : context.duitlahColors.negative,
                     ),
                   ),
                 ],
@@ -418,7 +584,14 @@ class _Count extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text('$value', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
+        Text(
+          '$value',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
         Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
@@ -436,10 +609,12 @@ class _LineTile extends StatelessWidget {
     final isOutflow = (double.tryParse(line.amount) ?? 0) < 0;
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: ListTile(
+      child: AppRecordTile(
         leading: DuitlahIcon(
           isOutflow ? Icons.arrow_upward : Icons.arrow_downward,
-          color: isOutflow ? context.duitlahColors.negative : context.duitlahColors.positive,
+          color: isOutflow
+              ? context.duitlahColors.negative
+              : context.duitlahColors.positive,
         ),
         title: Text(line.description ?? line.occurredOn),
         subtitle: Text(line.occurredOn),
@@ -448,7 +623,11 @@ class _LineTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(line.amount, style: Theme.of(context).textTheme.titleSmall),
-            Chip(label: Text(line.status.name), visualDensity: VisualDensity.compact, padding: EdgeInsets.zero),
+            Chip(
+              label: Text(line.status.name),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+            ),
           ],
         ),
         onTap: onTap,
@@ -473,9 +652,15 @@ class _MatchSheet extends ConsumerWidget {
   final String businessAccountId;
   final StatementLineResponse line;
 
-  Future<void> _match(BuildContext context, WidgetRef ref, String businessAccountEntryId) async {
+  Future<void> _match(
+    BuildContext context,
+    WidgetRef ref,
+    String businessAccountEntryId,
+  ) async {
     try {
-      await ref.read(reconciliationRepositoryProvider).matchLine(
+      await ref
+          .read(reconciliationRepositoryProvider)
+          .matchLine(
             spaceId,
             importId,
             line.id,
@@ -483,13 +668,22 @@ class _MatchSheet extends ConsumerWidget {
           );
       if (context.mounted) Navigator.of(context).pop(true);
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final suggestionsKey = (spaceId: spaceId, importId: importId, lineId: line.id);
+    final suggestionsKey = (
+      spaceId: spaceId,
+      importId: importId,
+      lineId: line.id,
+    );
     final suggestions = ref.watch(matchSuggestionsProvider(suggestionsKey));
     final entriesKey = (spaceId: spaceId, resourceId: businessAccountId);
     final entries = ref.watch(accountEntriesProvider(entriesKey));
@@ -499,11 +693,18 @@ class _MatchSheet extends ConsumerWidget {
       initialChildSize: 0.75,
       builder: (context, scrollController) => SafeArea(
         child: ListView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           controller: scrollController,
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: AppSpacing.scrollInsets(context, floatingAction: false),
           children: [
-            Text('Match "${line.description ?? line.occurredOn}"', style: Theme.of(context).textTheme.titleLarge),
-            Text('${line.occurredOn} · ${line.amount}', style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              'Match "${line.description ?? line.occurredOn}"',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            Text(
+              '${line.occurredOn} · ${line.amount}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             const SizedBox(height: AppSpacing.md),
             Text('Suggestions', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: AppSpacing.sm),
@@ -515,17 +716,33 @@ class _MatchSheet extends ConsumerWidget {
                     )
                   : Column(
                       children: items
-                          .map((s) => _SuggestionTile(
-                                suggestion: s,
-                                onTap: () => _match(context, ref, s.businessAccountEntryId),
-                              ))
+                          .map(
+                            (s) => _SuggestionTile(
+                              suggestion: s,
+                              onTap: () => _match(
+                                context,
+                                ref,
+                                s.businessAccountEntryId,
+                              ),
+                            ),
+                          )
                           .toList(),
                     ),
-              loading: () => const Padding(padding: EdgeInsets.all(AppSpacing.md), child: LoadingView()),
-              error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(matchSuggestionsProvider(suggestionsKey))),
+              loading: () => const Padding(
+                padding: EdgeInsets.all(AppSpacing.md),
+                child: LoadingView(),
+              ),
+              error: (e, _) => ErrorView(
+                error: e,
+                onRetry: () =>
+                    ref.invalidate(matchSuggestionsProvider(suggestionsKey)),
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            Text('Or pick any entry manually', style: Theme.of(context).textTheme.titleSmall),
+            Text(
+              'Or pick any entry manually',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
             const SizedBox(height: AppSpacing.sm),
             entries.when(
               data: (items) => items.isEmpty
@@ -535,17 +752,28 @@ class _MatchSheet extends ConsumerWidget {
                     )
                   : Column(
                       children: items
-                          .map((e) => ListTile(
-                                contentPadding: EdgeInsets.zero,
-                                title: Text(e.description ?? (e.direction == EntryDirection.IN ? 'Money in' : 'Money out')),
-                                subtitle: Text(e.occurredOn),
-                                trailing: Text(e.amount),
-                                onTap: () => _match(context, ref, e.id),
-                              ))
+                          .map(
+                            (e) => AppRecordTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                e.description ??
+                                    (e.direction == EntryDirection.IN
+                                        ? 'Money in'
+                                        : 'Money out'),
+                              ),
+                              subtitle: Text(e.occurredOn),
+                              trailing: Text(e.amount),
+                              onTap: () => _match(context, ref, e.id),
+                            ),
+                          )
                           .toList(),
                     ),
               loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(accountEntriesProvider(entriesKey))),
+              error: (e, _) => ErrorView(
+                error: e,
+                onRetry: () =>
+                    ref.invalidate(accountEntriesProvider(entriesKey)),
+              ),
             ),
           ],
         ),
@@ -568,8 +796,12 @@ class _SuggestionTile extends StatelessWidget {
       leading: Chip(
         label: Text(isExact ? 'EXACT' : 'PROBABLE'),
         backgroundColor: isExact ? Theme.of(context).colorScheme.primary : null,
-        labelStyle: TextStyle(color: isExact ? Theme.of(context).colorScheme.onPrimary : null),
-        side: isExact ? null : BorderSide(color: Theme.of(context).colorScheme.outline),
+        labelStyle: TextStyle(
+          color: isExact ? Theme.of(context).colorScheme.onPrimary : null,
+        ),
+        side: isExact
+            ? null
+            : BorderSide(color: Theme.of(context).colorScheme.outline),
         visualDensity: VisualDensity.compact,
       ),
       title: Text(suggestion.description ?? suggestion.occurredOn),
@@ -584,7 +816,11 @@ class _SuggestionTile extends StatelessWidget {
 /// amount, mirroring the accounting module's debit/credit balance
 /// indicator (`journal_entries_screen.dart`'s `_JournalEntryFormSheet`).
 class _SplitSheet extends ConsumerStatefulWidget {
-  const _SplitSheet({required this.spaceId, required this.importId, required this.line});
+  const _SplitSheet({
+    required this.spaceId,
+    required this.importId,
+    required this.line,
+  });
 
   final String spaceId;
   final String importId;
@@ -595,7 +831,10 @@ class _SplitSheet extends ConsumerStatefulWidget {
 }
 
 class _SplitSheetState extends ConsumerState<_SplitSheet> {
-  List<SplitPortionDraft> _portions = [SplitPortionDraft(), SplitPortionDraft()];
+  List<SplitPortionDraft> _portions = [
+    SplitPortionDraft(),
+    SplitPortionDraft(),
+  ];
   bool _submitting = false;
 
   double get _target => (double.tryParse(widget.line.amount) ?? 0).abs();
@@ -617,10 +856,15 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
   }
 
   Future<void> _submit() async {
-    final inputs = _portions.map((p) => p.toInput()).whereType<SplitPortionInput>().toList();
+    final inputs = _portions
+        .map((p) => p.toInput())
+        .whereType<SplitPortionInput>()
+        .toList();
     setState(() => _submitting = true);
     try {
-      await ref.read(reconciliationRepositoryProvider).splitLine(
+      await ref
+          .read(reconciliationRepositoryProvider)
+          .splitLine(
             widget.spaceId,
             widget.importId,
             widget.line.id,
@@ -630,7 +874,10 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
     } catch (e) {
       if (mounted) {
         setState(() => _submitting = false);
-        showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
       }
     }
   }
@@ -643,17 +890,21 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
       ]),
       builder: (context, _) => Padding(
         padding: EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
+          left: AppSpacing.pageMargin,
+          right: AppSpacing.pageMargin,
           top: AppSpacing.lg,
           bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
         ),
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Split into portions', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Split into portions',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               Text(
                 'Line total: ${widget.line.amount}',
                 style: Theme.of(context).textTheme.bodySmall,
@@ -667,12 +918,16 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: (_diff.abs() < 0.005 ? context.duitlahColors.positive : context.duitlahColors.negative).withValues(alpha: 0.08),
+                  color:
+                      (_diff.abs() < 0.005
+                              ? context.duitlahColors.positive
+                              : context.duitlahColors.negative)
+                          .withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Column(
                   children: [
-                    Row(
+                    AppAdaptiveRow(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Portions total: ${_total.toStringAsFixed(2)}'),
@@ -684,14 +939,20 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
                       'Remaining: ${_diff.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: _diff.abs() < 0.005 ? context.duitlahColors.positive : context.duitlahColors.negative,
+                        color: _diff.abs() < 0.005
+                            ? context.duitlahColors.positive
+                            : context.duitlahColors.negative,
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(label: 'Submit split', loading: _submitting, onPressed: _canSubmit ? _submit : null),
+              PrimaryButton(
+                label: 'Submit split',
+                loading: _submitting,
+                onPressed: _canSubmit ? _submit : null,
+              ),
             ],
           ),
         ),

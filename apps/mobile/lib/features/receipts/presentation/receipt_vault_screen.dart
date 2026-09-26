@@ -1,3 +1,5 @@
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_search_field.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +11,6 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_state_views.dart';
-import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/dialogs.dart';
 import '../application/receipt_vault_providers.dart';
 import '../domain/vault_receipt.dart';
@@ -28,6 +29,12 @@ class _ReceiptVaultScreenState extends ConsumerState<ReceiptVaultScreen> {
   final _searchController = TextEditingController();
   bool _uploading = false;
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _uploadBatch() async {
     final picker = ImagePicker();
     final files = await picker.pickMultiImage(imageQuality: 90);
@@ -38,14 +45,26 @@ class _ReceiptVaultScreenState extends ConsumerState<ReceiptVaultScreen> {
 
     setState(() => _uploading = true);
     try {
-      await ref.read(receiptVaultRepositoryProvider).upload(
+      await ref
+          .read(receiptVaultRepositoryProvider)
+          .upload(
             filePaths: files.map((f) => f.path).toList(),
             purpose: purpose,
           );
       ref.invalidate(receiptVaultListProvider);
-      if (mounted) showSuccessSnackBar(context, 'Receipt${files.length > 1 ? 's' : ''} saved to vault.');
+      if (mounted) {
+        showSuccessSnackBar(
+          context,
+          'Receipt${files.length > 1 ? 's' : ''} saved to vault.',
+        );
+      }
     } catch (e) {
-      if (mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Upload failed.');
+      if (mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Upload failed.',
+        );
+      }
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
@@ -59,11 +78,13 @@ class _ReceiptVaultScreenState extends ConsumerState<ReceiptVaultScreen> {
         children: [
           ListTile(
             title: const Text('Personal expense'),
-            onTap: () => Navigator.of(context).pop(ReceiptPurpose.PERSONAL_EXPENSE),
+            onTap: () =>
+                Navigator.of(context).pop(ReceiptPurpose.PERSONAL_EXPENSE),
           ),
           ListTile(
             title: const Text('Business expense'),
-            onTap: () => Navigator.of(context).pop(ReceiptPurpose.BUSINESS_EXPENSE),
+            onTap: () =>
+                Navigator.of(context).pop(ReceiptPurpose.BUSINESS_EXPENSE),
           ),
           ListTile(
             title: const Text('Tax evidence'),
@@ -84,54 +105,74 @@ class _ReceiptVaultScreenState extends ConsumerState<ReceiptVaultScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Receipt Vault')),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: AppTextField(
-              label: 'Search by merchant',
-              controller: _searchController,
-              onSubmitted: (value) => ref.read(receiptSearchQueryProvider.notifier).state =
-                  value.trim().isEmpty ? null : value.trim(),
-            ),
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async => ref.invalidate(receiptVaultListProvider),
-              child: receipts.when(
-                data: (items) => items.isEmpty
-                    ? ListView(
-                        children: const [
-                          SizedBox(height: 80),
-                          EmptyView(icon: Icons.folder_outlined, title: 'No receipts yet'),
-                        ],
-                      )
-                    : GridView.builder(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: AppSpacing.sm,
-                          crossAxisSpacing: AppSpacing.sm,
-                          childAspectRatio: 0.85,
-                        ),
-                        itemCount: items.length,
-                        itemBuilder: (context, index) {
-                          final receipt = items[index];
-                          return _ReceiptCard(receipt: receipt);
-                        },
-                      ),
-                loading: () => const LoadingView(),
-                error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(receiptVaultListProvider)),
+      body: AppPageBody(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: AppSearchField(
+                hint: 'Search by merchant',
+                controller: _searchController,
+                onSubmitted: (value) =>
+                    ref.read(receiptSearchQueryProvider.notifier).state =
+                        value.trim().isEmpty ? null : value.trim(),
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async => ref.invalidate(receiptVaultListProvider),
+                child: receipts.when(
+                  data: (items) => items.isEmpty
+                      ? ListView(
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          children: const [
+                            SizedBox(height: 80),
+                            EmptyView(
+                              icon: Icons.folder_outlined,
+                              title: 'No receipts yet',
+                            ),
+                          ],
+                        )
+                      : GridView.builder(
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          padding: AppSpacing.scrollInsets(
+                            context,
+                            floatingAction: true,
+                          ),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: AppSpacing.sm,
+                                crossAxisSpacing: AppSpacing.sm,
+                                childAspectRatio: 0.85,
+                              ),
+                          itemCount: items.length,
+                          itemBuilder: (context, index) {
+                            final receipt = items[index];
+                            return _ReceiptCard(receipt: receipt);
+                          },
+                        ),
+                  loading: () => const LoadingView(),
+                  error: (e, _) => ErrorView(
+                    error: e,
+                    onRetry: () => ref.invalidate(receiptVaultListProvider),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _uploading ? null : _uploadBatch,
         child: _uploading
             ? const SizedBox(
-                height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2.4))
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(strokeWidth: 2.4),
+              )
             : const DuitlahIcon(Icons.add_a_photo_outlined),
       ),
     );
@@ -156,12 +197,37 @@ class _ReceiptCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.network(receipt.imageUrl, fit: BoxFit.cover),
+                  Image.network(
+                    receipt.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stack) => ColoredBox(
+                      color: Theme.of(context).colorScheme.surfaceContainer,
+                      child: Center(
+                        child: Semantics(
+                          label: 'Receipt preview unavailable',
+                          child: DuitlahIcon(
+                            Icons.receipt_long_outlined,
+                            size: 32,
+                          ),
+                        ),
+                      ),
+                    ),
+                    loadingBuilder: (context, child, progress) =>
+                        progress == null
+                        ? child
+                        : const Center(
+                            child: SkeletonBlock(height: 80, width: 80),
+                          ),
+                  ),
                   if (receipt.needsReview)
                     Positioned(
                       top: 4,
                       right: 4,
-                      child: DuitlahIcon(Icons.warning_amber_rounded, color: context.duitlahColors.warning, size: 18),
+                      child: DuitlahIcon(
+                        Icons.warning_amber_rounded,
+                        color: context.duitlahColors.warning,
+                        size: 18,
+                      ),
                     ),
                 ],
               ),
@@ -178,7 +244,10 @@ class _ReceiptCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   if (receipt.folder != null)
-                    Text(receipt.folder!, style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      receipt.folder!,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                 ],
               ),
             ),

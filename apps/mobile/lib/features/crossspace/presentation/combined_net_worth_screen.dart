@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/glass_account_selector.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
@@ -26,50 +29,76 @@ class CombinedNetWorthScreen extends ConsumerWidget {
     final combined = ref.watch(combinedNetWorthProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Combined Net Worth')),
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(combinedNetWorthProvider),
-        child: combined.when(
-          data: (nw) => ListView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            children: [
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    children: [
-                      Text('Estimated net worth', style: Theme.of(context).textTheme.bodyMedium),
-                      Text(Money.format(nw.estimatedTotalNetWorth), style: Theme.of(context).textTheme.headlineMedium),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        'Personal net worth plus your ownership value across every business you own. '
-                        'An estimate, not authoritative bookkeeping.',
-                        style: Theme.of(context).textTheme.bodySmall,
-                        textAlign: TextAlign.center,
-                      ),
-                      const Divider(height: AppSpacing.lg),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _Summary('Personal', nw.personalNetWorth),
-                          _Summary('Business ownership', nw.totalBusinessOwnershipValue),
-                        ],
-                      ),
-                    ],
+      appBar: AppBar(
+        title: const Text('Combined Net Worth'),
+        actions: const [
+          GlassAccountSelector(view: AccountView.both),
+          SizedBox(width: 12),
+        ],
+      ),
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(combinedNetWorthProvider),
+          child: combined.when(
+            data: (nw) => ListView(
+              padding: AppSpacing.scrollInsets(context, floatingAction: false),
+              children: [
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Estimated net worth',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        Text(
+                          Money.format(nw.estimatedTotalNetWorth),
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          'Personal net worth plus your ownership value across every business you own. '
+                          'An estimate, not authoritative bookkeeping.',
+                          style: Theme.of(context).textTheme.bodySmall,
+                          textAlign: TextAlign.center,
+                        ),
+                        const Divider(height: AppSpacing.lg),
+                        AppAdaptiveRow(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _Summary('Personal', nw.personalNetWorth),
+                            _Summary(
+                              'Business ownership',
+                              nw.totalBusinessOwnershipValue,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text('By business', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: AppSpacing.sm),
-              if (nw.businessOwnership.isEmpty)
-                const EmptyView(icon: Icons.store_outlined, title: "You don't own any business spaces yet")
-              else
-                ...nw.businessOwnership.map((b) => _OwnershipTile(line: b)),
-            ],
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  'By business',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                if (nw.businessOwnership.isEmpty)
+                  const EmptyView(
+                    icon: Icons.store_outlined,
+                    title: "You don't own any business spaces yet",
+                  )
+                else
+                  ...nw.businessOwnership.map((b) => _OwnershipTile(line: b)),
+              ],
+            ),
+            loading: () => const LoadingView(),
+            error: (e, _) => ErrorView(
+              error: e,
+              onRetry: () => ref.invalidate(combinedNetWorthProvider),
+            ),
           ),
-          loading: () => const LoadingView(),
-          error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(combinedNetWorthProvider)),
         ),
       ),
     );
@@ -87,7 +116,10 @@ class _Summary extends StatelessWidget {
     return Column(
       children: [
         Text(label, style: Theme.of(context).textTheme.bodySmall),
-        Text(Money.format(amount), style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          Money.format(amount),
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
       ],
     );
   }
@@ -102,10 +134,13 @@ class _OwnershipTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: ListTile(
+      child: AppRecordTile(
         leading: const DuitlahIcon(Icons.store_outlined),
         title: Text(line.spaceName),
-        trailing: Text(Money.format(line.equityValue), style: Theme.of(context).textTheme.titleSmall),
+        trailing: Text(
+          Money.format(line.equityValue),
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
       ),
     );
   }

@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/theme/app_theme.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_search_field.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -73,68 +76,69 @@ class _MoreMenuScreenState extends State<MoreMenuScreen> {
     ];
     return Scaffold(
       appBar: AppBar(title: const Text('More')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-        children: [
-          Text(
-            'Your financial toolkit',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Manage your money, plan ahead and make Duitlah yours.',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            onChanged: (value) =>
-                setState(() => _query = value.toLowerCase().trim()),
-            decoration: const InputDecoration(
-              hintText: 'Search tools…',
-              prefixIcon: Padding(
-                padding: EdgeInsets.all(14),
-                child: DuitlahIcon(Icons.search, size: 18),
-              ),
+      body: AppPageBody(
+        child: ListView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: AppSpacing.scrollInsets(context, floatingAction: false),
+          children: [
+            Text(
+              'Your financial toolkit',
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-          ),
-          for (final group in <(String, List<int>)>[
-            ('Everyday money', [1, 6, 7, 8, 15, 16, 17, 25, 26]),
-            ('Insights & planning', [18, 10, 12, 9, 14, 19]),
-            ('Records & automation', [2, 3, 4, 5, 13]),
-            ('Business', [0, 11]),
-            ('Your Duitlah', [23, 21, 22, 20, 24]),
-          ]) ...[
-            if (group.$2.any((i) => items[i].$2.toLowerCase().contains(_query)))
-              Padding(
-                padding: const EdgeInsets.only(top: 28, bottom: 12),
-                child: Text(
-                  group.$1,
-                  style: Theme.of(context).textTheme.titleMedium,
+            const SizedBox(height: 8),
+            Text(
+              'Manage your money, plan ahead and make Duitlah yours.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            AppSearchField(
+              hint: 'Search tools…',
+              onChanged: (value) =>
+                  setState(() => _query = value.toLowerCase().trim()),
+            ),
+            for (final group in <(String, List<int>)>[
+              ('Everyday money', [1, 6, 7, 8, 15, 16, 17, 25, 26]),
+              ('Insights & planning', [18, 10, 12, 9, 14, 19]),
+              ('Records & automation', [2, 3, 4, 5, 13]),
+              ('Business', [0, 11]),
+              ('Your Duitlah', [23, 21, 22, 20, 24]),
+            ]) ...[
+              if (group.$2.any(
+                (i) => items[i].$2.toLowerCase().contains(_query),
+              ))
+                Padding(
+                  padding: const EdgeInsets.only(top: 28, bottom: 12),
+                  child: Text(
+                    group.$1,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ),
-              ),
-            if (group.$2.any((i) => items[i].$2.toLowerCase().contains(_query)))
-              Card(
-                child: Column(
-                  children: [
-                    for (final index in group.$2.where(
-                      (i) => items[i].$2.toLowerCase().contains(_query),
-                    )) ...[
-                      if (index != group.$2.first) const Divider(indent: 56),
-                      ListTile(
-                        leading: DuitlahIcon(items[index].$1),
-                        title: Text(items[index].$2),
-                        trailing: const DuitlahIcon(
-                          Icons.chevron_right,
-                          size: 20,
+              if (group.$2.any(
+                (i) => items[i].$2.toLowerCase().contains(_query),
+              ))
+                Card(
+                  child: Column(
+                    children: [
+                      for (final index in group.$2.where(
+                        (i) => items[i].$2.toLowerCase().contains(_query),
+                      )) ...[
+                        if (index != group.$2.first) const Divider(indent: 56),
+                        ListTile(
+                          leading: DuitlahIcon(items[index].$1),
+                          title: Text(items[index].$2),
+                          trailing: const DuitlahIcon(
+                            Icons.chevron_right,
+                            size: 20,
+                          ),
+                          onTap: () => context.push(items[index].$3),
                         ),
-                        onTap: () => context.push(items[index].$3),
-                      ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

@@ -1,3 +1,6 @@
+import 'package:duitlah_mobile/core/widgets/app_adaptive_row.dart';
+import 'package:duitlah_mobile/core/widgets/app_page_body.dart';
+import 'package:duitlah_mobile/core/widgets/app_field_group.dart';
 import 'package:duitlah_mobile/core/theme/duitlah_colors.dart';
 import 'package:duitlah_mobile/core/widgets/duitlah_segmented_control.dart';
 import 'package:duitlah_mobile/core/utils/money.dart';
@@ -26,7 +29,11 @@ import '../domain/banking.dart';
 typedef _MappingChoice = ({String? chartOfAccountsId});
 
 class BusinessAccountDetailScreen extends ConsumerWidget {
-  const BusinessAccountDetailScreen({super.key, required this.spaceId, required this.accountId});
+  const BusinessAccountDetailScreen({
+    super.key,
+    required this.spaceId,
+    required this.accountId,
+  });
 
   final String spaceId;
   final String accountId;
@@ -36,66 +43,100 @@ class BusinessAccountDetailScreen extends ConsumerWidget {
   Future<void> _addEntry(BuildContext context, WidgetRef ref) async {
     final amountController = TextEditingController();
     final descriptionController = TextEditingController();
-    final dateController = TextEditingController(text: DateTime.now().toIso8601String().substring(0, 10));
+    final dateController = TextEditingController(
+      text: DateTime.now().toIso8601String().substring(0, 10),
+    );
     var direction = EntryDirection.IN;
 
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            top: AppSpacing.lg,
-            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Add entry', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: AppSpacing.md),
-              DuitlahSegmentedControl<EntryDirection>(
-                segments: const [
-                  ButtonSegment(value: EntryDirection.IN, label: Text('Money in')),
-                  ButtonSegment(value: EntryDirection.OUT, label: Text('Money out')),
-                ],
-                selected: {direction},
-                onSelectionChanged: (s) => setSheetState(() => direction = s.first),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Amount', controller: amountController, keyboardType: TextInputType.number),
-              const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Date (YYYY-MM-DD)', controller: dateController),
-              const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Description (optional)', controller: descriptionController),
-              const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(
-                label: 'Add',
-                onPressed: () async {
-                  final amount = amountController.text.trim();
-                  if (amount.isEmpty) return;
-                  try {
-                    await ref.read(bankingRepositoryProvider).createEntry(
-                          spaceId,
-                          accountId,
-                          direction: direction,
-                          amount: amount,
-                          occurredOn: dateController.text.trim(),
-                          description:
-                              descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
+        builder: (context, setSheetState) => SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: AppSpacing.pageMargin,
+              right: AppSpacing.pageMargin,
+              top: AppSpacing.lg,
+              bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Add entry',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                DuitlahSegmentedControl<EntryDirection>(
+                  segments: const [
+                    ButtonSegment(
+                      value: EntryDirection.IN,
+                      label: Text('Money in'),
+                    ),
+                    ButtonSegment(
+                      value: EntryDirection.OUT,
+                      label: Text('Money out'),
+                    ),
+                  ],
+                  selected: {direction},
+                  onSelectionChanged: (s) =>
+                      setSheetState(() => direction = s.first),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppTextField(
+                  label: 'Amount',
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppTextField(
+                  label: 'Date (YYYY-MM-DD)',
+                  controller: dateController,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppTextField(
+                  label: 'Description (optional)',
+                  controller: descriptionController,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                PrimaryButton(
+                  label: 'Add',
+                  onPressed: () async {
+                    final amount = amountController.text.trim();
+                    if (amount.isEmpty) return;
+                    try {
+                      await ref
+                          .read(bankingRepositoryProvider)
+                          .createEntry(
+                            spaceId,
+                            accountId,
+                            direction: direction,
+                            amount: amount,
+                            occurredOn: dateController.text.trim(),
+                            description:
+                                descriptionController.text.trim().isEmpty
+                                ? null
+                                : descriptionController.text.trim(),
+                          );
+                      if (context.mounted) Navigator.of(context).pop(true);
+                    } catch (e) {
+                      if (context.mounted) {
+                        showErrorSnackBar(
+                          context,
+                          e is AppException
+                              ? e.message
+                              : 'Something went wrong.',
                         );
-                    if (context.mounted) Navigator.of(context).pop(true);
-                  } catch (e) {
-                    if (context.mounted) {
-                      showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+                      }
                     }
-                  }
-                },
-              ),
-            ],
+                  },
+                ),
+              ],
+            ),
           ),
-        )),
+        ),
       ),
     );
     if (saved == true) {
@@ -106,8 +147,12 @@ class BusinessAccountDetailScreen extends ConsumerWidget {
   }
 
   Future<void> _transfer(BuildContext context, WidgetRef ref) async {
-    final accounts = await ref.read(bankingRepositoryProvider).listAccounts(spaceId);
-    final destinations = accounts.where((a) => a.id != accountId && !a.archived).toList();
+    final accounts = await ref
+        .read(bankingRepositoryProvider)
+        .listAccounts(spaceId);
+    final destinations = accounts
+        .where((a) => a.id != accountId && !a.archived)
+        .toList();
     if (!context.mounted) return;
     if (destinations.isEmpty) {
       showErrorSnackBar(context, 'No other business accounts to transfer to.');
@@ -116,65 +161,105 @@ class BusinessAccountDetailScreen extends ConsumerWidget {
 
     final amountController = TextEditingController();
     final descriptionController = TextEditingController();
-    final dateController = TextEditingController(text: DateTime.now().toIso8601String().substring(0, 10));
+    final dateController = TextEditingController(
+      text: DateTime.now().toIso8601String().substring(0, 10),
+    );
     var destinationId = destinations.first.id;
 
     final saved = await showAppBottomSheet<bool>(
       context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => SingleChildScrollView(child: Padding(
-          padding: EdgeInsets.only(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            top: AppSpacing.lg,
-            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Transfer to another account', style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: AppSpacing.md),
-              DropdownButtonFormField<String>(
-                icon: const DuitlahIcon(Icons.expand_more, size: 18),
-initialValue: destinationId,
-                decoration: const InputDecoration(labelText: 'To account'),
-                items: destinations.map((a) => DropdownMenuItem(value: a.id, child: Text(a.name))).toList(),
-                onChanged: (v) => setSheetState(() => destinationId = v ?? destinationId),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Amount', controller: amountController, keyboardType: TextInputType.number),
-              const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Date (YYYY-MM-DD)', controller: dateController),
-              const SizedBox(height: AppSpacing.sm),
-              AppTextField(label: 'Description (optional)', controller: descriptionController),
-              const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(
-                label: 'Transfer',
-                onPressed: () async {
-                  final amount = amountController.text.trim();
-                  if (amount.isEmpty) return;
-                  try {
-                    await ref.read(bankingRepositoryProvider).transfer(
-                          spaceId,
-                          accountId,
-                          toBusinessAccountId: destinationId,
-                          amount: amount,
-                          occurredOn: dateController.text.trim(),
-                          description:
-                              descriptionController.text.trim().isEmpty ? null : descriptionController.text.trim(),
+        builder: (context, setSheetState) => SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: AppSpacing.pageMargin,
+              right: AppSpacing.pageMargin,
+              top: AppSpacing.lg,
+              bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Transfer to another account',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                AppFieldGroup(
+                  label: 'To account',
+                  child: DropdownButtonFormField<String>(
+                    itemHeight: null,
+                    isExpanded: true,
+                    icon: const DuitlahIcon(Icons.expand_more, size: 18),
+                    initialValue: destinationId,
+                    decoration: const InputDecoration(),
+                    items: destinations
+                        .map(
+                          (a) => DropdownMenuItem(
+                            value: a.id,
+                            child: Text(a.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) =>
+                        setSheetState(() => destinationId = v ?? destinationId),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppTextField(
+                  label: 'Amount',
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppTextField(
+                  label: 'Date (YYYY-MM-DD)',
+                  controller: dateController,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppTextField(
+                  label: 'Description (optional)',
+                  controller: descriptionController,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                PrimaryButton(
+                  label: 'Transfer',
+                  onPressed: () async {
+                    final amount = amountController.text.trim();
+                    if (amount.isEmpty) return;
+                    try {
+                      await ref
+                          .read(bankingRepositoryProvider)
+                          .transfer(
+                            spaceId,
+                            accountId,
+                            toBusinessAccountId: destinationId,
+                            amount: amount,
+                            occurredOn: dateController.text.trim(),
+                            description:
+                                descriptionController.text.trim().isEmpty
+                                ? null
+                                : descriptionController.text.trim(),
+                          );
+                      if (context.mounted) Navigator.of(context).pop(true);
+                    } catch (e) {
+                      if (context.mounted) {
+                        showErrorSnackBar(
+                          context,
+                          e is AppException
+                              ? e.message
+                              : 'Something went wrong.',
                         );
-                    if (context.mounted) Navigator.of(context).pop(true);
-                  } catch (e) {
-                    if (context.mounted) {
-                      showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+                      }
                     }
-                  }
-                },
-              ),
-            ],
+                  },
+                ),
+              ],
+            ),
           ),
-        )),
+        ),
       ),
     );
     if (saved == true) {
@@ -184,15 +269,23 @@ initialValue: destinationId,
     }
   }
 
-  Future<void> _mapLedgerAccount(BuildContext context, WidgetRef ref, BusinessAccount account) async {
-    final ledgerAccounts = await ref.read(chartOfAccountsRepositoryProvider).listAccounts(spaceId);
+  Future<void> _mapLedgerAccount(
+    BuildContext context,
+    WidgetRef ref,
+    BusinessAccount account,
+  ) async {
+    final ledgerAccounts = await ref
+        .read(chartOfAccountsRepositoryProvider)
+        .listAccounts(spaceId);
     if (!context.mounted) return;
     if (ledgerAccounts.isEmpty) {
       context.push(AppRoutes.accountingChartOfAccounts(spaceId));
       return;
     }
 
-    final candidates = ledgerAccounts.where((a) => a.type == LedgerAccountType.ASSET && !a.archived).toList();
+    final candidates = ledgerAccounts
+        .where((a) => a.type == LedgerAccountType.ASSET && !a.archived)
+        .toList();
     final selected = await showAppBottomSheet<_MappingChoice>(
       context,
       builder: (context) => SafeArea(
@@ -201,24 +294,35 @@ initialValue: destinationId,
           children: [
             Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Text('Map to ledger account', style: Theme.of(context).textTheme.titleLarge),
+              child: Text(
+                'Map to ledger account',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
             ),
             ListTile(
               title: const Text('No mapping'),
-              trailing: account.chartOfAccountsId == null ? const DuitlahIcon(Icons.check) : null,
+              trailing: account.chartOfAccountsId == null
+                  ? const DuitlahIcon(Icons.check)
+                  : null,
               onTap: () => Navigator.of(context).pop((chartOfAccountsId: null)),
             ),
             if (candidates.isEmpty)
               const Padding(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.sm,
+                ),
                 child: Text('No ASSET accounts in the Chart of Accounts yet.'),
               )
             else
               for (final a in candidates)
                 ListTile(
                   title: Text('${a.code} · ${a.name}'),
-                  trailing: account.chartOfAccountsId == a.id ? const DuitlahIcon(Icons.check) : null,
-                  onTap: () => Navigator.of(context).pop((chartOfAccountsId: a.id)),
+                  trailing: account.chartOfAccountsId == a.id
+                      ? const DuitlahIcon(Icons.check)
+                      : null,
+                  onTap: () =>
+                      Navigator.of(context).pop((chartOfAccountsId: a.id)),
                 ),
           ],
         ),
@@ -226,14 +330,21 @@ initialValue: destinationId,
     );
     if (selected == null) return;
     try {
-      await ref.read(bankingRepositoryProvider).updateChartOfAccountsMapping(
+      await ref
+          .read(bankingRepositoryProvider)
+          .updateChartOfAccountsMapping(
             spaceId,
             accountId,
             chartOfAccountsId: selected.chartOfAccountsId,
           );
       ref.invalidate(businessAccountDetailProvider(_key));
     } catch (e) {
-      if (context.mounted) showErrorSnackBar(context, e is AppException ? e.message : 'Something went wrong.');
+      if (context.mounted) {
+        showErrorSnackBar(
+          context,
+          e is AppException ? e.message : 'Something went wrong.',
+        );
+      }
     }
   }
 
@@ -244,76 +355,111 @@ initialValue: destinationId,
 
     return Scaffold(
       appBar: AppBar(title: Text(account.valueOrNull?.name ?? 'Account')),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(businessAccountDetailProvider(_key));
-          ref.invalidate(accountEntriesProvider(_key));
-        },
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          children: [
-            account.when(
-              data: (a) => Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Balance', style: Theme.of(context).textTheme.bodyMedium),
-                      Text('${a.currency} ${a.balance}', style: Theme.of(context).textTheme.headlineMedium),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text('${a.type.name} · Opening balance ${a.openingBalance}', style: Theme.of(context).textTheme.bodySmall),
-                      const SizedBox(height: AppSpacing.md),
-                      SecondaryButton(
-                        label: 'Transfer to another account',
-                        onPressed: () => _transfer(context, ref),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      SecondaryButton(
-                        label: a.chartOfAccountsId == null ? 'Map to ledger account' : 'Change ledger account mapping',
-                        onPressed: () => _mapLedgerAccount(context, ref, a),
-                      ),
-                    ],
+      body: AppPageBody(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(businessAccountDetailProvider(_key));
+            ref.invalidate(accountEntriesProvider(_key));
+          },
+          child: ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: AppSpacing.scrollInsets(context, floatingAction: true),
+            children: [
+              account.when(
+                data: (a) => Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Balance',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        Text(
+                          '${a.currency} ${a.balance}',
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          '${a.type.name} · Opening balance ${a.openingBalance}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        SecondaryButton(
+                          label: 'Transfer to another account',
+                          onPressed: () => _transfer(context, ref),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        SecondaryButton(
+                          label: a.chartOfAccountsId == null
+                              ? 'Map to ledger account'
+                              : 'Change ledger account mapping',
+                          onPressed: () => _mapLedgerAccount(context, ref, a),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+                loading: () => const LoadingView(),
+                error: (e, _) => ErrorView(
+                  error: e,
+                  onRetry: () =>
+                      ref.invalidate(businessAccountDetailProvider(_key)),
+                ),
               ),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(businessAccountDetailProvider(_key))),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text('Entries', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: AppSpacing.sm),
-            entries.when(
-              data: (items) => items.isEmpty
-                  ? const Padding(
-                      padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                      child: Text('No entries yet.'),
-                    )
-                  : Column(
-                      children: items
-                          .map(
-                            (e) => Card(
-                              margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                              child: ListTile(
-                                leading: DuitlahIcon(
-                                  e.direction == EntryDirection.IN ? Icons.arrow_downward : Icons.arrow_upward,
-                                  color: e.direction == EntryDirection.IN ? context.duitlahColors.positive : context.duitlahColors.negative,
+              const SizedBox(height: AppSpacing.lg),
+              Text('Entries', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: AppSpacing.sm),
+              entries.when(
+                data: (items) => items.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                        child: Text('No entries yet.'),
+                      )
+                    : Column(
+                        children: items
+                            .map(
+                              (e) => Card(
+                                margin: const EdgeInsets.only(
+                                  bottom: AppSpacing.sm,
                                 ),
-                                title: Text(e.description ?? (e.direction == EntryDirection.IN ? 'Money in' : 'Money out')),
-                                subtitle: Text(e.occurredOn),
-                                trailing: Text(Money.format(e.amount)),
+                                child: AppRecordTile(
+                                  leading: DuitlahIcon(
+                                    e.direction == EntryDirection.IN
+                                        ? Icons.arrow_downward
+                                        : Icons.arrow_upward,
+                                    color: e.direction == EntryDirection.IN
+                                        ? context.duitlahColors.positive
+                                        : context.duitlahColors.negative,
+                                  ),
+                                  title: Text(
+                                    e.description ??
+                                        (e.direction == EntryDirection.IN
+                                            ? 'Money in'
+                                            : 'Money out'),
+                                  ),
+                                  subtitle: Text(e.occurredOn),
+                                  trailing: Text(Money.format(e.amount)),
+                                ),
                               ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-              loading: () => const LoadingView(),
-              error: (e, _) => ErrorView(error: e, onRetry: () => ref.invalidate(accountEntriesProvider(_key))),
-            ),
-          ],
+                            )
+                            .toList(),
+                      ),
+                loading: () => const LoadingView(),
+                error: (e, _) => ErrorView(
+                  error: e,
+                  onRetry: () => ref.invalidate(accountEntriesProvider(_key)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => _addEntry(context, ref), child: const DuitlahIcon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _addEntry(context, ref),
+        child: const DuitlahIcon(Icons.add),
+      ),
     );
   }
 }
