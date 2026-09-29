@@ -1,0 +1,188 @@
+{
+  "_comment": "Narration cues. 'start' is film time in seconds. 'source' is the [start, end] of this phrase inside 'source_file' (cut by scripts/cut_vo.py). 'tts' is what ElevenLabs reads if you re-record a line with scripts/elevenlabs_vo.py; 'guide' is only for the macOS scratch voice.",
+  "source_file": "out/Duitlah_VO.mp3",
+  "omitted_from_source": [
+    "See everything.",
+    "Your money in one place.",
+    "Understand the pattern.",
+    "not just the numbers."
+  ],
+  "lines": [
+    {
+      "id": "01",
+      "text": "Where did it all go?",
+      "tts": "Where did it all go?",
+      "guide": "Where did it all go?",
+      "start": 1.95,
+      "source": [
+        0.01,
+        1.24
+      ]
+    },
+    {
+      "id": "02",
+      "text": "Duitlah brings everything together.",
+      "tts": "Duitlah brings everything together.",
+      "guide": "Doo-it-lah brings everything together.",
+      "start": 3.95,
+      "source": [
+        2.02,
+        4.075
+      ]
+    },
+    {
+      "id": "03",
+      "text": "Know where it went.",
+      "tts": "Know where it went.",
+      "guide": "Know where it went.",
+      "start": 7.6,
+      "source": [
+        8.75,
+        9.76
+      ]
+    },
+    {
+      "id": "04",
+      "text": "Every transaction.",
+      "tts": "Every transaction.",
+      "guide": "Every transaction.",
+      "start": 8.9,
+      "source": [
+        10.1,
+        11.24
+      ]
+    },
+    {
+      "id": "05",
+      "text": "Clear.",
+      "tts": "Clear.",
+      "guide": "Clear.",
+      "start": 10.3,
+      "source": [
+        11.7,
+        12.18
+      ]
+    },
+    {
+      "id": "06",
+      "text": "Need to split it?",
+      "tts": "Need to split it?",
+      "guide": "Need to split it?",
+      "start": 11.05,
+      "source": [
+        12.81,
+        13.735
+      ]
+    },
+    {
+      "id": "07",
+      "text": "Bagilah.",
+      "tts": "Bagilah.",
+      "guide": "Bah-gee-lah.",
+      "start": 12.25,
+      "source": [
+        14.02,
+        14.72
+      ]
+    },
+    {
+      "id": "08",
+      "text": "Split without the mess.",
+      "tts": "Split without the mess.",
+      "guide": "Split without the mess.",
+      "start": 13.3,
+      "source": [
+        15.01,
+        16.51
+      ]
+    },
+    {
+      "id": "09",
+      "text": "Everyone knows their part.",
+      "tts": "Everyone knows their part.",
+      "guide": "Everyone knows their part.",
+      "start": 15.1,
+      "source": [
+        17.605,
+        19.085
+      ]
+    },
+    {
+      "id": "10",
+      "text": "See the patterns behind your spending,",
+      "tts": "See the patterns behind your spending,",
+      "guide": "See the patterns behind your spending,",
+      "start": 16.95,
+      "source": [
+        21.765,
+        23.855
+      ]
+    },
+    {
+      "id": "11",
+      "text": "And when you need an answer,",
+      "tts": "And when you need an answer,",
+      "guide": "And when you need an answer,",
+      "start": 19.35,
+      "source": [
+        25.945,
+        27.165
+      ]
+    },
+    {
+      "id": "12",
+      "text": "just ask.",
+      "tts": "just ask.",
+      "guide": "just ask.",
+      "start": 20.8,
+      "source": [
+        27.515,
+        28.42
+      ]
+    },
+    {
+      "id": "13",
+      "text": "Your money explained.",
+      "tts": "Your money explained.",
+      "guide": "Your money explained.",
+      "start": 22.0,
+      "source": [
+        29.035,
+        30.735
+      ]
+    },
+    {
+      "id": "14",
+      "text": "More than tracking.",
+      "tts": "More than tracking.",
+      "guide": "More than tracking.",
+      "start": 23.95,
+      "source": [
+        31.17,
+        32.22
+      ]
+    },
+    {
+      "id": "15",
+      "text": "Duitlah.",
+      "tts": "Duitlah.",
+      "guide": "Doo-it-lah.",
+      "start": 26.4,
+      "source": [
+        32.975,
+        33.6
+      ]
+    },
+    {
+      "id": "16",
+      "text": "Your money. Finally makes sense.",
+      "tts": "Your money. Finally makes sense.",
+      "guide": "Your money. Finally makes sense.",
+      "start": 27.35,
+      "source": [
+        34.005,
+        36.495
+      ]
+    }
+  ]
+}

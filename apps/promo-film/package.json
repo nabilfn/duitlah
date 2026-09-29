@@ -1,0 +1,33 @@
+{
+  "name": "duitlah-promo-film",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Duitlah 30-second product film (Remotion + React Three Fiber)",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "audio": "python3 scripts/make_audio.py",
+    "stills": "node scripts/render-stills.mjs",
+    "draft": "remotion render src/index.ts Promo9x16 out/draft_9x16.mp4 --scale=0.5 --crf=28 --gl=angle && remotion render src/index.ts Promo16x9 out/draft_16x9.mp4 --scale=0.5 --crf=28 --gl=angle",
+    "master": "remotion render src/index.ts Promo9x16 out/Duitlah_Promo_9x16.mp4 --crf=16 --gl=angle --props='{\"layout\":\"portrait\",\"audio\":\"no-vo\"}' && remotion render src/index.ts Promo16x9 out/Duitlah_Promo_16x9.mp4 --crf=16 --gl=angle --props='{\"layout\":\"landscape\",\"audio\":\"no-vo\"}'",
+    "typecheck": "tsc --noEmit",
+    "vo": "python3 scripts/elevenlabs_vo.py",
+    "vo:apply": "python3 scripts/make_audio.py && sh scripts/apply-vo.sh",
+    "vo:cut": "python3 scripts/cut_vo.py && python3 scripts/make_audio.py"
+  },
+  "dependencies": {
+    "@react-three/fiber": "^9.8.1",
+    "@remotion/bundler": "^4.0.529",
+    "@remotion/cli": "^4.0.529",
+    "@remotion/renderer": "^4.0.529",
+    "@remotion/three": "^4.0.529",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "remotion": "^4.0.529",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/three": "^0.186.0",
+    "typescript": "^7.0.2"
+  }
+}
